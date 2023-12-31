@@ -1,0 +1,16 @@
+{
+  "name": "saslediscordbot",
+  "version": "1.0.0",
+  "description": "A discord bot for SAS:LE.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "pushcmds": "node src/regester-commands.js"
+  },
+  "author": "TheAFKGamer10",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1"
+  }
+}
