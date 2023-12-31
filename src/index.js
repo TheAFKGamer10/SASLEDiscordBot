@@ -48,7 +48,7 @@ client.on('interactionCreate', async (interaction) => {
     const { commandName, options } = interaction;
     try {
         if (commandName === 'join') {
-            const AllReadyInDepartment = false //interaction.member.roles.cache.has(process.env.LEO_ROLE_ID);
+            const AllReadyInDepartment = interaction.member.roles.cache.has(process.env.LEO_ROLE_ID);
             const UsersName = interaction.member.user.username;
                 
 
