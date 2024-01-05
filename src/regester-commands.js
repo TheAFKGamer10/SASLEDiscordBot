@@ -3,7 +3,6 @@ const { REST, Routes } = require('discord.js');
 
 const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
-let departmentFound = false;
 var departmentList = JSON.parse(process.env.ListOfDepartments.split(", "));
 const choice = [];
 departmentList.forEach(CurrentDepartment => {
@@ -15,10 +14,6 @@ departmentList.forEach(CurrentDepartment => {
 });
 
 const commands = [
-    {
-        name: 'ping',
-        description: 'Replies with bot ping.',
-    },
     {
         name: 'join',
         description: 'Join a Departmant.',
