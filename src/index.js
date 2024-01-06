@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, IntentsBitField, PermissionFlagsBits } = require('discord.js');
+const { Client, IntentsBitField, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 
 const client = new Client({
     intents: [
@@ -69,11 +69,17 @@ client.on('interactionCreate', async (interaction) => {
 
             departmentList.forEach(CurrentDepartment => {
                 if (department === CurrentDepartment && !departmentFound) { 
+                    departmentFound = true;
                     interaction.member.roles.add(process.env.LEO_ROLE_ID);
                     interaction.member.roles.add(`${process.env[CurrentDepartment + '_ROLE_ID']}`);
                     interaction.member.edit({ nick: `${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
                     interaction.reply({ content: `You have been added to ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}!`, ephemeral: true });
-                    departmentFound = true;
+                    
+                    const embed = new EmbedBuilder()
+                        .setTitle(`${UsersName} has joined ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}`)
+                        .setColor(0x0099FF)
+                        .setTimestamp();
+                    client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [embed] });
                 }
             });               
         }

@@ -14,20 +14,20 @@ departmentList.forEach(CurrentDepartment => {
 });
 
 const commands = [
-    {
-        name: 'join',
-        description: 'Join a Departmant.',
-        options: [
-            {
-                name: 'department',
-                description: 'The department you want to join.',
-                type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-                required: true,
-                autocomplete: false,
-                choices: choice
-            }
-        ]
-    }
+  {
+    name: 'join',
+    description: 'Join a Departmant.',
+    options: [
+        {
+            name: 'department',
+            description: 'The department you want to join.',
+            type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+            required: true,
+            autocomplete: false,
+            choices: choice
+        }
+    ]
+  }
 ];
 
 
