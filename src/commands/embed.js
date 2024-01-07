@@ -1,4 +1,4 @@
-const { client, EmbedBuilder, env} = require("../importdefaults");
+const { client, EmbedBuilder, env } = require("../importdefaults");
 
 module.exports = async (interaction) => {
     const { commandName, options } = interaction;
@@ -28,10 +28,10 @@ module.exports = async (interaction) => {
                 { name: 'Rule #7', value: 'Use common sense. (Don\'t be stupid.)', inline: true },
             )
             .setColor(0xFF470F)
-            .setFooter({ text: 'If you violate the rules you agree to the consequences.'})
+            .setFooter({ text: 'If you violate the rules you agree to the consequences.' })
             .setTimestamp();
         // End of embed
-        
+
         if (options.getChannel('chanel') === null) {
             interaction.reply({ embeds: [embed] });
         } else {

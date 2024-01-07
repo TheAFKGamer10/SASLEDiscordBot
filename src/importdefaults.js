@@ -1,7 +1,7 @@
 const env = require('dotenv').config();
 const { Client, IntentsBitField, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 
-const client = new Client ({
+const client = new Client({
     intents: [
         IntentsBitField.Flags.Guilds,
         IntentsBitField.Flags.GuildMembers,

@@ -1,4 +1,4 @@
-const { client, EmbedBuilder, env} = require("./importdefaults");
+const { client, EmbedBuilder, env } = require("./importdefaults");
 const embed = require('./commands/embed');
 const join = require("./commands/join");
 
@@ -10,21 +10,21 @@ async function getUsersNumbers() {
     let members = await guild.members.fetch();
     members.forEach((member) => {
         MembersList = member.displayName;
-        
+
         if (MembersList.includes("|")) {
             const UserDepartID = MembersList.split(' | ')[0];
             const index = UserDepartID.length - 1;
 
             let num1 = MembersList.charAt(index - 1);
             let num2 = MembersList.charAt(index);
-            
+
             CurrentUsersNumbers.push(num1 + num2);
         }
     });
-    
-    console.log(CurrentUsersNumbers);  
-    
-    if (CurrentUsersNumbers.length >= 100 ) {
+
+    console.log(CurrentUsersNumbers);
+
+    if (CurrentUsersNumbers.length >= 100) {
         throw new Error("There are more than 100 users in a department. Cannot add more.");
     }
 }
