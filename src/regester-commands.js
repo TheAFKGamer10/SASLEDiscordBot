@@ -15,16 +15,39 @@ departmentList.forEach(CurrentDepartment => {
 
 const commands = [
   {
+    name: 'embed',
+    description: 'Sends an embed message.',
+    options: [
+      {
+        name: 'option',
+        description: 'The type of imbed you would like to send.',
+        type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        required: true,
+        choices: [
+          {
+            name: 'Rules',
+            value: 'rules'
+          }
+        ]
+      },
+      {
+        name: 'chanel',
+        description: 'The channel you would like to send the embed in.',
+        type: 7, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+      }
+    ]
+  },
+  {
     name: 'join',
     description: 'Join a Departmant.',
     options: [
         {
-            name: 'department',
-            description: 'The department you want to join.',
-            type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
-            required: true,
-            autocomplete: false,
-            choices: choice
+          name: 'department',
+          description: 'The department you want to join.',
+          type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+          required: true,
+          autocomplete: false,
+          choices: choice
         }
     ]
   }
