@@ -5,7 +5,7 @@ module.exports = async (interaction) => {
 
     if (options.getString('option') === 'rules') {
         // Start of embed
-        const embed = new EmbedBuilder()
+        const rulesembed = new EmbedBuilder()
             .setTitle('Rules')
             .addFields(
                 { name: '**Discord Chat Rules**', value: 'These rules apply to the Discord server.' },
@@ -33,10 +33,20 @@ module.exports = async (interaction) => {
         // End of embed
 
         if (options.getChannel('chanel') === null) {
-            interaction.reply({ embeds: [embed] });
+            interaction.reply({ embeds: [rulesembed] });
         } else {
-            client.channels.cache.get(options.getChannel('chanel').id).send({ embeds: [embed] });
+            client.channels.cache.get(options.getChannel('chanel').id).send({ embeds: [rulesembed] });
             interaction.reply({ content: 'Embed sent!', ephemeral: true });
         }
+
+        const commandused = `/${commandName} option:${options.getString('option')} chanel:${options.getChannel('chanel') !== null ? options.getChannel('chanel').name : 'null'}`;
+        // Start of embed
+        const logembed = new EmbedBuilder()
+        .setTitle("Member Used Embed")
+        .setDescription(`<@${interaction.member.user.id}> used \`\`\`${commandused}\`\`\` in <#${interaction.channel.id}>.`)
+        .setColor(0x0099FF)
+        .setTimestamp();
+        // End of embed
+        client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [logembed] });
     }
 }
