@@ -10,6 +10,7 @@ client.on('ready', async () => {
 client.on('interactionCreate', async (interaction) => {
     const { commandName, options } = interaction;
     try {
+        await interaction.deferReply({ ephemeral: true });
         if (commandName === 'join') {
             join(interaction);
         }

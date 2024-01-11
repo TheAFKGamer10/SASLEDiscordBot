@@ -39,7 +39,7 @@ module.exports = async (interaction) => {
 
 
     if (AllReadyInDepartment) {
-        interaction.reply({ content: 'You are already in a department!', ephemeral: true }); return;
+        interaction.editReply({ content: 'You are already in a department!', ephemeral: true }); return;
     }
 
 
@@ -58,7 +58,7 @@ module.exports = async (interaction) => {
         replyContent += `\nFind more information here ${process.env.JOIN_WEBSITE}`;
     }
 
-    interaction.reply({ content: replyContent, ephemeral: true });
+    interaction.editReply({ content: replyContent, ephemeral: true });
     interaction.member.roles.add(process.env.LEO_ROLE_ID);
     interaction.member.roles.add(process.env.CADET_ROLE_ID);
     interaction.member.roles.add(`${process.env[CurrentDepartment + '_ROLE_ID']}`);

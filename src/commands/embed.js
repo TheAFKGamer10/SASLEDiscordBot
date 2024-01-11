@@ -33,10 +33,10 @@ module.exports = async (interaction) => {
         // End of embed
 
         if (options.getChannel('chanel') === null) {
-            interaction.reply({ embeds: [rulesembed] });
+            interaction.editReply({ embeds: [rulesembed] });
         } else {
             client.channels.cache.get(options.getChannel('chanel').id).send({ embeds: [rulesembed] });
-            interaction.reply({ content: 'Embed sent!', ephemeral: true });
+            interaction.editReply({ content: 'Embed sent!', ephemeral: true });
         }
 
         const commandused = `/${commandName} option:${options.getString('option')} chanel:${options.getChannel('chanel') !== null ? options.getChannel('chanel').name : 'null'}`;
