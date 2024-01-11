@@ -25,7 +25,13 @@ module.exports = async (interaction) => {
         });
 
 
-        if (CurrentUsersNumbers.length >= 100) {
+        if (CurrentUsersNumbers.length >= 99) {
+            const toomanyusersembed = new EmbedBuilder()
+                .setTitle("Departments Full")
+                .setDescription(`All departments are full. The maximum number of users are in a department. Contact an admin to review the departments.`)
+                .setColor(0xFF470F)
+                .setTimestamp();
+            client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [toomanyusersembed] });
             throw new Error("There are more than 100 users in a department. Cannot add more.");
         }
     }
@@ -47,7 +53,12 @@ module.exports = async (interaction) => {
 
     CurrentDepartment = department.toUpperCase();
 
-    interaction.reply({ content: `You have been added to ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}!`, ephemeral: true });
+    let replyContent = `You have been added to ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}!`;
+    if (process.env.JOIN_WEBSITE !== "") {
+        replyContent += `\nFind more information here ${process.env.JOIN_WEBSITE}`;
+    }
+
+    interaction.reply({ content: replyContent, ephemeral: true });
     interaction.member.roles.add(process.env.LEO_ROLE_ID);
     interaction.member.roles.add(process.env.CADET_ROLE_ID);
     interaction.member.roles.add(`${process.env[CurrentDepartment + '_ROLE_ID']}`);
@@ -56,7 +67,7 @@ module.exports = async (interaction) => {
 
     const embed = new EmbedBuilder()
         .setTitle("Member Joined Department")
-        .setDescription(`<@${interaction.member.user.id}> has joined \`${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}\`.`)
+        .setDescription(`<@${interaction.member.user.id}> has joined <@&${process.env[CurrentDepartment + '_ROLE_ID']}>.`)
         .setColor(0x0099FF)
         .setTimestamp();
     client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [embed] });
