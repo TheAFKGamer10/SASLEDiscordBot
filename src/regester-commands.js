@@ -1,17 +1,34 @@
 require('dotenv').config();
 const { REST, Routes } = require('discord.js');
+const rules = require("./../rules.config.json");
 
 const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
 var departmentList = JSON.parse(process.env.ListOfDepartments.split(", "));
-const choice = [];
+const departments = [];
 departmentList.forEach(CurrentDepartment => {
-  choice.push({
+  departments.push({
     name: `${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}`,
     value: CurrentDepartment
   });
 
 });
+
+const embedchoices = [{ name: 'Rules Overview', value: 'rulesoverview' }];
+
+Object.keys(rules).forEach(key => {
+  if (!key.includes("_") && !key.includes("Overveiw")) {
+
+    let value = key.toLowerCase();
+    value = value.replace(/ /g, '');
+
+    embedchoices.push({
+      name: key,
+      value: value
+    });
+  }
+});
+
 
 const commands = [
   {
@@ -19,16 +36,17 @@ const commands = [
     description: 'Sends an embed message.',
     options: [
       {
-        name: 'option',
-        description: 'The type of imbed you would like to send.',
+        name: 'category',
+        description: 'The category of embed you would like to send.',
         type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
         required: true,
-        choices: [
-          {
-            name: 'Rules',
-            value: 'rules'
-          }
-        ]
+        choices: embedchoices
+      },
+      {
+        name: 'rulenumber',
+        description: 'The rule number you would like to send.',
+        type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        autocomplete: true,
       },
       {
         name: 'chanel',
@@ -47,7 +65,7 @@ const commands = [
         type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
         required: true,
         autocomplete: false,
-        choices: choice
+        choices: departments
       }
     ]
   }

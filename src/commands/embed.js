@@ -1,52 +1,114 @@
 const { client, EmbedBuilder, env } = require("../importdefaults");
+const rules = require("./../../rules.config.json");
 
 module.exports = async (interaction) => {
     const { commandName, options } = interaction;
+    if (options.getString('category') === 'rulesoverview' && options.getString('rulenumber') !== null) {
+        interaction.reply({ content: 'You can not select a rule from Rules Overview. Select a specific catogory to use this option.', ephemeral: true });
+        return;
+    }
+    if (options.getChannel('chanel') !== null) {
+        await interaction.deferReply({ ephemeral: true });
+    } else {
+        await interaction.deferReply();
+    }
 
-    if (options.getString('option') === 'rules') {
-        // Start of embed
-        const rulesembed = new EmbedBuilder()
-            .setTitle('Rules')
+    let rulesembed = new EmbedBuilder()
+    let rulelist = [];
+    let keysUpper = [];
+    let keysLower = [];
+    let category = options.getString('category');
+    let LookingForRule = options.getString('rulenumber');
+    let outputrule = [];
+    let OutputName = '';
+    let ListToObject = [];
+
+    if (options.getString('category') !== 'rulesoverview') {
+
+
+        Object.keys(rules).forEach(key => {
+            if (!key.includes("_") && !key.includes("Overveiw")) {
+                rulelist.push(key);
+            }
+        });
+
+        Object.keys(rules).forEach(key => {
+            if (!key.includes("_") && !key.includes("Overveiw")) {
+                keysUpper.push(key);
+                keysLower.push(key.toLowerCase().replace(/ /g, ''));
+            }
+        });
+
+        rules[keysUpper[keysLower.indexOf(category)]].forEach(element => {
+            if (element.name.toLowerCase().replace(/ /g, '') == LookingForRule) {
+                outputrule.push(
+                    {
+                        name: `**${element.name}**`,
+                        value: element.value,
+                        inline: element.inline
+                    }
+                );
+                OutputName = element.name;
+            }
+            ListToObject.push(
+                {
+                    name: element.name,
+                    value: element.value,
+                    inline: element.inline
+                }
+            );
+        });
+    }
+
+    if (options.getString('rulenumber') !== null) {
+        rulesembed = new EmbedBuilder()
             .addFields(
-                { name: '**Discord Chat Rules**', value: 'These rules apply to the Discord server.' },
-                { name: 'Rule #1', value: 'Please do not advertise. (Do not give links to other servers.)', inline: true },
-                { name: 'Rule #2', value: 'English only.', inline: true },
-                { name: 'Rule #3', value: 'Do not ping Admin or Staff. (If you have a problem, cerate a ticket.)', inline: true },
-                { name: 'Rule #4', value: 'Do not spam. (We do not want the same thing over and over again.)', inline: true },
-                { name: 'Rule #5', value: 'Do not ping @everyone.', inline: true },
-                { name: 'Rule #6', value: 'You must be over 13. (Discords terms of services rule. "By using or accessing the Discord application (the “App”) or the website located at https://discord.com/ (the "Site"), which are collectively referred to as the “Service,” you agree (i) that you are 13 years of age and the minimum age of digital consent in your country." You can find all of the rules of discord at https://discord.com/terms.)' },
-            )
-            .addFields({ name: '\u200B', value: '\u200B' }) // Break bewtween server and discord rules.
-            .addFields(
-                { name: '**FiveM Server Rules**', value: 'These rules apply to the FiveM server.' },
-                { name: 'Rule #1', value: 'You must be trained before you patrol by yourself. Create a ticket and we will be hapy to train you.', inline: true },
-                { name: 'Rule #2', value: 'Using our cad system is required during gameplay. (Unless down.)', inline: true },
-                { name: 'Rule #3', value: 'Do not abuse your power. (Do not use your power to gain an advantage over other players.)', inline: true },
-                { name: 'Rule #4', value: 'Do not break roleplay. (Do not do anything that would not happen in real life. Unless an exception is mady by actiave staff.)', inline: true },
-                { name: 'Rule #5', value: 'Cars and Clothing are for a specific department. (Please use items specific to your rank.)', inline: true },
-                { name: 'Rule #6', value: 'Do not use any mods. (This includes trainers, cheats, and any other mods.)', inline: true },
-                { name: 'Rule #7', value: 'Use common sense. (Don\'t be stupid.)', inline: true },
+                outputrule
             )
             .setColor(0xFF470F)
             .setFooter({ text: 'If you violate the rules you agree to the consequences.' })
             .setTimestamp();
-        // End of embed
-
-        if (options.getChannel('chanel') === null) {
-            interaction.editReply({ embeds: [rulesembed] });
+    } else {
+        if (options.getString('category') === 'rulesoverview') {
+            // Start of embed
+            rulesembed = new EmbedBuilder()
+                .setTitle('**Rules**')
+                .addFields(
+                    rules["Discord Chat Rules Overveiw"]
+                )
+                .addFields({ name: '\u200B', value: '\u200B' }) // Break bewtween server and discord rules.
+                .addFields(
+                    rules["FiveM Server Rules Overveiw"]
+                )
+                .setColor(0xFF470F)
+                .setFooter({ text: 'If you violate the rules you agree to the consequences.' })
+                .setTimestamp();
+            // End of embed
         } else {
-            client.channels.cache.get(options.getChannel('chanel').id).send({ embeds: [rulesembed] });
-            interaction.editReply({ content: 'Embed sent!', ephemeral: true });
+            rulesembed = new EmbedBuilder()
+                .addFields(
+                    ListToObject
+                )
+                .setColor(0xFF470F)
+                .setFooter({ text: 'If you violate the rules you agree to the consequences.' })
+                .setTimestamp();
         }
+    }
 
-        const commandused = `/${commandName} option:${options.getString('option')} chanel:${options.getChannel('chanel') !== null ? options.getChannel('chanel').name : 'null'}`;
-        // Start of embed
-        const logembed = new EmbedBuilder()
+    if (options.getChannel('chanel') === null) {
+        interaction.editReply({ embeds: [rulesembed] });
+    } else {
+        client.channels.cache.get(options.getChannel('chanel').id).send({ embeds: [rulesembed] });
+        interaction.editReply({ content: 'Embed sent!', ephemeral: true });
+    }
+
+    const commandused = `/${commandName} category:${options.getString('category')} rule:${options.getString('rulenumber') !== null ? options.getString('rulenumber') : 'null'} chanel:${options.getChannel('chanel') !== null ? options.getChannel('chanel').name : 'null'}`;
+    // Start of embed
+    const logembed = new EmbedBuilder()
         .setTitle("Member Used Embed")
         .setDescription(`<@${interaction.member.user.id}> used \`\`\`${commandused}\`\`\` in <#${interaction.channel.id}>.`)
         .setColor(0x0099FF)
         .setTimestamp();
-        // End of embed
-        client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [logembed] });
-    }
+    // End of embed
+    client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [logembed] });
 }

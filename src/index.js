@@ -1,6 +1,7 @@
 const { client } = require("./importdefaults");
 const embed = require('./commands/embed');
 const join = require("./commands/join");
+const emebedRuleFinder = require("./events/emebedRuleFinder");
 
 client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -10,7 +11,12 @@ client.on('ready', async () => {
 client.on('interactionCreate', async (interaction) => {
     const { commandName, options } = interaction;
     try {
-        await interaction.deferReply({ ephemeral: true });
+        if (interaction.isAutocomplete()) {
+            if (commandName === 'embed') {
+                emebedRuleFinder(interaction);
+                return;
+            }
+        }
         if (commandName === 'join') {
             join(interaction);
         }

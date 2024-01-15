@@ -2,6 +2,9 @@ const { client, EmbedBuilder, env } = require("../importdefaults");
 
 module.exports = async (interaction) => {
     const { commandName, options } = interaction;
+
+    await interaction.deferReply({ ephemeral: true });
+
     const CurrentUsersNumbers = [];
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     let members = await guild.members.fetch();
