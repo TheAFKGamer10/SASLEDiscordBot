@@ -1,5 +1,5 @@
 {
-    "_comment": "Can only have a total of 15 in all lists not saying all. (If the list does not start with `all` then count how many name and value pairs there are, and make sure it is less than 15.)",
+    "_comment": "Can have a total of 15 name and value pairs in any catogoery ending with 'Overveiw'. More rules can be found here https://discordjs.guide/popular-topics/embeds.html#notes",
     "Discord Chat Rules Overveiw": [
         {
             "name": "**Discord Chat Rules**",
