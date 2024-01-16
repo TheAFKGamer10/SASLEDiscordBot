@@ -2,6 +2,7 @@ const { client } = require("./importdefaults");
 const embed = require('./commands/embed');
 const join = require("./commands/join");
 const emebedRuleFinder = require("./events/emebedRuleFinder");
+const forcejoin = require("./commands/force-join");
 
 client.on('ready', async () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -19,6 +20,9 @@ client.on('interactionCreate', async (interaction) => {
         }
         if (commandName === 'join') {
             join(interaction);
+        }
+        if (commandName === 'force-join') {
+            forcejoin(interaction);
         }
         if (commandName === 'embed') {
             embed(interaction);

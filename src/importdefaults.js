@@ -10,6 +10,10 @@ const client = new Client({
     ],
     PermissionFlagsBits: [
         PermissionFlagsBits.ManageNicknames,
+        PermissionFlagsBits.ManageRoles,
+        PermissionFlagsBits.ManageChannels,
+        PermissionFlagsBits.ManageGuild,
+        PermissionFlagsBits.ManageMessages,
     ],
 });
 

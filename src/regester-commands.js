@@ -68,6 +68,25 @@ const commands = [
         choices: departments
       }
     ]
+  },
+  {
+    name: 'force-join',
+    description: 'Make a user join a department.',
+    options: [
+      {
+        name: 'department',
+        description: 'The department you want them to join.',
+        type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        required: true,
+        choices: departments
+      },
+      {
+        name: 'user',
+        description: 'The user being forced inot a department.',
+        type: 6, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        required: true,
+      }
+    ]
   }
 ];
 

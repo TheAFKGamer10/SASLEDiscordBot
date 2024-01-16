@@ -1,3 +1,4 @@
+const { Collection } = require("discord.js");
 const { client, EmbedBuilder, env } = require("../importdefaults");
 
 module.exports = async (interaction) => {
@@ -8,8 +9,12 @@ module.exports = async (interaction) => {
     const CurrentUsersNumbers = [];
     const guild = client.guilds.cache.get(process.env.GUILD_ID);
     let members = await guild.members.fetch();
-    const AllReadyInDepartment = interaction.member.roles.cache.has(process.env.LEO_ROLE_ID);
-    const UsersName = interaction.member.user.displayName;
+    const member = guild.members.fetch(interaction.options.getUser('user'));
+    var LEOroleMembersPreCheck = guild.roles.cache.get(process.env.LEO_ROLE_ID).members;
+    if (Array.from(LEOroleMembersPreCheck.keys()).includes((await member).user.id)) {
+        interaction.editReply({ content: `<@${(await member).user.id}> is already in a department!`, ephemeral: true }); return;
+    }
+    const UsersName = (await member).displayName;
     const department = options.getString('department');
 
     async function getusers() {
@@ -27,7 +32,6 @@ module.exports = async (interaction) => {
             }
         });
 
-
         if (CurrentUsersNumbers.length >= 99) {
             const toomanyusersembed = new EmbedBuilder()
                 .setTitle("Departments Full")
@@ -39,12 +43,6 @@ module.exports = async (interaction) => {
         }
     }
     await getusers();
-
-
-    if (AllReadyInDepartment) {
-        interaction.editReply({ content: 'You are already in a department!', ephemeral: true }); return;
-    }
-
 
     const NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
     function getDepartID() {
@@ -61,22 +59,33 @@ module.exports = async (interaction) => {
         replyContent += `\nFind more information here ${process.env.JOIN_WEBSITE}`;
     }
 
-    interaction.editReply({ content: replyContent, ephemeral: true });
-    interaction.member.roles.add(process.env.LEO_ROLE_ID);
-    interaction.member.roles.add(process.env.CADET_ROLE_ID);
-    interaction.member.roles.add(`${process.env[CurrentDepartment + '_ROLE_ID']}`);
-    interaction.member.edit({ nick: `${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
+    interaction.editReply({ content: `<@${(await member).user.id}> has been added to <@&${process.env[CurrentDepartment + '_ROLE_ID']}>.`, ephemeral: true });
+    client.users.send(`${(await member).user.id}`, `${replyContent}`);
+    (await member).roles.add(process.env.LEO_ROLE_ID);
+    (await member).roles.add(process.env.CADET_ROLE_ID);
+    (await member).roles.add(process.env[CurrentDepartment + '_ROLE_ID']);
+    (await member).setNickname(`${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}`);
     console.log(`${NewDepartID} has joined ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}`);
 
+
     const embed = new EmbedBuilder()
-        .setTitle("Member Joined Department")
-        .setDescription(`<@${interaction.member.user.id}> has joined <@&${process.env[CurrentDepartment + '_ROLE_ID']}>.`)
+        .setTitle("Member Force Joined Department")
+        .setDescription(`<@${(await member).user.id}> has been added to <@&${process.env[CurrentDepartment + '_ROLE_ID']}>.`)
         .setColor(0x0099FF)
         .setTimestamp();
     client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [embed] });
 
-    if (!interaction.member.displayName.includes(" | ")) {
-        interaction.member.edit({ nick: `${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
-        console.log('Double Checked')
+    var LEOroleMembers = guild.roles.cache.get(process.env.LEO_ROLE_ID).members;
+    var CADETroleMembers = guild.roles.cache.get(process.env.CADET_ROLE_ID).members;
+    var DepartmentroleMembers = guild.roles.cache.get(process.env[CurrentDepartment + '_ROLE_ID']).members;
+
+    if (!Array.from(LEOroleMembers.keys()).includes((await member).user.id) || !Array.from(CADETroleMembers.keys()).includes((await member).user.id) || !Array.from(DepartmentroleMembers.keys()).includes((await member).user.id)) {
+        (await member).roles.add(process.env.LEO_ROLE_ID);
+        (await member).roles.add(process.env.CADET_ROLE_ID);
+        (await member).roles.add(process.env[CurrentDepartment + '_ROLE_ID']);
     }
+    if (!UsersName.includes(" | ")) {
+        (await member).setNickname(`${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}`);
+    }
+
 }
