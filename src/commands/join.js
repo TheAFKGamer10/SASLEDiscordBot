@@ -46,13 +46,14 @@ module.exports = async (interaction) => {
     }
 
 
-    const NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
+    var NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
     function getDepartID() {
         NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
+        if (CurrentUsersNumbers.includes(NewDepartID)) {
+            getDepartID();
+        }
     }
-    if (CurrentUsersNumbers.includes(NewDepartID)) {
-        getDepartID();
-    }
+    getDepartID();
 
     CurrentDepartment = department.toUpperCase();
 
