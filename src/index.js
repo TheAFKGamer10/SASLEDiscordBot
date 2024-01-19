@@ -3,9 +3,15 @@ const embed = require('./commands/embed');
 const join = require("./commands/join");
 const emebedRuleFinder = require("./events/emebedRuleFinder");
 const forcejoin = require("./commands/force-join");
+const fs = require('fs');
 
 function envcheck() {
     EmptyENVItmes = [];
+
+    if (!fs.existsSync('./.env')) {
+        console.log('An .env file was not found, please create one from the .env.example file and fill in the values correctly.')
+        process.exit(126);
+    }
 
     Object.values(process.env).forEach((value, index) => {
         if (value == '') {
