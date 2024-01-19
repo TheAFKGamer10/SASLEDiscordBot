@@ -76,8 +76,16 @@ module.exports = async (interaction) => {
         .setTimestamp();
     client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [embed] });
 
+    var LEOroleMembers = guild.roles.cache.get(process.env.LEO_ROLE_ID).members;
+    var CADETroleMembers = guild.roles.cache.get(process.env.CADET_ROLE_ID).members;
+    var DepartmentroleMembers = guild.roles.cache.get(process.env[CurrentDepartment + '_ROLE_ID']).members;
+
+    if (!Array.from(LEOroleMembers.keys()).includes(interaction.member.id) || !Array.from(CADETroleMembers.keys()).includes(interaction.member.id) || !Array.from(DepartmentroleMembers.keys()).includes(interaction.member.id)) {
+        interaction.member.roles.add(process.env.LEO_ROLE_ID);
+        interaction.member.roles.add(process.env.CADET_ROLE_ID);
+        interaction.member.roles.add(`${process.env[CurrentDepartment + '_ROLE_ID']}`);
+    }
     if (!interaction.member.displayName.includes(" | ")) {
         interaction.member.edit({ nick: `${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
-        console.log('Double Checked')
     }
 }

@@ -5,7 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon src/index.js",
-    "pushcmds": "node src/regester-commands.js"
+    "update-start": "node scripts/update/update.js && nodemon src/index.js",
+    "pushcmds": "node src/regester-commands.js",
+    "update": "node scripts/update/update.js"
   },
   "author": "TheAFKGamer10",
   "license": "MIT",
