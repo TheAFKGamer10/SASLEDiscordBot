@@ -4,11 +4,12 @@ function run(command, output = '') {
     output = execSync(command);
     return output.toString();
 }
-run('git stash');
-run('git pull origin main');
 
 OldENVLenght = Object.keys(process.env).length;
 EmptyENVItmes = [];
+
+run('git stash');
+run('git pull origin main');
 
 if (OldENVLenght != Object.keys(process.env).length) {
     Object.values(process.env).forEach((value, index) => {
