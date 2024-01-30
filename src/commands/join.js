@@ -1,4 +1,5 @@
 const { client, EmbedBuilder, env } = require("../importdefaults");
+const mysql = require('../events/mysqlhander.js');
 
 module.exports = async (interaction) => {
     const { commandName, options } = interaction;
@@ -41,8 +42,13 @@ module.exports = async (interaction) => {
     await getusers();
 
 
+    let allreadyindepartmenttext = `You are already in a department!`;
+    if (process.env.JOIN_WEBSITE !== "") {
+        allreadyindepartmenttext += `\nFind more information here ${process.env.JOIN_WEBSITE}`;
+    }
+
     if (AllReadyInDepartment) {
-        interaction.editReply({ content: 'You are already in a department!', ephemeral: true }); return;
+        interaction.editReply({ content: allreadyindepartmenttext, ephemeral: true }); return;
     }
 
 
@@ -68,6 +74,8 @@ module.exports = async (interaction) => {
     interaction.member.roles.add(`${process.env[CurrentDepartment + '_ROLE_ID']}`);
     interaction.member.edit({ nick: `${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
     console.log(`${NewDepartID} has joined ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}`);
+
+    mysql('insert', 'departmentjoins', `(false, '${UsersName}', '${interaction.member.id}', '${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}', 'N/A', '0', '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
 
     const embed = new EmbedBuilder()
         .setTitle("Member Joined Department")

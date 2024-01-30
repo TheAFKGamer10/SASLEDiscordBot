@@ -1,5 +1,5 @@
 const { client, EmbedBuilder, env } = require("../importdefaults");
-const rules = require("./../../rules.config.json");
+const rules = require("../../config/rules.config.json");
 
 module.exports = async (interaction) => {
     const { commandName, options } = interaction;
@@ -20,19 +20,13 @@ module.exports = async (interaction) => {
     let category = options.getString('category');
     let LookingForRule = options.getString('rulenumber');
     let outputrule = [];
-    let OutputName = '';
     let ListToObject = [];
 
     if (options.getString('category') !== 'rulesoverview') {
-
-
         Object.keys(rules).forEach(key => {
             if (!key.includes("_") && !key.includes("Overveiw")) {
                 rulelist.push(key);
             }
-        });
-
-        Object.keys(rules).forEach(key => {
             if (!key.includes("_") && !key.includes("Overveiw")) {
                 keysUpper.push(key);
                 keysLower.push(key.toLowerCase().replace(/ /g, ''));
@@ -43,12 +37,11 @@ module.exports = async (interaction) => {
             if (element.name.toLowerCase().replace(/ /g, '') == LookingForRule) {
                 outputrule.push(
                     {
-                        name: `**${element.name}**`,
+                        name: element.name,
                         value: element.value,
                         inline: element.inline
                     }
                 );
-                OutputName = element.name;
             }
             ListToObject.push(
                 {
@@ -62,15 +55,13 @@ module.exports = async (interaction) => {
 
     if (options.getString('rulenumber') !== null) {
         rulesembed = new EmbedBuilder()
-            .addFields(
-                outputrule
-            )
+            .setTitle(`**${outputrule[0].name}**`)
+            .setDescription(outputrule[0].value)
             .setColor(0xFF470F)
             .setFooter({ text: 'If you violate the rules you agree to the consequences.' })
             .setTimestamp();
     } else {
         if (options.getString('category') === 'rulesoverview') {
-            // Start of embed
             rulesembed = new EmbedBuilder()
                 .setTitle('**Rules**')
                 .addFields(
@@ -83,7 +74,6 @@ module.exports = async (interaction) => {
                 .setColor(0xFF470F)
                 .setFooter({ text: 'If you violate the rules you agree to the consequences.' })
                 .setTimestamp();
-            // End of embed
         } else {
             rulesembed = new EmbedBuilder()
                 .addFields(
@@ -103,12 +93,10 @@ module.exports = async (interaction) => {
     }
 
     const commandused = `/${commandName} category:${options.getString('category')} rule:${options.getString('rulenumber') !== null ? options.getString('rulenumber') : 'null'} chanel:${options.getChannel('chanel') !== null ? options.getChannel('chanel').name : 'null'}`;
-    // Start of embed
     const logembed = new EmbedBuilder()
         .setTitle("Member Used Embed")
         .setDescription(`<@${interaction.member.user.id}> used \`\`\`${commandused}\`\`\` in <#${interaction.channel.id}>.`)
         .setColor(0x0099FF)
         .setTimestamp();
-    // End of embed
     client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [logembed] });
 }

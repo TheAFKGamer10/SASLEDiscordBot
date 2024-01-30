@@ -103,12 +103,17 @@
         },
         {
             "name": "Rule 5",
-            "value": "Do not ping @everyone.",
+            "value": "Do not excessively ping people multiple times. (It is very annoying to everyone.)",
             "inline": true
         },
         {
             "name": "Rule 6",
-            "value": "Do not ask for admin or a higher rank. (Joining then asking for a high rank or admin is anoying and gets you banned.)",
+            "value": "Do not ask for admin or a higher rank. (Joining then asking for a high rank or admin is anoying and will result in slower progress.)",
+            "inline": true
+        },
+        {
+            "name": "Rule 7",
+            "value": "Do not Direct Message any memberes of the server without their permission.",
             "inline": true
         },
         {
@@ -138,21 +143,26 @@
         },
         {
             "name": "Rule 4",
-            "value": "Do not break roleplay. (Do not do anything that would not happen in real life. Unless an exception is mady by actiave staff.)",
+            "value": "A microphone is required for proper communication. (You will not be able to play without one.)",
             "inline": true
         },
         {
             "name": "Rule 5",
-            "value": "Cars and Clothing are for a specific department. (Please use items specific to your rank.)",
+            "value": "Do not break roleplay. (Do not do anything that would not happen in real life. Unless an exception is mady by actiave staff.)",
             "inline": true
         },
         {
             "name": "Rule 6",
-            "value": "Do not use any mods. (This includes trainers, cheats, and any other mods.)",
+            "value": "Cars and Clothing are for a specific department. (Please use items specific to your rank.)",
             "inline": true
         },
         {
             "name": "Rule 7",
+            "value": "Do not use any mods. (This includes trainers, cheats, and any other mods.)",
+            "inline": true
+        },
+        {
+            "name": "Rule 8",
             "value": "Use common sense. (Don't be stupid.)",
             "inline": true
         }

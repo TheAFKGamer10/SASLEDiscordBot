@@ -1,0 +1,33 @@
+{
+    "LSPD": [
+        "lspdvic",
+        "lspd15exp",
+        "lspdcap",
+        "lspdtaur",
+        "valor2",
+        "valor3"
+    ],
+    "BCSO": [
+        "bcvic",
+        "so1",
+        "sh1",
+        "bc13exp",
+        "bcimpala",
+        "bctaur",
+        "so2",
+        "so7",
+        "sh2",
+        "sh9",
+        "sh13"
+    ],
+    "SP": [
+        "tr11vic",
+        "libertycvpi",
+        "tr12caprice",
+        "libertyfpis",
+        "tr14tahoe",
+        "saspvic",
+        "sasp13fpiu",
+        "liberty13tahoe"
+    ]
+}

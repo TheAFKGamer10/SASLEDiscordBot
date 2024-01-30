@@ -1,5 +1,5 @@
-const { Collection } = require("discord.js");
 const { client, EmbedBuilder, env } = require("../importdefaults");
+const mysql = require('../events/mysqlhander.js');
 
 module.exports = async (interaction) => {
     const { commandName, options } = interaction;
@@ -15,6 +15,7 @@ module.exports = async (interaction) => {
         interaction.editReply({ content: `<@${(await member).user.id}> is already in a department!`, ephemeral: true }); return;
     }
     const UsersName = (await member).displayName;
+    const userid = (await member).user.id;
     const department = options.getString('department');
 
     async function getusers() {
@@ -44,13 +45,14 @@ module.exports = async (interaction) => {
     }
     await getusers();
 
-    const NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
+    var NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
     function getDepartID() {
         NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
+        if (CurrentUsersNumbers.includes(NewDepartID)) {
+            getDepartID();
+        }
     }
-    if (CurrentUsersNumbers.includes(NewDepartID)) {
-        getDepartID();
-    }
+    getDepartID();
 
     CurrentDepartment = department.toUpperCase();
 
@@ -59,18 +61,19 @@ module.exports = async (interaction) => {
         replyContent += `\nFind more information here ${process.env.JOIN_WEBSITE}`;
     }
 
-    interaction.editReply({ content: `<@${(await member).user.id}> has been added to <@&${process.env[CurrentDepartment + '_ROLE_ID']}>.`, ephemeral: true });
-    client.users.send(`${(await member).user.id}`, `${replyContent}`);
+    interaction.editReply({ content: `<@${userid}> has been added to <@&${process.env[CurrentDepartment + '_ROLE_ID']}>.`, ephemeral: true });
+    client.users.send(`${userid}`, `${replyContent}`);
     (await member).roles.add(process.env.LEO_ROLE_ID);
     (await member).roles.add(process.env.CADET_ROLE_ID);
     (await member).roles.add(process.env[CurrentDepartment + '_ROLE_ID']);
     (await member).setNickname(`${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}`);
     console.log(`${NewDepartID} has joined ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}`);
 
+    mysql('insert', 'departmentjoins', `(true, '${UsersName}', '${userid}', '${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}', '${interaction.member.displayName}', '${interaction.member.id}', '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
 
     const embed = new EmbedBuilder()
         .setTitle("Member Force Joined Department")
-        .setDescription(`<@${(await member).user.id}> has been added to <@&${process.env[CurrentDepartment + '_ROLE_ID']}>.`)
+        .setDescription(`<@${userid}> has been added to <@&${process.env[CurrentDepartment + '_ROLE_ID']}> by <@${interaction.member.id}>.`)
         .setColor(0x0099FF)
         .setTimestamp();
     client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [embed] });
@@ -79,7 +82,7 @@ module.exports = async (interaction) => {
     var CADETroleMembers = guild.roles.cache.get(process.env.CADET_ROLE_ID).members;
     var DepartmentroleMembers = guild.roles.cache.get(process.env[CurrentDepartment + '_ROLE_ID']).members;
 
-    if (!Array.from(LEOroleMembers.keys()).includes((await member).user.id) || !Array.from(CADETroleMembers.keys()).includes((await member).user.id) || !Array.from(DepartmentroleMembers.keys()).includes((await member).user.id)) {
+    if (!Array.from(LEOroleMembers.keys()).includes(userid) || !Array.from(CADETroleMembers.keys()).includes(userid) || !Array.from(DepartmentroleMembers.keys()).includes(userid)) {
         (await member).roles.add(process.env.LEO_ROLE_ID);
         (await member).roles.add(process.env.CADET_ROLE_ID);
         (await member).roles.add(process.env[CurrentDepartment + '_ROLE_ID']);
@@ -87,5 +90,4 @@ module.exports = async (interaction) => {
     if (!UsersName.includes(" | ")) {
         (await member).setNickname(`${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}`);
     }
-
 }

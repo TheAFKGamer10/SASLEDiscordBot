@@ -6,11 +6,11 @@ module.exports = async (interaction) => {
         interaction.respond([{ name: 'You can not select a rule from Rules Overview. Select a specific catogory to use this option.', value: 'NotFound' }]);
         return;
     }
-    const fs = require('fs');
+    const { fs } = require('./../importdefaults.js');
     var keysUpper = [];
     var keysLower = [];
     let embedchoices = [];
-    const rules = JSON.parse(fs.readFileSync('./rules.config.json'));
+    const rules = JSON.parse(fs.readFileSync('./config/rules.config.json'));
     if (!Catagory || Catagory === 'null') {
         interaction.respond([{ name: 'A Catogory Is Required to use this option.', value: 'NotFound' }]);
         return;
@@ -38,11 +38,16 @@ module.exports = async (interaction) => {
 
     names[keysUpper[keysLower.indexOf(Catagory)]].forEach(element => {
         if (element.includes('**')) return;
-        value = element.toLowerCase().replace(/ /g, '');
+        value = rules[keysUpper[keysLower.indexOf(Catagory)]].find(o => o.name === element).value
+        if (`${element}: ${value}`.length > 100) {
+            finalname = `${element}: ${value}`.slice(0, 94) + '...';
+        } else {
+            finalname = `${element}: ${value}`;
+        }
 
         embedchoices.push({
-            name: element,
-            value: value
+            name: finalname,
+            value: element.toLowerCase().replace(/ /g, '')
         });
     });
 

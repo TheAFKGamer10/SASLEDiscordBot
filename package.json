@@ -5,15 +5,16 @@
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon src/index.js",
-    "update-start": "node scripts/update/update.js && nodemon src/index.js",
+    "update-start": "npm run update && npm run pushcmds && npm run start",
     "pushcmds": "node src/regester-commands.js",
-    "update": "node scripts/update/update.js"
+    "update": "node scripts/update/update.js && npm run pushcmds"
   },
   "author": "TheAFKGamer10",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
+    "mysql2": "^3.7.1",
     "nodemon": "^3.0.2"
   }
 }

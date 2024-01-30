@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { REST, Routes } = require('discord.js');
-const rules = require("./../rules.config.json");
+const rules = require("./../config/rules.config.json");
 
 const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
@@ -32,12 +32,12 @@ Object.keys(rules).forEach(key => {
 
 const commands = [
   {
-    name: 'embed',
-    description: 'Sends an embed message.',
+    name: 'rules',
+    description: 'Sends the catogory of rule selected.',
     options: [
       {
         name: 'category',
-        description: 'The category of embed you would like to send.',
+        description: 'The category of rule you would like to send.',
         type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
         required: true,
         choices: embedchoices
@@ -50,7 +50,7 @@ const commands = [
       },
       {
         name: 'chanel',
-        description: 'The channel you would like to send the embed in.',
+        description: 'The channel you would like to send the rule in.',
         type: 7, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
       }
     ]
@@ -85,6 +85,52 @@ const commands = [
         description: 'The user being forced inot a department.',
         type: 6, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
         required: true,
+      }
+    ]
+  },
+  {
+    name: 'fto-complete',
+    description: 'Let\'s FTO easely mark a cadet as complete or not.',
+    options: [
+      {
+        name: 'passed',
+        description: 'Did the Cadet pass training?',
+        type: 5, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        required: true,
+      },
+      {
+        name: 'cadet',
+        description: 'The cadet you want to mark.',
+        type: 6, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        required: true,
+      }
+    ]
+  },
+  {
+    name: 'rp',
+    description: 'Let\'s you ping (or not) for Roleplay.',
+    options: [
+      {
+        name: 'aop',
+        description: 'The area of current Roleplay',
+        type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        required: true,
+      },
+      {
+        name: 'time',
+        description: 'The time of current Roleplay',
+        type: 3, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        required: true,
+      },
+      {
+        name: 'ping',
+        description: 'Would you like to ping everyone? Default: Yes',
+        type: 5, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+      },
+      {
+        name: 'training',
+        description: 'Is training avabile? Default: Yes',
+        type: 5, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
       }
     ]
   }

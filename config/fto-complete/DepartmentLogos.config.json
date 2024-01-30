@@ -1,0 +1,10 @@
+{
+    "_comment": "Format: EmojeName:EmojeID. Read more information in the .env file.",
+    "LSPD": "LSPD_Logo:1201312517058723921",
+    "BCSO": "BCSO_Logo:1201312118310457494",
+    "SP": "SASP_Logo:1201310866210050058",
+    "SAFD": "SAFD_Logo:120131459565986",
+
+    "ACCEPTED": "Accepted:1201314808050483401",
+    "DENIED": "Denied:1201314050630504539"
+}
