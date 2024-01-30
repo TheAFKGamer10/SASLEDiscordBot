@@ -17,11 +17,6 @@ if (!process.env.MYSQL_CONNECTION_STRING == '') {
 async function envcheck() {
     EmptyENVItmes = [];
 
-    if (!fs.existsSync('.env')) {
-        console.log('No .env file found. Please create one and fill in the required values.');
-        process.exit(126);
-    }
-
     Object.values(process.env).forEach((value, index) => {
         if (value == '') {
             EmptyENVItmes.push(Object.keys(process.env)[index]);
