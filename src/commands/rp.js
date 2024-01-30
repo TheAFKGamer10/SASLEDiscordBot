@@ -3,7 +3,6 @@ const mysql = require('../events/mysqlhander.js');
 
 module.exports = async (interaction) => {
     const { commandName, options } = interaction;
-    await interaction.deferReply();
 
     const aop = options.getString('aop');
     var time = options.getString('time');
@@ -19,5 +18,5 @@ module.exports = async (interaction) => {
         output += `\nTraining: <@&${process.env.CADET_ROLE_ID}> training **will** he happening!`;
     }
 
-    interaction.editReply({ content: output, allowedMentions: { parse: ["everyone"] } });
+    interaction.Reply({ content: output, allowedMentions: { parse: ["everyone"] } });
 }
