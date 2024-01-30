@@ -28,12 +28,10 @@ module.exports = async (interaction) => {
     const cadet_callsign = cadet_fullname.split(' | ')[0];
     const fto_callsign = fto_fullname.split(' | ')[0];
     var CADETroleMembers = guild.roles.cache.get(process.env.CADET_ROLE_ID).members;
-    /*
     if (!cadet_fullname.includes(' | ') || cadet_callsign.charAt(cadet_callsign.length - 3) !== '0' || !Array.from(CADETroleMembers.keys()).includes(cadet_id)) {
         interaction.editReply({ content: 'You can not complete training for somebody who is not a cadet.' });
         return;
     };
-    */
     var departmentList = JSON.parse(process.env.ListOfDepartments.split(", "));
     let cadetdepartment;
     let cadetdepartmentshort;

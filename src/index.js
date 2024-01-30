@@ -5,6 +5,10 @@ const emebedRuleFinder = require("./events/emebedRuleFinder");
 const forcejoin = require("./commands/force-join");
 const ftocomplete = require("./commands/fto-complete");
 const rp = require("./commands/rp");
+if (!fs.existsSync('./.env')) {
+    console.log('No .env file found. Please create one before starting the bot again.');
+    process.exit(126);
+}
 var hasdb = true;
 let mysqlfile;
 if (!process.env.MYSQL_CONNECTION_STRING == '') {
