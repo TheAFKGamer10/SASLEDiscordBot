@@ -19,25 +19,13 @@ if (!process.env.MYSQL_CONNECTION_STRING == '') {
 }
 
 async function envcheck() {
-    EmptyENVItmes = [];
-
-    Object.values(process.env).forEach((value, index) => {
-        if (value == '') {
-            EmptyENVItmes.push(Object.keys(process.env)[index]);
-        }
-    });
-
-    if (EmptyENVItmes.includes('MYSQL_CONNECTION_STRING')) {
-        EmptyENVItmes.splice(EmptyENVItmes.indexOf('MYSQL_CONNECTION_STRING'), 1);
-    }
-    if (EmptyENVItmes.includes('npm_config_noproxy')) {
-        EmptyENVItmes.splice(EmptyENVItmes.indexOf('npm_config_noproxy'), 1);
-    }
-
-    if (!EmptyENVItmes.length == 0) {
-        console.log(`The following ENV items are empty and the bot can not be run without them: \n\x1b[1m${EmptyENVItmes.join(', ')}\x1b[0m\nPlease fill them in the .env file before starting the bot again.`);
-        process.exit(126);
-    }
+    const envVars = fs.readFileSync('.env', 'utf-8').split('\n').filter(line => line.includes('=') && !line.includes('#')).length;
+    const exampleVars = fs.readFileSync('.env.example', 'utf-8').split('\n').filter(line => line.includes('=') && !line.includes('#')).length;
+    
+    if (envVars !== exampleVars) {
+        console.log('There are new ENV variables in the .env.example file. Please update your .env file accordingly before starting the bot again.');
+        process.exit(1);
+    }    
 }
 envcheck();
 
