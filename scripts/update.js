@@ -6,8 +6,8 @@ function run(command, output = '') {
     return output.toString();
 }
 
-//run('git stash');
-//run('git pull origin main');
+run('git stash');
+run('git pull origin main');
 
 const envVars = fs.readFileSync('.env', 'utf-8').split('\n').filter(line => line.includes('=') && !line.includes('#')).length;
 const exampleVars = fs.readFileSync('.env.example', 'utf-8').split('\n').filter(line => line.includes('=') && !line.includes('#')).length;
