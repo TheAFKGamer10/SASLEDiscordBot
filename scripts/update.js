@@ -1,23 +1,18 @@
 require('dotenv').config();
+const fs = require('fs');
 const execSync = require('child_process').execSync;
 function run(command, output = '') {
     output = execSync(command);
     return output.toString();
 }
 
-OldENVLenght = Object.keys(process.env).length;
-EmptyENVItmes = [];
+//run('git stash');
+//run('git pull origin main');
 
-run('git stash');
-run('git pull origin main');
+const envVars = fs.readFileSync('.env', 'utf-8').split('\n').filter(line => line.includes('=') && !line.includes('#')).length;
+const exampleVars = fs.readFileSync('.env.example', 'utf-8').split('\n').filter(line => line.includes('=') && !line.includes('#')).length;
 
-if (OldENVLenght != Object.keys(process.env).length) {
-    Object.values(process.env).forEach((value, index) => {
-        if (value == '') {
-            EmptyENVItmes.push(Object.keys(process.env)[index]);
-        }
-    });
-
-    console.log(`The following ENV items are empty and the bot can not be run without them: \n\x1b[1m${EmptyENVItmes.join(', ')}\x1b[0m.\nPlease fill them in the .env file before you start the bot again.`);
-    process.exit(126);
+if (envVars !== exampleVars) {
+    console.log('There are new ENV variables in the .env.example file. Please update your .env file accordingly before starting the bot again.');
+    process.exit(1);
 }
