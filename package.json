@@ -7,7 +7,7 @@
     "start": "nodemon src/index.js",
     "update-start": "npm run update && npm run pushcmds && npm run start",
     "pushcmds": "node src/regester-commands.js",
-    "update": "node scripts/update/update.js && npm run pushcmds"
+    "update": "node scripts/update.js && npm run pushcmds"
   },
   "author": "TheAFKGamer10",
   "license": "MIT",
