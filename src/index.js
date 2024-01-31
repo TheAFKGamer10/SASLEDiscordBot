@@ -33,6 +33,12 @@ async function envcheck() {
     if (EmptyENVItmes.includes('npm_config_noproxy')) {
         EmptyENVItmes.splice(EmptyENVItmes.indexOf('npm_config_noproxy'), 1);
     }
+    if (EmptyENVItmes.includes('NVM_CD_FLAGS')) {
+        EmptyENVItmes.splice(EmptyENVItmes.indexOf('NVM_CD_FLAGS'), 1);
+    }
+    if (EmptyENVItmes.includes('DEBUGINFOD_URLS')) {
+        EmptyENVItmes.splice(EmptyENVItmes.indexOf('DEBUGINFOD_URLS'), 1);
+    }
 
     if (!EmptyENVItmes.length == 0) {
         console.log(`The following ENV items are empty and the bot can not be run without them: \n\x1b[1m${EmptyENVItmes.join(', ')}\x1b[0m\nPlease fill them in the .env file before starting the bot again.`);
