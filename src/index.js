@@ -39,6 +39,9 @@ async function envcheck() {
     if (EmptyENVItmes.includes('DEBUGINFOD_URLS')) {
         EmptyENVItmes.splice(EmptyENVItmes.indexOf('DEBUGINFOD_URLS'), 1);
     }
+    if (EmptyENVItmes.includes('VSCODE_GIT_ASKPASS_EXTRA_ARGS')) {
+        EmptyENVItmes.splice(EmptyENVItmes.indexOf('VSCODE_GIT_ASKPASS_EXTRA_ARGS'), 1);
+    }
 
     if (!EmptyENVItmes.length == 0) {
         console.log(`The following ENV items are empty and the bot can not be run without them: \n\x1b[1m${EmptyENVItmes.join(', ')}\x1b[0m\nPlease fill them in the .env file before starting the bot again.`);
