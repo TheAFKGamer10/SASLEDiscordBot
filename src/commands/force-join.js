@@ -16,7 +16,7 @@ module.exports = async (interaction) => {
     }
     const UsersName = (await member).displayName;
     const userid = (await member).user.id;
-    const department = options.getString('department');
+    const CurrentDepartment = options.getString('department').toUpperCase();
 
     async function getusers() {
         members.forEach((member) => {
@@ -53,8 +53,6 @@ module.exports = async (interaction) => {
         }
     }
     getDepartID();
-
-    CurrentDepartment = department.toUpperCase();
 
     let replyContent = `You have been added to ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}!`;
     if (process.env.JOIN_WEBSITE !== "") {

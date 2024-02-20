@@ -93,14 +93,26 @@ const commands = [
     description: 'Let\'s FTO easely mark a cadet as complete or not.',
     options: [
       {
+        name: 'cadet',
+        description: 'The cadet you want to mark.',
+        type: 6, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+        required: true,
+      },
+      {
         name: 'passed',
         description: 'Did the Cadet pass training?',
         type: 5, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
         required: true,
-      },
+      }
+    ]
+  },
+  {
+    name: 'fto-train',
+    description: 'Starts the training process for a cadet.',
+    options: [
       {
         name: 'cadet',
-        description: 'The cadet you want to mark.',
+        description: 'The cadet you want to train.',
         type: 6, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
         required: true,
       }

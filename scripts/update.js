@@ -9,6 +9,7 @@ function run(command, output = '') {
 
 run('git stash');
 run('git pull origin main');
+run('npm install');
 
 var newVersion = require('../package.json').version;
 if (oldVersion !== newVersion) {

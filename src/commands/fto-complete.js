@@ -18,7 +18,7 @@ module.exports = async (interaction) => {
     const cadet = options.getUser('cadet');
     const fto = interaction.member;
     const cadet_id = cadet.id;
-    const fto_id = interaction.member.id;
+    const fto_id = fto.id;
     if (cadet_id == fto_id) {
         interaction.editReply({ content: 'You can not complete your own training.' });
         return;
@@ -67,9 +67,11 @@ module.exports = async (interaction) => {
 
     const report_id = (await mysql('select', 'cadettrainings', `SELECT id FROM cadettrainings`)).length + 1;
 
+    const member = guild.members.fetch(cadet);
     if (passed) {
         mysql('insert', 'cadettrainings', `(1, '${cadet_fullname}', ${cadet_id}, '${fto_fullname}', ${fto_id}, '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
     } else {
+        (await member).roles.remove(process.env.JOIN_SERVER_ROLE_ID);
         mysql('insert', 'cadettrainings', `(0, '${cadet_fullname}', ${cadet_id}, '${fto_fullname}', ${fto_id}, '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
     }
 
@@ -128,7 +130,6 @@ ${status === 'ACCEPTED' ? `Welcome To The Team` : ''}
     // End of embed
     client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [logembed] });
 
-    const member = guild.members.fetch(cadet);
     (await member).roles.remove(process.env.CADET_ROLE_ID);
     (await member).roles.add(process.env[cadetdepartmentshort + '_PROBIB_ID']);
     (await member).roles.add(process.env[cadetdepartmentshort + '_PROBIB_ID']);

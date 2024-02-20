@@ -18,7 +18,6 @@ const client = new Client(
             PermissionFlagsBits.ManageMessages,
         ],
         disableEveryone: false,
-        allowedMentions: { everyone: true },
     }
 );
 
