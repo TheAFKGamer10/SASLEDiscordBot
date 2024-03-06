@@ -71,7 +71,6 @@ module.exports = async (interaction) => {
     if (passed) {
         mysql('insert', 'cadettrainings', `(1, '${cadet_fullname}', ${cadet_id}, '${fto_fullname}', ${fto_id}, '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
     } else {
-        (await member).roles.remove(process.env.JOIN_SERVER_ROLE_ID);
         mysql('insert', 'cadettrainings', `(0, '${cadet_fullname}', ${cadet_id}, '${fto_fullname}', ${fto_id}, '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
     }
 
@@ -123,21 +122,27 @@ ${status === 'ACCEPTED' ? `Welcome To The Team` : ''}
 `});
 
     const logembed = new EmbedBuilder()
-        .setTitle(`Cadet ${status === 'ACCEPTED' ? 'Passed' : 'Failed'} training`)
+        .setTitle(`Cadet ${status === 'ACCEPTED' ? 'Passed' : 'Failed'} Training`)
         .setDescription(`<@${fto_id}> has ${status} <@${cadet_id}> into <@&${cadetdepartmentid}>.`)
         .setColor(0x0099FF)
         .setTimestamp();
     // End of embed
     client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [logembed] });
 
-    (await member).roles.remove(process.env.CADET_ROLE_ID);
-    (await member).roles.add(process.env[cadetdepartmentshort + '_PROBIB_ID']);
-    (await member).roles.add(process.env[cadetdepartmentshort + '_PROBIB_ID']);
-
     const index = cadet_callsign.length - 1;
     let num1 = cadet_callsign.charAt(index - 1);
     let num2 = cadet_callsign.charAt(index);
-    (await member).setNickname(`${process.env[cadetdepartmentshort + '_START_LETTER']}-1${num1 + num2} | ${cadet_fullname.split(' | ')[1]}`);
+
+    if (passed) {
+        (await member).roles.remove(process.env.CADET_ROLE_ID);
+        (await member).roles.remove(process.env.CADET_ROLE_ID);
+        (await member).roles.add(process.env[cadetdepartmentshort + '_PROBIB_ID']);
+        (await member).roles.add(process.env[cadetdepartmentshort + '_PROBIB_ID']);
+
+        (await member).setNickname(`${process.env[cadetdepartmentshort + '_START_LETTER']}-1${num1 + num2} | ${cadet_fullname.split(' | ')[1]}`);
+    } else {
+        (await member).roles.remove(process.env.JOIN_SERVER_ROLE_ID);
+    }
 
     console.log(`${num1 + num2} has ${status === 'ACCEPTED' ? 'Passed' : 'Failed'} training`);
 }
