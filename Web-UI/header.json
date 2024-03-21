@@ -1,0 +1,29 @@
+{
+    "Home": {
+        "title": "Home",
+        "description": "Welcome to the home page",
+        "link": "/"
+    },
+    "About": {
+        "title": "About",
+        "description": "Welcome to the about page",
+        "link": "/about"
+    },
+
+
+
+
+
+    "ifAdmin": {
+       "Admin": {
+           "title": "Admin",
+           "description": "Welcome to the admin page",
+           "link": "/admin"
+       },
+       "ENV": {
+           "title": "Configuration",
+           "description": "Welcome to the environment page",
+           "link": "/admin/env"
+       }
+    }
+}

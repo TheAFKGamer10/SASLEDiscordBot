@@ -24,17 +24,25 @@ module.exports = async (thingtodo, table, sqlstring) => {
         }
 
         if (thingtodo == 'connect') {
-            connect().then((result) => {
-                mysqlconnection.query('CREATE TABLE IF NOT EXISTS cadettrainings (id INT AUTO_INCREMENT PRIMARY KEY, passed BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, fto_username VARCHAR(64), fto_id BIGINT, timestamp TEXT)', function (err, result) {
-                    if (err) throw err;
+            return new Promise((resolve, reject) => {
+                connect().then((result) => {
+                    mysqlconnection.query('CREATE TABLE IF NOT EXISTS cadettrainings (id INT AUTO_INCREMENT PRIMARY KEY, passed BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, fto_username VARCHAR(64), fto_id BIGINT, timestamp TEXT)', function (err, result) {
+                        if (err) reject(err);
+                        mysqlconnection.query('CREATE TABLE IF NOT EXISTS departmentjoins (id INT AUTO_INCREMENT PRIMARY KEY, forced BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, department VARCHAR(64), admin_forced_username VARCHAR(64), admin_forced_id BIGINT, timestamp TEXT)', function (err, result) {
+                            if (err) reject(err);
+                            mysqlconnection.query('CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(64), password VARCHAR(64))', function (err, result) {
+                                if (err) reject(err);
+                                close().then(() => {
+                                    resolve('Tables created. Connection closed.');
+                                }).catch((error) => {
+                                    reject(error);
+                                });
+                            });
+                        });
+                    });
+                }).catch((error) => {
+                    reject(error);
                 });
-                mysqlconnection.query('CREATE TABLE IF NOT EXISTS departmentjoins (id INT AUTO_INCREMENT PRIMARY KEY, forced BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, department VARCHAR(64), admin_forced_username VARCHAR(64), admin_forced_id BIGINT, timestamp TEXT)', function (err, result) {
-                    if (err) throw err;
-                });
-                close().catch((error) => {console.log(error);});
-                console.log(result);
-            }).catch((error) => {
-                console.log(error);
             });
         }
         if (thingtodo == 'insert') {
@@ -46,9 +54,13 @@ module.exports = async (thingtodo, table, sqlstring) => {
                 if (table == 'departmentjoins') {
                     valuestemplate = '(forced, cadet_username, cadet_id, department, admin_forced_username, admin_forced_id, timestamp)';
                 }
+                if (table == 'users') {
+                    valuestemplate = '(username, password)';
+                }
     
                 mysqlconnection.query(`INSERT INTO ${table} ${valuestemplate} VALUES ${sqlstring}`, function (err, result) {
                     if (err) throw err;
+                    return result;
                 });
                 close().catch((error) => {console.log(error);});
             }).catch((error) => {

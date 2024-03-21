@@ -32,7 +32,7 @@ module.exports = async (interaction) => {
         interaction.editReply({ content: 'You can not complete training for somebody who is not a cadet.' });
         return;
     };
-    var departmentList = JSON.parse(process.env.ListOfDepartments.split(", "));
+    var departmentList = JSON.parse(process.env.LIST_OF_DEPARTMENTS.split(", "));
     let cadetdepartment;
     let cadetdepartmentshort;
     let cadetdepartmentid;

@@ -1,20 +1,34 @@
 {
-  "name": "saslediscordbot",
+  "name": "fivemdiscordbot",
   "version": "1.0.0",
-  "description": "A discord bot for SAS:LE.",
+  "description": "A discord bot to help with your FiveM server.",
   "main": "src/index.js",
   "scripts": {
     "start": "nodemon src/index.js",
     "update-start": "npm run update && npm run pushcmds && npm run start",
     "pushcmds": "node src/regester-commands.js",
-    "update": "node scripts/update.js && npm run pushcmds"
+    "update": "node scripts/update.js && npm run pushcmds",
+    "express": "nodemon Web-UI/server.js"
   },
   "author": "TheAFKGamer10",
+  "funding": {
+    "url": "https://afkhosting.win/"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "WEB-UI/auth/data/users.json"
+    ]
+  },
   "license": "MIT",
   "dependencies": {
-    "discord.js": "^14.14.1",
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.6",
+    "discord.js": "^14.12.1",
     "dotenv": "^16.3.1",
+    "express": "^4.18.3",
+    "express-session": "^1.18.0",
     "mysql2": "^3.7.1",
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "path": "^0.12.7"
   }
 }

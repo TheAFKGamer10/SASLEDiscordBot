@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/auth/style.css" />
+  </head>
+  <body id="body" class="light" onload="pageloaded()">
+    <div id="top-bar" class="top-bar">
+      <div id="top-bar-left" class="top-bar-left"></div>
+      <div id="top-bar-right" class="top-bar-right">
+        <div id="colourmode" class="colourmode">
+          <button id="lightdarkbutton" class="ldbutton" onclick="changeld()">
+            <img id="ldicon" class="ldicon" src="/img/sun.svg" height="25px" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="announcement" class="announcement">
+      <div id="announcement-text" class="announcement-text">
+        <h1 id="announcement-text-h1"></h1>
+        <p id="announcement-text-p"></p>
+      </div>
+      <button onclick="closeAnnouncement()">X</button>
+    </div>
+
+      <h2>Login</h2>
+      <form class="login-form">
+          <label for="username">Username:</label>
+          <input type="text" autocomplete="username" autocapitalize="off" id="username" class="userinput input" placeholder="Enter your username" value="root"/>
+  
+          <label for="password">Password:</label>
+          <input type="password" autocomplete="current-password" autocapitalize="off" id="password" class="passinput input" placeholder="Enter your password" value="pass" />
+      </form>
+      <button type="submit" autofocus class="submitbtn" onclick="login()">Login</button>
+
+    <script type="text/javascript" src="./auth/main.js"></script>
+  </body>
+</html>

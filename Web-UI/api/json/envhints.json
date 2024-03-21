@@ -1,0 +1,114 @@
+{
+    "BOT_TOKEN": {
+        "type": "password",
+        "required": true,
+        "onlyifDB": false,
+        "description": "Your Bot Token",
+        "default": "*****************"
+    },
+    "CLIENT_ID": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": false,
+        "description": "Your Bots Client/User ID",
+        "default": "000000000000000000"
+    },
+    "GUILD_ID": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The ID of the server you want to use the bot in",
+        "default": "000000000000000000"
+    },
+    "LOG_CHANNEL_ID": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The ID of the channel you want to log commands in",
+        "default": "000000000000000000"
+    },
+    "MYSQL_CONNECTION_text": {
+        "type": "CONNECTION_text",
+        "required": false,
+        "onlyifDB": false,
+        "description": "Your MySQL Connection text (optional) (mysql://user:password@host:port/database)",
+        "default": "mysql://user:password@host:port/database"
+    },
+    "JOIN_WEBSITE": {
+        "type": "URL",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The URL of the website you want to show users after they join a department",
+        "default": "https://example.com/info"
+    },
+    "LEO_ROLE_ID": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The ID of the role you want to give to LEOs. Ex. Police, Fire, EMS, etc.",
+        "default": "000000000000000000"
+    },
+    "CADET_ROLE_ID": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The ID of the role you want to give to cadets",
+        "default": "000000000000000000"
+    },
+    "LIST_OF_DEPARTMENTS": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": false,
+        "description": "A comma separated list of departments you want to use",
+        "default": "LSPD, BCSO, SAHP, SAFD, SASP"
+    },
+    "JOIN_SERVER_ROLE_ID": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": true,
+        "description": "The ID of the role you want to give to users that can join the FiveM server. Will be added when they are ready for training, kept if they complete training but removed if they fail. They will have to request training again to get the role back.",
+        "default": "000000000000000000"
+    },
+    "COOKIE_SECRET": {
+        "type": "password",
+        "required": true,
+        "onlyifDB": false,
+        "descriptionusehtml": true,
+        "description": "A <a href=\"https://www.random.org/strings/?num=1&len=32&digits=on&upperalpha=on&loweralpha=on&unique=on&format=plain\">random string of characters</a> used to secure your browser cookies",
+        "default": "*****************"
+    },
+
+
+
+
+
+
+    "_DEPARTMENT_NAME": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The name of the department",
+        "default": ""
+    },
+    "_ROLE_ID": {
+        "type": "number",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The ID of the department",
+        "default": "000000000000000000"
+    },
+    "_START_LETTER": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The leter to start each officers callsign with",
+        "default": ""
+    },
+    "_PROBIB_ID": {
+        "type": "text",
+        "required": true,
+        "onlyifDB": true,
+        "description": "The ID of the role you want to give to users after they complete training",
+        "default": "000000000000000000"
+    }
+}

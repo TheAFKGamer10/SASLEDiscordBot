@@ -4,7 +4,7 @@ const rules = require("./../config/rules.config.json");
 
 const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
 
-var departmentList = JSON.parse(process.env.ListOfDepartments.split(", "));
+var departmentList = JSON.parse(process.env.LIST_OF_DEPARTMENTS.split(", "));
 const departments = [];
 departmentList.forEach(CurrentDepartment => {
   departments.push({

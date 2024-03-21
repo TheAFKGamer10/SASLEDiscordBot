@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FiveM Discord Bot</title>
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+  </head>
+  <body id="body" class="light" onload="pageloaded()">
+    <div id="top-bar" class="top-bar">
+      <div id="top-bar-left" class="top-bar-left"></div>
+      <div id="top-bar-right" class="top-bar-right">
+        <div id="colourmode" class="colourmode">
+          <button id="lightdarkbutton" class="ldbutton" onclick="changeld()">
+            <img id="ldicon" class="ldicon" src="/img/sun.svg" height="25px" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="announcement" class="announcement">
+      <div id="announcement-text" class="announcement-text">
+        <h1 id="announcement-text-h1"></h1>
+        <p id="announcement-text-p"></p>
+      </div>
+      <button onclick="closeAnnouncement()">X</button>
+    </div>
+
+    <h1>FiveM Discord Bot</h1>
+
+    <div id="config" class="config"></div>
+
+    <br />
+    <button id="sumbitbtn" class="submitbtn" onclick="submit()">Submit</button>
+    <br />
+    <div id="footer" class="footer">
+      <p id="footer-text" class="footer-text"></p>
+    </div>
+    <script type="text/javascript" src="main.js"></script>
+  </body>
+</html>
