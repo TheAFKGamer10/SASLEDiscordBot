@@ -52,14 +52,10 @@ module.exports = async (interaction) => {
     }
 
 
-    var NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
-    function getDepartID() {
-        NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
-        if (CurrentUsersNumbers.includes(NewDepartID)) {
-            getDepartID();
-        }
-    }
-    getDepartID();
+    let NewDepartID;
+    do {
+        NewDepartID = Math.floor(Math.random() * 90) + 10;
+    } while (CurrentUsersNumbers.includes(NewDepartID));
 
     CurrentDepartment = department.toUpperCase();
 
