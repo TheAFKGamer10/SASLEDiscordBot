@@ -1,0 +1,12 @@
+*.env*
+!.env.example
+node_module*
+*test*
+.gitignore
+*.log
+.git
+
+nodejs-portable*
+
+# For the WEB-UI
+users.json
