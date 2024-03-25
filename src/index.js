@@ -6,6 +6,7 @@ const forcejoin = require("./commands/force-join");
 const ftocomplete = require("./commands/fto-complete");
 const ftotrain = require("./commands/fto-train");
 const rp = require("./commands/rp");
+const rpcountdownchecker = require("./events/rpcountdownchecker");
 if (!fs.existsSync('./.env')) {
     console.log('No .env file found. Please create one before starting the bot again.');
     process.exit(126);
@@ -23,7 +24,7 @@ async function envcheck() {
     requireditems = ['BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'LOG_CHANNEL_ID', 'LEO_ROLE_ID', 'CADET_ROLE_ID', 'LIST_OF_DEPARTMENTS'];
     empty = [];
     depsreq = [];
-    
+
     JSON.parse(env.parsed.LIST_OF_DEPARTMENTS).forEach(element => {
         depsreq.push(element.toUpperCase() + '_START_LETTER');
         depsreq.push(element.toUpperCase() + '_DEPARTMENT_NAME');
@@ -33,7 +34,7 @@ async function envcheck() {
             requireditems.push('JOIN_SERVER_ROLE_ID');
         }
     });
-    
+
     Object.keys(env.parsed).forEach(element => {
         if (requireditems.includes(element) && env.parsed[element] == '') {
             empty.push(element);
@@ -58,18 +59,19 @@ client.on('ready', async () => {
     }
     if (process.env.UPTIME_KUMA_URL !== undefined && process.env.UPTIME_KUMA_URL !== '') {
         console.log('This method of uptime kuma is no longer supported. Please use the new method of sending a HTTP(s) request to the bots website insted.');
-        setInterval(function() {
+        setInterval(function () {
             fetch(process.env.UPTIME_KUMA_URL, {
                 method: 'GET',
             }).then((response) => {
                 if (response.status !== 200) {
                     console.log(`Uptime Kuma: Error: ${response.status}`);
-                } 
+                }
             }).catch((error) => {
                 console.log(`Uptime Kuma: Error: ${error}`);
             });
         }, process.env.UPTIME_KUMA_INTERVAL * 1000);
     }
+    rpcountdownchecker(hasdb);
     console.log(`Logged in as ${client.user.tag}!`);
 });
 

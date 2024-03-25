@@ -32,10 +32,13 @@ module.exports = async (thingtodo, table, sqlstring) => {
                             if (err) reject(err);
                             mysqlconnection.query('CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(64), password VARCHAR(64))', function (err, result) {
                                 if (err) reject(err);
-                                close().then(() => {
-                                    resolve('Tables created. Connection closed.');
-                                }).catch((error) => {
-                                    reject(error);
+                                mysqlconnection.query('CREATE TABLE IF NOT EXISTS rp (id INT AUTO_INCREMENT PRIMARY KEY, aop VARCHAR(64), timestamp TEXT, ping BOOL, training BOOL)', function (err, result) {
+                                    if (err) reject(err);
+                                    close().then(() => {
+                                        resolve('Tables created. Connection closed.');
+                                    }).catch((error) => {
+                                        reject(error);
+                                    });
                                 });
                             });
                         });
@@ -57,12 +60,15 @@ module.exports = async (thingtodo, table, sqlstring) => {
                 if (table == 'users') {
                     valuestemplate = '(username, password)';
                 }
-    
+                if (table == 'rp') {
+                    valuestemplate = '(aop, timestamp, ping, training)';
+                }
+
                 mysqlconnection.query(`INSERT INTO ${table} ${valuestemplate} VALUES ${sqlstring}`, function (err, result) {
                     if (err) throw err;
                     return result;
                 });
-                close().catch((error) => {console.log(error);});
+                close().catch((error) => { console.log(error); });
             }).catch((error) => {
                 console.log(error);
             });
@@ -76,6 +82,17 @@ module.exports = async (thingtodo, table, sqlstring) => {
                         resolve(result);
                     });
                 });
+            });
+        }
+        if (thingtodo == 'delete') {
+            connect().then((result) => {
+                mysqlconnection.query(`DELETE FROM ${table} WHERE ${sqlstring}`, function (err, result) {
+                    if (err) throw err;
+                    return result;
+                });
+                close().catch((error) => { console.log(error); });
+            }).catch((error) => {
+                console.log(error);
             });
         }
 

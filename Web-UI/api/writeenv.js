@@ -13,8 +13,7 @@ module.exports = async (data) => {
                     fileLines[lineIndex] = element + ' = ' + (data[element] ? data[element] : '');
                 else if (data[element].includes('[') && data[element].includes(']')) {
                     fileLines[lineIndex] = element + ' = ' + (data[element] ? data[element].replace(/\s/g, '') : '');
-                }
-                else {
+                } else {
                     fileLines[lineIndex] = element + ' = \'' + data[element] + '\'';
                 }
             } else {
@@ -22,8 +21,7 @@ module.exports = async (data) => {
                     fileLines.push(element + ' = ' + (data[element] ? data[element] : ''));
                 else if (data[element].includes('[') && data[element].includes(']')) {
                     fileLines.push(element + ' = ' + JSON.parse(data[element]));
-                }
-                else {
+                } else {
                     fileLines.push(element + ' = \'' + (data[element] ? data[element] : '') + '\'');
                 }
             }

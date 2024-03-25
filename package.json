@@ -16,7 +16,8 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "WEB-UI/auth/data/users.json"
+      "WEB-UI/auth/data/users.json",
+      "src/files/next-rp.json"
     ]
   },
   "license": "MIT",

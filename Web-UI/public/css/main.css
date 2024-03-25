@@ -1,0 +1,78 @@
+/*Sets Varibles*/
+@import url("/public/css/topbar.css");
+
+:root {
+  --dark-mode-color: #222222;
+  --light-mode-color: #f8f8f8;
+  --dark-mode-text-color: #ffffff;
+  --light-mode-text-color: #111111;
+  --dark-mode-topbar-color: #007bff;
+  --light-mode-topbar-color: #444444;
+  --light-mode-dropdown-color: #f8f8f8;
+  --dark-mode-dropdown-color: #222222;
+  --button-grey: #7b7b7b;
+  --button-blue: #007bff;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+  text-align: center;
+  flex-wrap: wrap;
+}
+
+body {
+  margin: 0;
+}
+
+
+
+
+/* Footer */
+.footer {
+  margin-top: 20px;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 90dvw;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  padding: 10px;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.light {
+  .footer {
+    background-color: var(--light-mode-color);
+    color: var(--light-mode-text-color);
+  }
+}
+.dark {
+  .footer {
+    background-color: var(--dark-mode-color);
+    color: var(--dark-mode-text-color);
+  }
+}
+
+@media screen and (min-height: 100vh) {
+  body {
+    padding-bottom: 0;
+  }
+
+  .footer {
+    position: relative;
+  }
+}
+
+.footer-left {
+  float: none;
+  margin-right: auto;
+}
+
+.footer-right {
+  float: none;
+  margin-left: auto;
+}

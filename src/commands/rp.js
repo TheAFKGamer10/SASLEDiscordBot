@@ -24,7 +24,7 @@ module.exports = async (interaction) => {
         }
         timestamp = Math.floor(Date.now() / 1000) + addTimeInSeconds;
     } else if (time > 1000000000) {
-        timestamp = time; 
+        timestamp = time;
     } else {
         timestamp = Math.floor(Date.now() / 1000) + (time * 60);
     }
@@ -36,6 +36,18 @@ module.exports = async (interaction) => {
     }
     if (training) {
         output += `\nTraining: <@&${process.env.CADET_ROLE_ID}> training **will** he happening!`;
+    }
+
+    if (process.env.MYSQL_CONNECTION_STRING !== '') {
+        const rpTime = new Date(timestamp * 1000);
+        const newData = rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, '0') + " " + rpTime.getDate().toString().padStart(2, '0') + " " + rpTime.getHours().toString().padStart(2, '0') + " " + rpTime.getMinutes().toString().padStart(2, '0');
+        await mysql('insert', 'rp', `('${aop}', '${newData}', ${ping}, ${training})`);
+    } else {
+        const existingData = fs.readFileSync('./src/files/next-rp.json', 'utf-8');
+        const rpTime = new Date(timestamp * 1000);
+        const newData = { [rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, '0') + " " + rpTime.getDate().toString().padStart(2, '0') + " " + rpTime.getHours().toString().padStart(2, '0') + " " + rpTime.getMinutes().toString().padStart(2, '0')]: { aop, ping, training } };
+        const mergedData = { ...JSON.parse(existingData), ...newData };
+        fs.writeFileSync('./src/files/next-rp.json', JSON.stringify(mergedData, null, 4));
     }
 
     interaction.reply({ content: output, allowedMentions: { parse: ["everyone"] } });

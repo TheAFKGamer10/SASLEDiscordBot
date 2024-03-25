@@ -3,11 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Configure ENV Variables</title>
+    <title>Next Roleplay</title>
     <link rel="stylesheet" type="text/css" href="/public/css/main.css" />
-    <link rel="stylesheet" type="text/css" href="/admin/config-env/main.css" />
   </head>
-  <body id="body" class="light" onload="pageloaded(); envpageloaded()">
+  <body id="body" class="light" onload="pageloaded(); nextrppageloaded()">
     <div id="top-bar" class="top-bar">
       <div id="top-bar-left" class="top-bar-left"></div>
       <div id="top-bar-right" class="top-bar-right">
@@ -27,15 +26,23 @@
       <button onclick="closeAnnouncement()">X</button>
     </div>
 
-    <h1>FiveM Discord Bot</h1>
-    <div id="config" class="config"></div>
-    <br />
-    <button id="sumbitbtn" class="submitbtn" onclick="submit()">Submit</button>
 
-    <div id="footer" class="footer"></div>
+    <div id="TimeArea" class="TimeArea">
+      <h1 id="WillWappenath1">The next Roleplay will happen at:</h1>
+      <p id="Time" class="Time"></p>
+      <h3 id="Countdownh3">Time until the next Roleplay:</h3>
+      <p id="Countdown" class="Countdown"></p>
+    </div>
 
-    <script type="text/javascript" src="config-env/configenv.js"></script>
+    <div id="footer" class="footer">
+      <div id="footer-left" class="footer-left">
+        <p>Next Roleplay</p>
+      </div>
+      <div id="footer-right" class="footer-right">
+        <p>© 2021 Next Roleplay</p>
+      </div>
+    </div>
     <script type="text/javascript" src="/main.js"></script>
-    </script>
+    <script type="text/javascript" src="client/next-rp/nextrp.js"></script>
   </body>
 </html>

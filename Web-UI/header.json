@@ -1,29 +1,21 @@
 {
     "Home": {
         "title": "Home",
-        "description": "Welcome to the home page",
         "link": "/"
     },
     "About": {
-        "title": "About",
-        "description": "Welcome to the about page",
-        "link": "/about"
+        "title": "Next RP",
+        "link": "/next-rp"
     },
-
-
-
-
-
+    
     "ifAdmin": {
-       "Admin": {
-           "title": "Admin",
-           "description": "Welcome to the admin page",
-           "link": "/admin"
-       },
-       "ENV": {
-           "title": "Configuration",
-           "description": "Welcome to the environment page",
-           "link": "/admin/env"
-       }
+        "Admin": {
+            "title": "Admin Home",
+            "link": "/admin"
+        },
+        "ENV": {
+            "title": "Configuration",
+            "link": "/admin/env"
+        }
     }
 }

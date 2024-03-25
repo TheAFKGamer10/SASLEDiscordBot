@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const { exec, spawn } = require('child_process');
 const env = require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const package = require('../package.json');
@@ -14,6 +15,7 @@ beforerun();
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
+app.disable('x-powered-by');
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(session({
     secret: env.parsed.COOKIE_SECRET || 'pOkPUqtcw6qUaZ163FgPzcDPurK1Wr5t',
@@ -25,6 +27,10 @@ const PORT = 3000;
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
+    // const botProcess = spawn('node', ['src/index.js']);
+    // botProcess.stdout.on('data', (data) => {
+    //     console.log(data.toString());
+    // });
 });
 
 // Authentication
@@ -80,7 +86,6 @@ app.get('/logout', (question, answer) => {
 app.all('/api/*', (question, answer) => {
     return answer.status(401).send('Unauthorized');
 });
-
 app.get('/v1/stat', (question, answer) => {
     res = {
         "status": "ok",
@@ -88,18 +93,15 @@ app.get('/v1/stat', (question, answer) => {
     };
     answer.send(res);
 });
-
 app.get('/v1/config/get', async (question, answer) => {
     if (!question.cookies.userid) {
         return answer.status(401).send('Unauthorized');
     }
     answer.send(await getenv());
 });
-
 app.get('/v1/config/envhints', async (question, answer) => {
     answer.send(require('./api/json/envhints.json'));
 });
-
 app.post('/v1/config/submit', (question, answer) => {
     if (!question.cookies.userid) {
         return answer.status(401).send('Unauthorized');
@@ -107,9 +109,8 @@ app.post('/v1/config/submit', (question, answer) => {
     writeenv(question.body);
     answer.send({ "status": "ok" });
 });
-
 app.post('/v1/config/removeVariable', async (req, res) => {
-    if (!req.session.userid) {
+    if (!req.cookies.userid) {
         return res.status(401).send('Unauthorized');
     }
 
@@ -134,9 +135,6 @@ app.post('/v1/config/removeVariable', async (req, res) => {
         res.send({ "status": "ok" });
     });
 });
-
-
-
 app.get('/checkCookies', async (question, answer) => {
     if (question.cookies[question.query.cookie]) {
         answer.send('true');
@@ -144,34 +142,67 @@ app.get('/checkCookies', async (question, answer) => {
         answer.send('false');
     }
 });
+app.all('/auth/data/*', (question, answer) => {
+    answer.status(403).send('Forbidden');
+});
+app.get('/v1/bot/next-rp', async (question, answer) => {
+    if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null) {
+        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
+        let nextRpData = (await mysql('select', 'rp', `SELECT * FROM rp`));
+        let keys = Object.keys(nextRpData);
+        if (keys.length === 0) { return answer.send({ "status": "warning", "message": "No RP Scheduled" }) }
+        result = {
+            "aop": nextRpData[keys[0]].aop,
+            "time": nextRpData[keys[0]].timestamp,
+            "training": nextRpData[keys[0]].training,
+            "servertimeoffset": new Date().getTimezoneOffset()
+        }
+        answer.send(result);
+    } else {
+        let nextRpData = require('../src/files/next-rp.json');
+        let keys = Object.keys(nextRpData);
+        if (keys.length === 0) { return answer.send({ "status": "warning", "message": "No RP Scheduled" }) }
+        result = {
+            "aop": nextRpData[keys[0]].aop,
+            "time": Object.keys(nextRpData)[0],
+            "training": nextRpData[keys[0]].training,
+            "servertimeoffset": new Date().getTimezoneOffset()
+        }
+        answer.send(result);
+    }
+});
 
 
 // Admin
 app.get('/admin', (question, answer) => {
-    // if (!question.cookies.userid) {
-    //     question.session.destroy();
-    //     return answer.redirect(`/login?next=${question.url}`);
-    // }
+    if (!question.cookies.userid) {
+        question.session.destroy();
+        answer.clearCookie('userid');
+        return answer.redirect(`/login?next=${question.url}`);
+    }
     answer.sendFile(path.join(__dirname, 'admin', 'admin.html'));
 });
 app.get('/admin/env', (question, answer) => {
     if (!question.cookies.userid) {
+        question.session.destroy();
+        answer.clearCookie('userid');
         return answer.redirect(`/login?next=${question.url}`);
     }
     answer.sendFile(path.join(__dirname, 'admin/config-env', 'configenv.html'));
 });
 
 
-
-
-
-app.all('/auth/data/*', (question, answer) => {
-    answer.status(403).send('Forbidden');
-});
-
+// Public Pages
 app.get('/', (question, answer) => {
     answer.sendFile(path.join(__dirname, '/index.html'));
 });
+app.get('/next-rp', (question, answer) => {
+    answer.sendFile(path.join(__dirname, 'client/next-rp/nextrp.html'));
+});
+
+
+
+
 /* This Must Be At The Bottom */
 app.all('/*', (question, answer) => {
     answer.sendFile(path.join(__dirname + question.url));

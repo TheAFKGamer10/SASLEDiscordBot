@@ -2,7 +2,7 @@
 
 async function makeboxes() {
     function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
-
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         document.getElementById('announcement').style.display = 'flex';
         document.getElementById('announcement-text-h1').innerHTML = h1;
         document.getElementById('announcement-text-p').innerHTML = p;
@@ -35,7 +35,7 @@ async function makeboxes() {
                     const ifDEPARTMENTS = ["_DEPARTMENT_NAME", "_START_LETTER", "_ROLE_ID", "_PROBIB_ID"]
 
                     let form = document.getElementById('config');
-                    form.innerHTML = ''; // Empty the div with id 'config'+
+                    form.innerHTML = ''; // Empty the div with id 'config'
 
                     let ifdb = [];
                     Object.keys(envhints).forEach((key) => {
@@ -43,7 +43,6 @@ async function makeboxes() {
                             ifdb.push(key);
                         }
                     });
-                    console.log(ifdb);
 
                     Object.keys(data).forEach((key) => {
                         let ending = "";
@@ -53,12 +52,29 @@ async function makeboxes() {
                             }
                         });
                         if (ifdb.includes(key) || ifdb.includes(ending) && data.MYSQL_CONNECTION_STRING == "") {
-                            console.log(key);
                             return;
-                        } 
-                        if (!Object.keys(envhints).includes(key)) {
-                            envhints[key] = { type: "text", required: false, default: "", description: "", descriptionusehtml: false};
                         }
+                        if (!Object.keys(envhints).includes(key)) {
+                            envhints[key] = { type: "text", required: false, default: "", description: "", descriptionusehtml: false };
+                        }
+
+
+                        if (envhints[key].type === 'dropdown') {
+                            let element;
+                            if (envhints[key].type === 'dropdown') {
+                                element = document.createElement('select');
+                                envhints[key].options.forEach(option => {
+                                    let optionElement = document.createElement('option');
+                                    optionElement.value = option;
+                                    optionElement.textContent = option;
+                                    element.appendChild(optionElement);
+                                });
+                            } else {
+                                element = document.createElement('div');
+                            }
+                            element.className = 'block';
+                        }
+
 
                         // Create a new div element
                         let div = document.createElement('div');
@@ -80,44 +96,73 @@ async function makeboxes() {
                         description.id = `description_${key}`;
                         description.className = 'description';
 
-                        // Create a new input element
-                        let input = document.createElement('input');
-                        input.className = 'input envinput';
-
-                        input.type = envhints[key].type;
-                        if (envhints[key]?.required || envhints[ending]?.required) {
-                            input.required = true;
-                        } else {
-                            input.required = false;
-                        }
-
-                        if (ending != "") {
-                            input.placeholder = envhints[ending].default;
-                        } else {
-                            input.placeholder = envhints[key].default;
-                        }
-                        input.id = `input_${key}`;
-                        if (key == "MYSQL_CONNECTION_STRING") {
-                            input.value = data[key].replace(/(mysql:\/\/[^:@]+:)[^:@]+(@[^:@]+:\d+\/[^:@]+)/, '$1*****$2');
-                        } else {
-                            input.value = data[key];
-                        }
-                        if (input.required) {
-                            // Create a new span element
-                            let span = document.createElement('span');
-                            span.textContent = '*';
-                            span.style = 'color: red;';
-                            span.className = 'required red';
-                            label.appendChild(span);
-                        }
-
-                        // Append the label, description, and input elements to the div
                         let textdiv = document.createElement('div');
                         textdiv.className = 'textdiv';
                         textdiv.appendChild(label);
                         textdiv.appendChild(description);
                         div.appendChild(textdiv);
-                        div.appendChild(input);
+
+                        if (envhints[key].type === 'dropdown') {
+                            let element;
+                            element = document.createElement('select');
+                            envhints[key].options.forEach(option => {
+                                let optionElement = document.createElement('option');
+                                optionElement.value = option;
+                                optionElement.textContent = option;
+                                element.appendChild(optionElement);
+                            });
+
+                            element.className = 'input envinput envdropdown';
+                            element.id = `input_${key}`;
+                            element.value = data[key];
+                            div.appendChild(element);
+                        } else {
+                            // Create a new input element
+                            let input = document.createElement('input');
+                            input.className = 'input envinput';
+
+                            input.type = envhints[key].type;
+
+                            if (key == "BOT_TOKEN") {
+                                input.type = "password";
+                                input.onmouseover = mouseoverPass;
+                                input.onmouseout = mouseoutPass;
+                            }
+
+                            if (envhints[key]?.required || envhints[ending]?.required) {
+                                input.required = true;
+                            } else {
+                                input.required = false;
+                            }
+
+                            if (ending != "") {
+                                input.placeholder = envhints[ending].default;
+                            } else {
+                                input.placeholder = envhints[key].default;
+                            }
+                            input.id = `input_${key}`;
+                            if (key == "MYSQL_CONNECTION_STRING") {
+                                input.onmouseover = connectionstringmouseoverPass;
+                                input.onmouseout = connectionstringmouseoutPass;
+                                sessionStorage.setItem('MYSQL_CONNECTION_STRING', data[key]);
+                                sessionStorage.setItem('const_MYSQL_CONNECTION_STRING', data[key]);
+                                input.value = data[key].replace(/(mysql:\/\/[^:@]+:)([^:@]+)(@[^:@]+:\d+\/[^:@]+)/, function (match, p1, p2, p3) {
+                                    return p1 + '*'.repeat(p2.length) + p3;
+                                });
+                            } else {
+                                input.value = data[key];
+                            }
+                            if (input.required) {
+                                // Create a new span element
+                                let span = document.createElement('span');
+                                span.textContent = '*';
+                                span.style = 'color: red;';
+                                span.className = 'required red';
+                                label.appendChild(span);
+                            }
+                            div.appendChild(input);
+                        }
+
                         // Append the div to the form
                         form.appendChild(div);
                     });
@@ -132,9 +177,7 @@ async function makeboxes() {
 
 }
 
-async function pageloaded() {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) { changeld(); }
-
+async function envpageloaded() {
     makeboxes();
 }
 
@@ -153,8 +196,6 @@ async function submit() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const URL = window.location.origin;
 
-    const required = ["BOT_TOKEN", "CLIENT_ID", "GUILD_ID", "LOG_CHANNEL_ID", "LIST_OF_DEPARTMENTS", "COOKIE_SECRET"]
-    const ifMYSQL = ["MYSQL_CONNECTION_STRING", 'JOIN_SERVER_ROLE_ID', "LEO_ROLE_ID", "CADET_ROLE_ID"]
     const ifDEPARTMENTS = ["_DEPARTMENT_NAME", "_START_LETTER", "_ROLE_ID"]
 
     let data = {};
@@ -171,8 +212,10 @@ async function submit() {
             return;
         }
         if (inputs[i].id == "input_MYSQL_CONNECTION_STRING") {
-            if (inputs[i].value.includes('*****')) {
+            if (sessionStorage.getItem('const_MYSQL_CONNECTION_STRING') == sessionStorage.getItem('MYSQL_CONNECTION_STRING')) {
                 delete data.MYSQL_CONNECTION_STRING
+            } else {
+                data.MYSQL_CONNECTION_STRING = sessionStorage.getItem('MYSQL_CONNECTION_STRING');
             }
             if (inputs[i].value != "" && !/^mysql:\/\/[^:@]+:[^:@]+@[^:@]+:\d+\/[^:@]+$/.test(inputs[i].value)) {
                 announcement(
@@ -181,7 +224,6 @@ async function submit() {
                     "warning",
                     false
                 );
-                console.log('Invalid connection string');
                 return;
             }
         }
@@ -206,7 +248,6 @@ async function submit() {
     })
         .then(response => response.json())
         .then(async data => {
-            console.log(data);
             if (data.status == 'ok') {
                 announcement(
                     "Config submitted!",
@@ -261,7 +302,6 @@ async function removeVariable(key) {
     })
         .then(response => response.json())
         .then(async data => {
-            console.log(data);
             if (data.status == 'ok') {
                 await makeboxes();
 
@@ -289,21 +329,28 @@ async function removeVariable(key) {
 
 
 
-function changeld(isdark) {
-    const ldbutton = document.getElementById("lightdarkbutton");
-    const body = document.getElementById("body");
-    if (body.classList.contains("dark") && isdark != "d") {
-        body.classList.remove("dark");
-        body.classList.add("light");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/img/sun.svg" height="25px" />`;
-    } else {
-        body.classList.remove("light");
-        body.classList.add("dark");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/img/moon.svg" height="25px" />`;
+function mouseoverPass() {
+    let obj = document.getElementById('input_BOT_TOKEN');
+    obj.type = 'text';
+}
+function mouseoutPass() {
+    let obj = document.getElementById('input_BOT_TOKEN');
+    obj.type = 'password';
+}
+
+function connectionstringmouseoverPass() {
+    let obj = document.getElementById('input_MYSQL_CONNECTION_STRING');
+    if (obj.value.includes('*')) {
+        obj.value = sessionStorage.getItem('MYSQL_CONNECTION_STRING');
+    }
+}
+async function connectionstringmouseoutPass() {
+    let obj = document.getElementById('input_MYSQL_CONNECTION_STRING');
+    if (obj.value !== "") {
+        sessionStorage.setItem('MYSQL_CONNECTION_STRING', obj.value)
+        obj.value = obj.value.replace(/(mysql:\/\/[^:@]+:)([^:@]+)(@[^:@]+:\d+\/[^:@]+)/, function (match, p1, p2, p3) {
+            return p1 + '*'.repeat(p2.length) + p3;
+        });
     }
 }
 
-
-function closeAnnouncement() {
-    document.getElementById('announcement').style.display = 'none';
-}
