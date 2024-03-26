@@ -151,6 +151,28 @@ function pageloaded() {
                         dropdown.appendChild(dropdownarea);
                         topbarleft.appendChild(dropdown);
                         topbarleft.appendChild(logoutButton);
+
+
+                        // Footer
+                        document.getElementById('footer').style.textDecoration = 'none';
+                        document.getElementById('footer').style.display = 'block';
+                        document.getElementById('footer').innerHTML = ` <!-- Plaese do not remove footer. It helps the developer of this softwear. But, it is open source, do what every you want (While still following the license). -->
+                            <p><a href="https://github.com/TheAFKGamer10/SASLEDiscordBot" target="_blank" class="footerlink" style="color: inherit; text-decoration: none">FiveM Discord Bot</a> by <a href="https://afkht.us/foot" target="_blank" class="footerlink" style="color: inherit; text-decoration: none">The AFK Gamer</a></p>
+                            <p style="font-size: 8px;">FiveM Discord Bot is not an official Discord or FiveM product. It is not affiliated with nor endorsed by Discord Inc. or Cfx.re.</p>
+                        `;
+                        var footerlinks = document.getElementsByClassName("footerlink");
+                        for (var i = 0; i < footerlinks.length; i++) {
+                            var footerlink = footerlinks[i];
+                            footerlink.style.cursor = "pointer";
+                            footerlink.onmouseover = function () {
+                                this.style.textDecoration = "underline";
+                                this.style.color = getComputedStyle(document.documentElement).getPropertyValue('--button-blue');
+                            };
+                            footerlink.onmouseout = function () {
+                                this.style.textDecoration = "none";
+                                this.style.color = "inherit";
+                            };
+                        }
                     } else {
                         topbarleft.style.marginBottom = '0px';
                         objkeys.forEach(key => {
@@ -200,16 +222,6 @@ function pageloaded() {
                     }
                 });
         });
-
-
-    document.getElementById('footer').innerHTML = `
-        <div id="footer-left" class="footer-left">
-            <p>Next Roleplay</p>
-        </div>
-        <div id="footer-right" class="footer-right">
-            <p>© 2021 Next Roleplay</p>
-        </div>
-    `;
 };
 
 
@@ -219,11 +231,11 @@ function changeld() {
     if (body.classList.contains("dark")) {
         body.classList.remove("dark");
         body.classList.add("light");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" height="25px" />`;
+        ldbutton.innerHTML = `<img id = "ldicon" class="ldicon" src = "/public/img/sun.svg" height = "25px" /> `;
     } else {
         body.classList.remove("light");
         body.classList.add("dark");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" height="25px" />`;
+        ldbutton.innerHTML = `<img id = "ldicon" class="ldicon" src = "/public/img/moon.svg" height = "25px" /> `;
     }
 }
 

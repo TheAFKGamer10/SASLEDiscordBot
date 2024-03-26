@@ -204,6 +204,6 @@ app.get('/next-rp', (question, answer) => {
 
 
 /* This Must Be At The Bottom */
-app.all('/*', (question, answer) => {
+app.get('/*', (question, answer) => {
     answer.sendFile(path.join(__dirname + question.url));
 });

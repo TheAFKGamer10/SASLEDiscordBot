@@ -1,0 +1,40 @@
+name: publish
+
+on:
+  push:
+    branches: [main, UI]
+  pull_request:
+    branches: [main]
+
+env:
+  BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+  CLIENT_ID: ${{ vars.CLIENT_ID }}
+  GUILD_ID: ${{ vars.GUILD_ID }}
+  LOG_CHANNEL_ID: ${{ vars.LOG_CHANNEL_ID }}
+  MYSQL_CONNECTION_STRING: ""
+  JOIN_WEBSITE: ${{ vars.JOIN_WEBSITE }}
+  LSPD_DEPARTMENT_NAME: LSPD (Los Santos Police Department)
+  LSPD_START_LETTER: B
+  LEO_ROLE_ID: ${{ vars.LEO_ROLE_ID }}
+  CADET_ROLE_ID: ${{ vars.CADET_ROLE_ID }}
+  LSPD_ROLE_ID: ${{ vars.LSPD_ROLE_ID }}
+  LIST_OF_DEPARTMENTS: '["LSPD"]'
+  JOIN_SERVER_ROLE_ID: ${{ vars.JOIN_SERVER_ROLE_ID }}
+  COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
+  ROOT_USERNAME: root
+  ROOT_PASSWORD: pass
+
+jobs:
+  build:
+    runs-on: [ubuntu-latest, windows-latest]
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npm run start
