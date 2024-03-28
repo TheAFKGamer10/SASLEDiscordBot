@@ -127,7 +127,7 @@ async function makeboxes() {
                             let input = document.createElement('input');
                             input.className = 'input envinput';
 
-                            input.type = envhints[key].type;
+                            input.type = ending != "" ? envhints[ending].type : envhints[key].type;
 
                             if (key == "BOT_TOKEN") {
                                 input.addEventListener('focusin', mouseoverPass);
@@ -136,11 +136,7 @@ async function makeboxes() {
 
                             input.required = envhints[key]?.required || envhints[ending]?.required ? true : false;
 
-                            if (ending != "") {
-                                input.placeholder = envhints[ending].default;
-                            } else {
-                                input.placeholder = envhints[key].default;
-                            }
+                            input.placeholder = ending != "" ? envhints[ending].default : envhints[key].default;
                             input.id = `input_${key}`;
                             if (key == "MYSQL_CONNECTION_STRING") {
                                 input.addEventListener('focusin', connectionstringmouseoverPass, true);
@@ -153,7 +149,7 @@ async function makeboxes() {
                             } else {
                                 input.value = data[key];
                             }
-                            if (input.required) {
+                            if (ending != "" ? envhints[ending].required : envhints[key].required) {
                                 // Create a new span element
                                 let span = document.createElement('span');
                                 span.textContent = '*';

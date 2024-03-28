@@ -31,5 +31,11 @@
   .createbtn {
     position: static;
     transform: none;
+    width: 80%;
+  }
+
+  .headernextto {
+    display: block;
+    align-items: center;
   }
 }

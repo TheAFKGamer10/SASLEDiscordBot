@@ -77,6 +77,13 @@
         "description": "A <a href=\"https://www.random.org/strings/?num=1&len=32&digits=on&upperalpha=on&loweralpha=on&unique=on&format=plain\">random string of characters</a> used to secure your browser cookies",
         "default": "*****************"
     },
+    "ROLEPLAY_ANOUNCEMENT_CHANNEL_ID": {
+        "type": "number",
+        "required": true,
+        "onlyifDB": false,
+        "description": "The ID of the channel you want to send roleplay announcements to",
+        "default": "000000000000000000"
+    },
     "TIME_FORMAT": {
         "type": "dropdown",
         "required": true,
