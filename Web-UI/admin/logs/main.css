@@ -1,0 +1,76 @@
+@import url("./../../public/css/main.css");
+.data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 90%;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  word-break: break-all;
+}
+
+table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd; /* Add border on the right */
+}
+
+table th,
+table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd; /* Add border on the right */
+}
+
+table th {
+  background-color: #4caf50;
+  color: var(--dark-mode-text-color);
+}
+
+table td:last-child {
+  border-right: none;
+}
+
+.light {
+  table {
+    border-top: 1px solid var(--dark-mode-color);
+    border-left: 1px solid var(--dark-mode-color);
+    border-right: 1px solid var(--dark-mode-color);
+  }
+  table td {
+    border-bottom: 1px solid var(--dark-mode-color);
+    border-right: 1px solid var(--dark-mode-color);
+  }
+  table th,
+  table td {
+    border-bottom: 1px solid var(--dark-mode-color);
+    border-right: 1px solid var(--dark-mode-color);
+  }
+}
+.dark {
+    table {
+        border-top: 1px solid var(--light-mode-color);
+        border-left: 1px solid var(--light-mode-color);
+        border-right: 1px solid var(--light-mode-color);
+      }
+      table td {
+        border-bottom: 1px solid var(--light-mode-color);
+        border-right: 1px solid var(--light-mode-color);
+      }
+      table th,
+      table td {
+        border-bottom: 1px solid var(--light-mode-color);
+        border-right: 1px solid var(--light-mode-color);
+      }
+}
+
+a, a:visited { /* Make links not have a diffrernt colour */
+  color: inherit;
+}

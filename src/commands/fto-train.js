@@ -4,7 +4,7 @@ module.exports = async (interaction) => {
     //await interaction.deferReply(); // Does not work because it will not send the ping to the user.
     const { commandName, options } = interaction;
 
-    const guild = client.guilds.cache.get(process.env.GUILD_ID);
+    const guild = client.guilds.cache.get(env.parsed.GUILD_ID);
     const cadet = options.getUser('cadet');
     const fto = interaction.member;
     const cadet_id = cadet.id;
@@ -17,15 +17,15 @@ module.exports = async (interaction) => {
     const fto_fullname = fto.displayName;
     const cadet_callsign = cadet_fullname.split(' | ')[0];
     const fto_callsign = fto_fullname.split(' | ')[0];
-    var CADETroleMembers = guild.roles.cache.get(process.env.CADET_ROLE_ID).members;
+    var CADETroleMembers = guild.roles.cache.get(env.parsed.CADET_ROLE_ID).members;
     if (!cadet_fullname.includes(' | ') || cadet_callsign.charAt(cadet_callsign.length - 3) !== '0' || !Array.from(CADETroleMembers.keys()).includes(cadet_id)) {
         interaction.reply({ content: 'You can not train for somebody who is not a cadet.', ephemeral: true});
         return;
     };
 
     const member = guild.members.fetch(cadet);
-    (await member).roles.add(process.env.JOIN_SERVER_ROLE_ID);
-    (await member).roles.add(process.env.JOIN_SERVER_ROLE_ID);
+    (await member).roles.add(env.parsed.JOIN_SERVER_ROLE_ID);
+    (await member).roles.add(env.parsed.JOIN_SERVER_ROLE_ID);
 
     interaction.reply({ content: `<@${cadet_id}>,\n<@${fto_id}> is ready to train you now. Plase join the server to get your training.` });
 

@@ -1,20 +1,20 @@
-require('dotenv').config();
+const { env } = require('./importdefaults');
 const { REST, Routes } = require('discord.js');
 const rules = require("./../config/rules.config.json");
 
-const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
+const rest = new REST({ version: '10' }).setToken(env.parsed.BOT_TOKEN);
 
-var departmentList = JSON.parse(process.env.LIST_OF_DEPARTMENTS.split(", "));
-const departments = [];
+var departmentList = JSON.parse(env.parsed.LIST_OF_DEPARTMENTS.split(", "));
+let departments = [];
 departmentList.forEach(CurrentDepartment => {
   departments.push({
-    name: `${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}`,
+    name: `${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}`,
     value: CurrentDepartment
   });
 
 });
 
-const embedchoices = [{ name: 'Rules Overview', value: 'rulesoverview' }];
+let embedchoices = [{ name: 'Rules Overview', value: 'rulesoverview' }];
 
 Object.keys(rules).forEach(key => {
   if (!key.includes("_") && !key.includes("Overveiw")) {
@@ -140,6 +140,11 @@ const commands = [
         type: 5, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
       },
       {
+        name: 'pingatrptime',
+        description: 'Would you like to ping at RP time? Default: Yes',
+        type: 5, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
+      },
+      {
         name: 'training',
         description: 'Is training avabile? Default: Yes',
         type: 5, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
@@ -155,8 +160,8 @@ const commands = [
 
     await rest.put(
       Routes.applicationGuildCommands(
-        process.env.CLIENT_ID,
-        process.env.GUILD_ID
+        env.parsed.CLIENT_ID,
+        env.parsed.GUILD_ID
       ),
       { body: commands }
     );

@@ -1,6 +1,23 @@
 async function nextrppageloaded() {
     const URL = window.location.origin;
-    return fetch(URL + `/v1/bot/next-rp`, {
+    fetch(URL + `/v1/checkCookies?cookie=userid`, {
+        method: 'GET'
+    })
+        .then(response => response.text())
+        .then(isadmin => {
+            if (isadmin === 'true') {
+                let createbuttonarea = document.getElementById('headernextto');
+                let createbutton = document.createElement('button');
+                createbutton.innerHTML = 'Create RP';
+                createbutton.className = 'createbtn';
+                createbutton.onclick = function () {
+                    window.location.href = '/next-rp/create';
+                };
+                createbuttonarea.appendChild(createbutton);
+            }
+        });
+
+    return fetch(URL + `/v1/bot/rp`, {
         method: 'GET'
     })
         .then(response => response.json())

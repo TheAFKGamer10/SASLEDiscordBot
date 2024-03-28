@@ -7,9 +7,9 @@ module.exports = async (interaction) => {
     await interaction.deferReply({ ephemeral: true });
 
     const CurrentUsersNumbers = [];
-    const guild = client.guilds.cache.get(process.env.GUILD_ID);
+    const guild = client.guilds.cache.get(env.parsed.GUILD_ID);
     let members = await guild.members.fetch();
-    const AllReadyInDepartment = interaction.member.roles.cache.has(process.env.LEO_ROLE_ID);
+    const AllReadyInDepartment = interaction.member.roles.cache.has(env.parsed.LEO_ROLE_ID);
     const UsersName = interaction.member.user.displayName;
     const department = options.getString('department');
 
@@ -35,7 +35,7 @@ module.exports = async (interaction) => {
                 .setDescription(`All departments are full. The maximum number of users are in a department. Contact an admin to review the departments.`)
                 .setColor(0xFF470F)
                 .setTimestamp();
-            client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [toomanyusersembed] });
+            client.channels.cache.get(env.parsed.LOG_CHANNEL_ID).send({ embeds: [toomanyusersembed] });
             throw new Error("There are more than 100 users in a department. Cannot add more.");
         }
     }
@@ -43,8 +43,8 @@ module.exports = async (interaction) => {
 
 
     let allreadyindepartmenttext = `You are already in a department!`;
-    if (process.env.JOIN_WEBSITE !== "") {
-        allreadyindepartmenttext += `\nFind more information here ${process.env.JOIN_WEBSITE}`;
+    if (env.parsed.JOIN_WEBSITE !== "") {
+        allreadyindepartmenttext += `\nFind more information here ${env.parsed.JOIN_WEBSITE}`;
     }
 
     if (AllReadyInDepartment) {
@@ -63,37 +63,37 @@ module.exports = async (interaction) => {
 
     CurrentDepartment = department.toUpperCase();
 
-    let replyContent = `You have been added to ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}!`;
-    if (process.env.JOIN_WEBSITE !== "") {
-        replyContent += `\nFind more information here ${process.env.JOIN_WEBSITE}`;
+    let replyContent = `You have been added to ${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}!`;
+    if (env.parsed.JOIN_WEBSITE !== "") {
+        replyContent += `\nFind more information here ${env.parsed.JOIN_WEBSITE}`;
     }
 
     interaction.editReply({ content: replyContent, ephemeral: true });
-    interaction.member.roles.add(process.env.LEO_ROLE_ID);
-    interaction.member.roles.add(process.env.CADET_ROLE_ID);
-    interaction.member.roles.add(`${process.env[CurrentDepartment + '_ROLE_ID']}`);
-    interaction.member.edit({ nick: `${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
-    console.log(`${NewDepartID} has joined ${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}`);
+    interaction.member.roles.add(env.parsed.LEO_ROLE_ID);
+    interaction.member.roles.add(env.parsed.CADET_ROLE_ID);
+    interaction.member.roles.add(`${env.parsed[CurrentDepartment + '_ROLE_ID']}`);
+    interaction.member.edit({ nick: `${env.parsed[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
+    console.log(`${NewDepartID} has joined ${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}`);
 
-    mysql('insert', 'departmentjoins', `(false, '${UsersName}', '${interaction.member.id}', '${process.env[CurrentDepartment + '_DEPARTMENT_NAME']}', 'N/A', '0', '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
+    mysql('insert', 'departmentjoins', `(false, '${UsersName}', '${interaction.member.id}', '${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}', 'N/A', '0', '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
 
     const embed = new EmbedBuilder()
         .setTitle("Member Joined Department")
-        .setDescription(`<@${interaction.member.user.id}> has joined <@&${process.env[CurrentDepartment + '_ROLE_ID']}>.`)
+        .setDescription(`<@${interaction.member.user.id}> has joined <@&${env.parsed[CurrentDepartment + '_ROLE_ID']}>.`)
         .setColor(0x0099FF)
         .setTimestamp();
-    client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [embed] });
+    client.channels.cache.get(env.parsed.LOG_CHANNEL_ID).send({ embeds: [embed] });
 
-    var LEOroleMembers = guild.roles.cache.get(process.env.LEO_ROLE_ID).members;
-    var CADETroleMembers = guild.roles.cache.get(process.env.CADET_ROLE_ID).members;
-    var DepartmentroleMembers = guild.roles.cache.get(process.env[CurrentDepartment + '_ROLE_ID']).members;
+    var LEOroleMembers = guild.roles.cache.get(env.parsed.LEO_ROLE_ID).members;
+    var CADETroleMembers = guild.roles.cache.get(env.parsed.CADET_ROLE_ID).members;
+    var DepartmentroleMembers = guild.roles.cache.get(env.parsed[CurrentDepartment + '_ROLE_ID']).members;
 
     if (!Array.from(LEOroleMembers.keys()).includes(interaction.member.id) || !Array.from(CADETroleMembers.keys()).includes(interaction.member.id) || !Array.from(DepartmentroleMembers.keys()).includes(interaction.member.id)) {
-        interaction.member.roles.add(process.env.LEO_ROLE_ID);
-        interaction.member.roles.add(process.env.CADET_ROLE_ID);
-        interaction.member.roles.add(`${process.env[CurrentDepartment + '_ROLE_ID']}`);
+        interaction.member.roles.add(env.parsed.LEO_ROLE_ID);
+        interaction.member.roles.add(env.parsed.CADET_ROLE_ID);
+        interaction.member.roles.add(`${env.parsed[CurrentDepartment + '_ROLE_ID']}`);
     }
     if (!interaction.member.displayName.includes(" | ")) {
-        interaction.member.edit({ nick: `${process.env[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
+        interaction.member.edit({ nick: `${env.parsed[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
     }
 }

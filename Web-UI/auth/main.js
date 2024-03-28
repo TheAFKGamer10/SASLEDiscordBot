@@ -13,7 +13,7 @@ async function login() {
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
     let next = new URLSearchParams(window.location.search).get("next");
-    fetch(`/process-login${next !== '' && next !== null ? `?next=${next}` : ''}`, {
+    fetch(`/v1/process-login${next !== '' && next !== null ? `?next=${next}` : ''}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

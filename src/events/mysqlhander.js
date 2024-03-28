@@ -2,8 +2,9 @@
 
 module.exports = async (thingtodo, table, sqlstring) => {
     try {
+        const env = require('dotenv').config();
         const mysql = require('mysql2');
-        var mysqlconnection = mysql.createConnection(process.env.MYSQL_CONNECTION_STRING);
+        var mysqlconnection = mysql.createConnection(env.parsed.MYSQL_CONNECTION_STRING);
 
         async function connect() {
             return new Promise((resolve, reject) => {
@@ -32,7 +33,7 @@ module.exports = async (thingtodo, table, sqlstring) => {
                             if (err) reject(err);
                             mysqlconnection.query('CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(64), password VARCHAR(64))', function (err, result) {
                                 if (err) reject(err);
-                                mysqlconnection.query('CREATE TABLE IF NOT EXISTS rp (id INT AUTO_INCREMENT PRIMARY KEY, aop VARCHAR(64), timestamp TEXT, ping BOOL, training BOOL)', function (err, result) {
+                                mysqlconnection.query('CREATE TABLE IF NOT EXISTS rp (id INT AUTO_INCREMENT PRIMARY KEY, aop VARCHAR(64), timestamp TEXT, ping BOOL, training BOOL, pingatrptime BOOL)', function (err, result) {
                                     if (err) reject(err);
                                     close().then(() => {
                                         resolve('Tables created. Connection closed.');
@@ -61,7 +62,7 @@ module.exports = async (thingtodo, table, sqlstring) => {
                     valuestemplate = '(username, password)';
                 }
                 if (table == 'rp') {
-                    valuestemplate = '(aop, timestamp, ping, training)';
+                    valuestemplate = '(aop, timestamp, ping, training, pingatrptime)';
                 }
 
                 mysqlconnection.query(`INSERT INTO ${table} ${valuestemplate} VALUES ${sqlstring}`, function (err, result) {
@@ -79,7 +80,11 @@ module.exports = async (thingtodo, table, sqlstring) => {
                     if (err) reject(err);
                     mysqlconnection.query(sqlstring, function (err, result, fields) {
                         if (err) reject(err);
-                        resolve(result);
+                        close().then(() => {
+                            resolve(result);
+                        }).catch((error) => {
+                            reject(error);
+                        }); 
                     });
                 });
             });
@@ -88,9 +93,12 @@ module.exports = async (thingtodo, table, sqlstring) => {
             connect().then((result) => {
                 mysqlconnection.query(`DELETE FROM ${table} WHERE ${sqlstring}`, function (err, result) {
                     if (err) throw err;
-                    return result;
+                    close().then(() => {
+                        return result;
+                    }).catch((error) => {
+                        console.log(error);
+                    });
                 });
-                close().catch((error) => { console.log(error); });
             }).catch((error) => {
                 console.log(error);
             });

@@ -1,0 +1,35 @@
+.headernextto {
+  text-align: center;
+  position: relative;
+  display: flex;
+}
+
+.createbtn {
+  position: absolute;
+  top: 50%;
+  right: 2%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 5px;
+  background-color: var(--button-blue);
+  font-size: 16px;
+  color: var(--dark-mode-text-color);
+}
+
+.willhappenth1 {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 800px) {
+  .headernextto {
+    flex-direction: column;
+  }
+
+  .createbtn {
+    position: static;
+    transform: none;
+  }
+}

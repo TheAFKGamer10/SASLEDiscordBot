@@ -12,6 +12,7 @@ async function makeboxes() {
         }
     }
 
+
     const URL = window.location.origin;
     return fetch(URL + `/v1/config/get`, {
         method: 'GET'
@@ -115,6 +116,11 @@ async function makeboxes() {
                             element.className = 'input envinput envdropdown';
                             element.id = `input_${key}`;
                             element.value = data[key];
+
+
+                            div.onclick = element.onclick = function () {
+                                element.focus();
+                            };
                             div.appendChild(element);
                         } else {
                             // Create a new input element
@@ -124,16 +130,11 @@ async function makeboxes() {
                             input.type = envhints[key].type;
 
                             if (key == "BOT_TOKEN") {
-                                input.type = "password";
-                                input.onmouseover = mouseoverPass;
-                                input.onmouseout = mouseoutPass;
-                            }
+                                input.addEventListener('focusin', mouseoverPass);
+                                input.addEventListener('focusout', mouseoutPass);
+                            };
 
-                            if (envhints[key]?.required || envhints[ending]?.required) {
-                                input.required = true;
-                            } else {
-                                input.required = false;
-                            }
+                            input.required = envhints[key]?.required || envhints[ending]?.required ? true : false;
 
                             if (ending != "") {
                                 input.placeholder = envhints[ending].default;
@@ -142,8 +143,8 @@ async function makeboxes() {
                             }
                             input.id = `input_${key}`;
                             if (key == "MYSQL_CONNECTION_STRING") {
-                                input.onmouseover = connectionstringmouseoverPass;
-                                input.onmouseout = connectionstringmouseoutPass;
+                                input.addEventListener('focusin', connectionstringmouseoverPass, true);
+                                input.addEventListener('focusout', connectionstringmouseoutPass, true);
                                 sessionStorage.setItem('MYSQL_CONNECTION_STRING', data[key]);
                                 sessionStorage.setItem('const_MYSQL_CONNECTION_STRING', data[key]);
                                 input.value = data[key].replace(/(mysql:\/\/[^:@]+:)([^:@]+)(@[^:@]+:\d+\/[^:@]+)/, function (match, p1, p2, p3) {
@@ -160,6 +161,10 @@ async function makeboxes() {
                                 span.className = 'required red';
                                 label.appendChild(span);
                             }
+
+                            div.onclick = input.onclick = function () {
+                                input.focus();
+                            };
                             div.appendChild(input);
                         }
 
@@ -333,9 +338,11 @@ function mouseoverPass() {
     let obj = document.getElementById('input_BOT_TOKEN');
     obj.type = 'text';
 }
+
 function mouseoutPass() {
     let obj = document.getElementById('input_BOT_TOKEN');
     obj.type = 'password';
+    obj.blur();
 }
 
 function connectionstringmouseoverPass() {
@@ -344,6 +351,7 @@ function connectionstringmouseoverPass() {
         obj.value = sessionStorage.getItem('MYSQL_CONNECTION_STRING');
     }
 }
+
 async function connectionstringmouseoutPass() {
     let obj = document.getElementById('input_MYSQL_CONNECTION_STRING');
     if (obj.value !== "") {
@@ -351,6 +359,8 @@ async function connectionstringmouseoutPass() {
         obj.value = obj.value.replace(/(mysql:\/\/[^:@]+:)([^:@]+)(@[^:@]+:\d+\/[^:@]+)/, function (match, p1, p2, p3) {
             return p1 + '*'.repeat(p2.length) + p3;
         });
+    } else {
+        sessionStorage.setItem('MYSQL_CONNECTION_STRING', obj.value);
     }
+    obj.blur();
 }
-

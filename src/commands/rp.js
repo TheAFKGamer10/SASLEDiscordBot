@@ -1,13 +1,15 @@
 const { client, EmbedBuilder, env, fs } = require("../importdefaults");
 const mysql = require('../events/mysqlhander.js');
+const path = require('path');
 
 module.exports = async (interaction) => {
     const { commandName, options } = interaction;
 
     const aop = options.getString('aop');
-    var time = options.getString('time');
-    const ping = options.getBoolean('ping') !== null ? options.getBoolean('ping') : true;
-    const training = options.getBoolean('training') !== null ? options.getBoolean('training') : true;
+    let time = options.getString('time');
+    const ping = options.getBoolean('ping') ?? true;
+    const training = options.getBoolean('training') ?? true;
+    const pingatrptime = options.getBoolean('pingatrptime') ?? true;
     let timestamp = 1707170000;
     let timeParts = time.split(':').map(Number);
     let addTimeInSeconds = 0;
@@ -35,19 +37,18 @@ module.exports = async (interaction) => {
         output += `\nPing: ||@everyone||`;
     }
     if (training) {
-        output += `\nTraining: <@&${process.env.CADET_ROLE_ID}> training **will** he happening!`;
+        output += `\nTraining: <@&${env.parsed.CADET_ROLE_ID}> training **will** he happening!`;
     }
 
-    if (process.env.MYSQL_CONNECTION_STRING !== '') {
-        const rpTime = new Date(timestamp * 1000);
+    const rpTime = new Date(timestamp * 1000);
+    if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         const newData = rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, '0') + " " + rpTime.getDate().toString().padStart(2, '0') + " " + rpTime.getHours().toString().padStart(2, '0') + " " + rpTime.getMinutes().toString().padStart(2, '0');
-        await mysql('insert', 'rp', `('${aop}', '${newData}', ${ping}, ${training})`);
+        await mysql('insert', 'rp', `('${aop}', '${newData}', ${ping}, ${training}, ${pingatrptime})`);
     } else {
-        const existingData = fs.readFileSync('./src/files/next-rp.json', 'utf-8');
-        const rpTime = new Date(timestamp * 1000);
-        const newData = { [rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, '0') + " " + rpTime.getDate().toString().padStart(2, '0') + " " + rpTime.getHours().toString().padStart(2, '0') + " " + rpTime.getMinutes().toString().padStart(2, '0')]: { aop, ping, training } };
+        const existingData = fs.readFileSync(path.join(__dirname, '..', 'files', 'next-rp.json'), 'utf-8');
+        const newData = { [rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, '0') + " " + rpTime.getDate().toString().padStart(2, '0') + " " + rpTime.getHours().toString().padStart(2, '0') + " " + rpTime.getMinutes().toString().padStart(2, '0')]: { aop, ping, training, pingatrptime } };
         const mergedData = { ...JSON.parse(existingData), ...newData };
-        fs.writeFileSync('./src/files/next-rp.json', JSON.stringify(mergedData, null, 4));
+        fs.writeFileSync(path.join(__dirname, '..', 'files', 'next-rp.json'), JSON.stringify(mergedData, null, 4));
     }
 
     interaction.reply({ content: output, allowedMentions: { parse: ["everyone"] } });

@@ -13,7 +13,7 @@ if (!fs.existsSync('./.env')) {
 }
 var hasdb = true;
 let mysqlfile;
-if (process.env.MYSQL_CONNECTION_STRING !== '') {
+if (env.parsed.MYSQL_CONNECTION_STRING !== '') {
     mysqlfile = require("./events/mysqlhander");
 } else {
     hasdb = false;
@@ -57,10 +57,10 @@ client.on('ready', async () => {
     if (hasdb) {
         mysqlfile('connect');
     }
-    if (process.env.UPTIME_KUMA_URL !== undefined && process.env.UPTIME_KUMA_URL !== '') {
+    if (env.parsed.UPTIME_KUMA_URL !== undefined && env.parsed.UPTIME_KUMA_URL !== '') {
         console.log('This method of uptime kuma is no longer supported. Please use the new method of sending a HTTP(s) request to the bots website insted.');
         setInterval(function () {
-            fetch(process.env.UPTIME_KUMA_URL, {
+            fetch(env.parsed.UPTIME_KUMA_URL, {
                 method: 'GET',
             }).then((response) => {
                 if (response.status !== 200) {
@@ -69,9 +69,10 @@ client.on('ready', async () => {
             }).catch((error) => {
                 console.log(`Uptime Kuma: Error: ${error}`);
             });
-        }, process.env.UPTIME_KUMA_INTERVAL * 1000);
+        }, env.parsed.UPTIME_KUMA_INTERVAL * 1000);
     }
     rpcountdownchecker(hasdb);
+
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
@@ -119,4 +120,6 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 
-client.login(process.env.BOT_TOKEN);
+client.login(env.parsed.BOT_TOKEN).catch((error) => {
+    console.log(error);
+});

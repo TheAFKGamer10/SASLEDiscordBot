@@ -98,5 +98,5 @@ module.exports = async (interaction) => {
         .setDescription(`<@${interaction.member.user.id}> used \`\`\`${commandused}\`\`\` in <#${interaction.channel.id}>.`)
         .setColor(0x0099FF)
         .setTimestamp();
-    client.channels.cache.get(process.env.LOG_CHANNEL_ID).send({ embeds: [logembed] });
+    client.channels.cache.get(env.parsed.LOG_CHANNEL_ID).send({ embeds: [logembed] });
 }

@@ -4,11 +4,13 @@
   "description": "A discord bot to help with your FiveM server.",
   "main": "src/index.js",
   "scripts": {
-    "start": "nodemon src/index.js",
-    "update-start": "npm run update && npm run pushcmds && npm run start",
+    "start": "node src/index.js",
     "pushcmds": "node src/regester-commands.js",
     "update": "node scripts/update.js && npm run pushcmds",
-    "express": "nodemon Web-UI/server.js"
+    "update-start": "npm run update && npm run pushcmds && npm run start",
+    "express": "node Web-UI/server.js",
+    "dev": "nodemon src/index.js",
+    "express-dev": "nodemon Web-UI/server.js"
   },
   "author": "TheAFKGamer10",
   "funding": {
@@ -20,6 +22,7 @@
       "src/files/next-rp.json"
     ]
   },
+  "type": "commonjs",
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^5.1.1",
@@ -29,7 +32,9 @@
     "express": "^4.18.3",
     "express-session": "^1.18.0",
     "mysql2": "^3.7.1",
-    "nodemon": "^3.0.2",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }

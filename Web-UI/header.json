@@ -7,7 +7,6 @@
         "title": "Next RP",
         "link": "/next-rp"
     },
-    
     "ifAdmin": {
         "Admin": {
             "title": "Admin Home",
@@ -16,6 +15,10 @@
         "ENV": {
             "title": "Configuration",
             "link": "/admin/env"
+        },
+        "Logs": {
+            "title": "Logs",
+            "link": "/admin/logs"
         }
     }
 }

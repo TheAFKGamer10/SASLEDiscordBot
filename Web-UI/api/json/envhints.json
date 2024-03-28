@@ -7,21 +7,21 @@
         "default": "*****************"
     },
     "CLIENT_ID": {
-        "type": "text",
+        "type": "number",
         "required": true,
         "onlyifDB": false,
         "description": "Your Bots Client/User ID",
         "default": "000000000000000000"
     },
     "GUILD_ID": {
-        "type": "text",
+        "type": "number",
         "required": true,
         "onlyifDB": false,
         "description": "The ID of the server you want to use the bot in",
         "default": "000000000000000000"
     },
     "LOG_CHANNEL_ID": {
-        "type": "text",
+        "type": "number",
         "required": true,
         "onlyifDB": false,
         "description": "The ID of the channel you want to log commands in",
@@ -42,14 +42,14 @@
         "default": "https://example.com/info"
     },
     "LEO_ROLE_ID": {
-        "type": "text",
+        "type": "number",
         "required": true,
         "onlyifDB": false,
         "description": "The ID of the role you want to give to LEOs. Ex. Police, Fire, EMS, etc.",
         "default": "000000000000000000"
     },
     "CADET_ROLE_ID": {
-        "type": "text",
+        "type": "number",
         "required": true,
         "onlyifDB": false,
         "description": "The ID of the role you want to give to cadets",
@@ -63,7 +63,7 @@
         "default": "LSPD, BCSO, SAHP, SAFD, SASP"
     },
     "JOIN_SERVER_ROLE_ID": {
-        "type": "text",
+        "type": "number",
         "required": true,
         "onlyifDB": true,
         "description": "The ID of the role you want to give to users that can join the FiveM server. Will be added when they are ready for training, kept if they complete training but removed if they fail. They will have to request training again to get the role back.",
@@ -112,7 +112,7 @@
         "default": ""
     },
     "_PROBIB_ID": {
-        "type": "text",
+        "type": "number",
         "required": true,
         "onlyifDB": true,
         "description": "The ID of the role you want to give to users after they complete training",

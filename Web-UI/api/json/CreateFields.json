@@ -1,0 +1,31 @@
+{
+
+    "AOP": {
+        "type": "text",
+        "required": true,
+        "description": "The planed Area of Patrol for the server",
+        "default": ""
+    },
+    "Timestamp": {
+        "type": "number",
+        "required": true,
+        "descriptionusehtml": true,
+        "description": "When should the RP start. Accepts <a href=\"https://www.unixtimestamp.com/\" target=\"_blank\">Unix Timestamps</a> and relative times.<br />Relative: days:hours:minutes (Ex. 1:12:30 = 1 day, 12 hours, 30 minutes) or just minutes (Ex. 30 = 30 minutes)",
+        "default": "1711590809 or "
+    },
+    "Ping": {
+        "type": "checkbox",
+        "checked": true,
+        "description": "Ping the server when you submit the form"
+    },
+    "Training": {
+        "type": "checkbox",
+        "checked": true,
+        "description": "Will training be happening during this RP"
+    },
+    "Ping At RP Time": {
+        "type": "checkbox",
+        "checked": true,
+        "description": "Should the server be pinged at the RP time"
+    }
+}
