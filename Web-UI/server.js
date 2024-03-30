@@ -57,9 +57,7 @@ app.listen(PORT, async () => {
 });
 
 // Authentication
-app.get('/login', (question, answer) => {
-    answer.sendFile(path.join(__dirname, 'auth', 'login.html'));
-});
+app.get('/login', (question, answer) => { answer.sendFile(path.join(__dirname, 'auth', 'login.html')); });
 app.post('/v1/process-login', async (question, answer) => {
     let users
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
@@ -162,6 +160,9 @@ app.get('/v1/config/get', async (question, answer) => {
     answer.send(result);
 });
 app.get('/v1/config/envhints', async (question, answer) => {
+    if (!question.session.role) {
+        return answer.status(401).send('Unauthorized');
+    }
     answer.send(require('./api/json/envhints.json'));
 });
 app.get('/v1/users/perms', async (question, answer) => {
@@ -261,9 +262,7 @@ app.get('/v1/bot/logs/get', async (question, answer) => {
     }
     answer.send(result);
 });
-app.get('/v1/bot/rp/create/fields', async (question, answer) => {
-    answer.send(require('./api/json/CreateFields.json'));
-});
+app.get('/v1/bot/rp/create/fields', async (question, answer) => { answer.send(require('./api/json/CreateFields.json')); });
 app.post('/v1/bot/rp/create', async (question, answer) => {
     if (!question.session.role || question.session.role > '2') {
         return answer.status(401).send('Unauthorized');
@@ -401,12 +400,8 @@ app.use('/admin', (question, answer, next) => {
         next();
     }
 });
-app.get('/admin', (question, answer) => {
-    answer.sendFile(path.join(__dirname, 'admin', 'admin.html'));
-});
-app.get('/admin/users', (question, answer) => {
-    answer.sendFile(path.join(__dirname, 'admin/users', 'users.html'));
-});
+app.get('/admin', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin', 'admin.html')); });
+app.get('/admin/users', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin/users', 'users.html')); });
 app.get('/admin/users/create', (question, answer) => {
     if (!question.session.userid || question.session.role > '0') {
         question.session.destroy();
@@ -416,12 +411,8 @@ app.get('/admin/users/create', (question, answer) => {
     }
     answer.sendFile(path.join(__dirname, 'admin/users/create', 'create.html'));
 });
-app.get('/admin/env', (question, answer) => {
-    answer.sendFile(path.join(__dirname, 'admin/config-env', 'configenv.html'));
-});
-app.get('/admin/logs', (question, answer) => {
-    answer.sendFile(path.join(__dirname, 'admin/logs', 'logs.html'));
-});
+app.get('/admin/env', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin/config-env', 'configenv.html')); });
+app.get('/admin/logs', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin/logs', 'logs.html')); });
 
 
 
@@ -430,9 +421,8 @@ app.get('/admin/logs', (question, answer) => {
 app.get('/', (question, answer) => {
     answer.sendFile(path.join(__dirname, '/index.html'));
 });
-app.get('/next-rp', (question, answer) => {
-    answer.sendFile(path.join(__dirname, 'client/next-rp/nextrp.html'));
-});
+app.get('/favicon.ico', (question, answer) => { answer.sendFile(path.join(__dirname, 'public/img/favicon.ico')); });
+app.get('/next-rp', (question, answer) => { answer.sendFile(path.join(__dirname, 'client/next-rp/nextrp.html')); });
 app.get('/next-rp/create', (question, answer) => {
     if (!question.session.role || question.session.role > '2') {
         question.session.destroy();
@@ -445,15 +435,9 @@ app.get('/next-rp/create', (question, answer) => {
 
 
 // Restricted Pages
-app.all('/auth/data/*', (question, answer) => {
-    answer.status(403).send('Forbidden');
-});
-app.all('/templates/*', (question, answer) => {
-    answer.status(403).send('Forbidden');
-});
+app.all('/auth/data/*', (question, answer) => { answer.status(403).send('Forbidden'); });
+app.all('/templates/*', (question, answer) => { answer.status(403).send('Forbidden'); });
 
 
 /* This Must Be At The Bottom */
-app.get('/*', (question, answer) => {
-    answer.sendFile(path.join(__dirname + question.url));
-});
+app.get('/*', (question, answer) => { answer.sendFile(path.join(__dirname + question.url)); });
