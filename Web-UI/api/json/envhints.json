@@ -3,6 +3,7 @@
         "type": "password",
         "required": true,
         "onlyifDB": false,
+        "AdminOnly": true,
         "description": "Your Bot Token",
         "default": "*****************"
     },
@@ -10,6 +11,7 @@
         "type": "number",
         "required": true,
         "onlyifDB": false,
+        "AdminOnly": true,
         "description": "Your Bots Client/User ID",
         "default": "000000000000000000"
     },
@@ -30,6 +32,7 @@
     "MYSQL_CONNECTION_STRING": {
         "type": "CONNECTION_text",
         "required": false,
+        "AdminOnly": true,
         "onlyifDB": false,
         "description": "Your MySQL Connection string. If you don't have a database, leave this blank. Redacts the password for security.",
         "default": "mysql://user:password@host:port/database"
@@ -72,6 +75,7 @@
     "COOKIE_SECRET": {
         "type": "password",
         "required": true,
+        "AdminOnly": true,
         "onlyifDB": false,
         "descriptionusehtml": true,
         "description": "A <a href=\"https://www.random.org/strings/?num=1&len=32&digits=on&upperalpha=on&loweralpha=on&unique=on&format=plain\">random string of characters</a> used to secure your browser cookies",
@@ -92,7 +96,16 @@
         "default": "USA",
         "options": ["USA", "EUROPE"]
     },
-
+    "ROOT_USERNAME": {
+        "type": "text",
+        "AdminOnly": true,
+        "onlyifDB": false
+    },
+    "ROOT_PASSWORD": {
+        "type": "password",
+        "AdminOnly": true,
+        "onlyifDB": false
+    },
 
 
 

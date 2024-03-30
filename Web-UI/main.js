@@ -57,17 +57,17 @@ function pageloaded() {
                 window.location.href = `/login?next=${window.location.pathname}`;
             };
 
-            fetch('/v1/checkCookies?cookie=userid', {
+            fetch('/v1/checkCookies?cookie=userid&perm=1', {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                 },
             })
                 .catch(error => console.error('Error:', error))
-                .then((response) => response.text())
+                .then((response) => response.json())
                 .then((data) => {
                     let objkeys = Object.keys(links);
-                    if (data == "true") {
+                    if (data.perm) {
                         objkeys.forEach(key => {
                             if (key == "ifAdmin") {
                                 return;
@@ -119,7 +119,6 @@ function pageloaded() {
                         });
 
 
-
                         let dropdownMenu = document.createElement('div');
                         dropdownMenu.className = 'hamburger-dropdown';
                         let dropdownContentMenu = document.createElement('div');
@@ -151,14 +150,15 @@ function pageloaded() {
                         dropdownarea.appendChild(dropdownContent);
                         dropdown.appendChild(dropdownarea);
                         topbarleft.appendChild(dropdown);
-                        topbarleft.appendChild(logoutButton);
 
 
                         // Footer
-                        document.getElementById('footer').innerHTML = ` <!-- Plaese do not remove footer. It helps the developer of this softwear. But, it is open source, do what every you want (While still following the license). -->
-                            <p><a href="https://github.com/TheAFKGamer10/SASLEDiscordBot" target="_blank" class="footerlink">FiveM Discord Bot</a> by <a href="https://afkht.us/foot" target="_blank" class="footerlink">The AFK Gamer</a></p>
-                            <p style="font-size: 8px;">FiveM Discord Bot is not an official Discord or FiveM product. It is not affiliated with nor endorsed by Discord Inc. or Cfx.re.</p>
-                        `;
+                        if (document.getElementById('footer')) {
+                            document.getElementById('footer').innerHTML = ` <!-- Plaese do not remove footer. It helps the developer of this softwear. But, it is open source, do what every you want (While still following the license). -->
+                                <p><a href="https://github.com/TheAFKGamer10/SASLEDiscordBot" target="_blank" class="footerlink">FiveM Discord Bot</a> by <a href="https://afkht.us/foot" target="_blank" class="footerlink">The AFK Gamer</a></p>
+                                <p style="font-size: 8px;">FiveM Discord Bot is not an official Discord or FiveM product. It is not affiliated with nor endorsed by Discord Inc. or Cfx.re.</p>
+                            `;
+                        }
                     } else {
                         topbarleft.style.marginBottom = '0px';
                         objkeys.forEach(key => {
@@ -181,6 +181,11 @@ function pageloaded() {
                             };
                             document.querySelector('.menu').appendChild(handburgeritem);
                         });
+                    }
+
+                    if (data.cookie) {
+                        topbarleft.appendChild(logoutButton);
+                    } else {
                         topbarleft.appendChild(loginButton);
                     }
 
@@ -195,7 +200,7 @@ function pageloaded() {
                         document.querySelector('.menu').style.justifyContent = 'center';
                         document.querySelector('.menu').style.alignItems = 'center';
 
-                        if (data == "true") {
+                        if (data.cookie) {
                             document.querySelector('.menu').appendChild(logoutButton);
                         } else {
                             document.querySelector('.menu').appendChild(loginButton);

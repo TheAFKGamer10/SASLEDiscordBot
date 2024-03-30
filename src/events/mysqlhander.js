@@ -31,7 +31,7 @@ module.exports = async (thingtodo, table, sqlstring) => {
                         if (err) reject(err);
                         mysqlconnection.query('CREATE TABLE IF NOT EXISTS departmentjoins (id INT AUTO_INCREMENT PRIMARY KEY, forced BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, department VARCHAR(64), admin_forced_username VARCHAR(64), admin_forced_id BIGINT, timestamp TEXT)', function (err, result) {
                             if (err) reject(err);
-                            mysqlconnection.query('CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(64), password VARCHAR(64))', function (err, result) {
+                            mysqlconnection.query('CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(64), password VARCHAR(64), permission TINYTEXT)', function (err, result) {
                                 if (err) reject(err);
                                 mysqlconnection.query('CREATE TABLE IF NOT EXISTS rp (id INT AUTO_INCREMENT PRIMARY KEY, aop VARCHAR(64), timestamp TEXT, ping BOOL, training BOOL, pingatrptime BOOL)', function (err, result) {
                                     if (err) reject(err);
@@ -59,7 +59,7 @@ module.exports = async (thingtodo, table, sqlstring) => {
                     valuestemplate = '(forced, cadet_username, cadet_id, department, admin_forced_username, admin_forced_id, timestamp)';
                 }
                 if (table == 'users') {
-                    valuestemplate = '(username, password)';
+                    valuestemplate = '(username, password, permission)';
                 }
                 if (table == 'rp') {
                     valuestemplate = '(aop, timestamp, ping, training, pingatrptime)';

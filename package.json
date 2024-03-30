@@ -13,6 +13,10 @@
     "express-dev": "nodemon Web-UI/server.js"
   },
   "author": "TheAFKGamer10",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheAFKGamer10/SASLEDiscordBot.git"
+  },
   "funding": {
     "url": "https://afkhosting.win/"
   },
@@ -32,7 +36,9 @@
     "express": "^4.18.3",
     "express-session": "^1.18.0",
     "mysql2": "^3.7.1",
-    "path": "^0.12.7"
+    "net": "^1.0.2",
+    "path": "^0.12.7",
+    "punycode": "^2.3.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

@@ -13,18 +13,18 @@ async function login() {
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
     let next = new URLSearchParams(window.location.search).get("next");
-    fetch(`/v1/process-login${next !== '' && next !== null ? `?next=${next}` : ''}`, {
+    fetch(`/v1/process-login`, { //${next !== '' && next !== null ? `?next=${next}` : ''}
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ "username": username, "password": password }),
+        body: JSON.stringify({ "username": username, "password": password}),
     })
         .then((response) => response.text())
         .then((data) => {
             data = JSON.parse(data);
-            if (data.status === "OK") {
-                window.location.href = next !== '' && next !== null ? next : '/admin';
+            if (data.status == "OK") {
+                window.location.href = next !== '' && next !== null ? next : '/';
             } else {
                 announcement("Error", data.message, "danger", true);
             }

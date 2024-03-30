@@ -12,16 +12,34 @@ async function createpageloaded() {
         }
     }
 
-    const URL = window.location.origin;
-    fetch(`/v1/bot/rp/create/fields`, {
+    let data = {};
+    fetch(window.location.origin + `/v1/users/perms`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
         }
     })
-
         .then(response => response.json())
-        .then(async data => {
+        .then(async roles => {
+            data = {
+                "Username": {
+                    "type": "text",
+                    "description": "The username of the user.",
+                    "required": true
+                },
+                "Password": {
+                    "type": "text",
+                    "description": "The password of the user.",
+                    "required": true
+                },
+                "Permission": {
+                    "type": "dropdown",
+                    "description": "The permission of the user.",
+                    "options": Object.values(roles),
+                    "required": true
+                }
+            };
+
             let form = document.getElementById('config');
             form.innerHTML = ''; // Empty the div with id 'config'
 
@@ -92,7 +110,7 @@ async function createpageloaded() {
                     element.className = 'input geninput dropdowninput';
                     element.id = `input_${key}`;
                     element.value = data[key].default;
-  
+
                     div.onclick = element.onclick = function () {
                         element.focus();
                     };
@@ -146,7 +164,9 @@ async function createpageloaded() {
                 form.appendChild(div);
             });
         });
-}
+        
+};
+
 
 async function submit() {
     function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
@@ -183,8 +203,7 @@ async function submit() {
         }
     }
 
-
-    fetch(`/v1/bot/rp/create`, {
+    fetch(`/v1/users/create`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -195,15 +214,15 @@ async function submit() {
         .then(async data => {
             if (data.status == 'OK') {
                 announcement(
-                    "Config submitted!",
-                    "The config has been submitted successfully!",
+                    "User Creates!",
+                    "The user has been created successfully!",
                     "success",
                     true
                 );
             } else {
                 announcement(
                     "Error!",
-                    `An error occurred while submitting the information! Please check the console for error details. ${(data.message != undefined) ? `<br />Error: ${data.message}` : ""}`,
+                    data.message || `An error occurred while submitting the config! Please check the console for error details. ${(data != undefined) ? `<br />Error: ${data}` : ""}`,
                     "danger",
                     true
                 );

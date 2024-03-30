@@ -26,16 +26,13 @@
 @media (max-width: 800px) {
   .headernextto {
     flex-direction: column;
+    display: block;
+    align-items: center;
   }
 
   .createbtn {
     position: static;
     transform: none;
     width: 80%;
-  }
-
-  .headernextto {
-    display: block;
-    align-items: center;
   }
 }

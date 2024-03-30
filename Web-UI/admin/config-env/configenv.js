@@ -13,8 +13,7 @@ async function makeboxes() {
     }
 
 
-    const URL = window.location.origin;
-    return fetch(URL + `/v1/config/get`, {
+    return fetch(`/v1/config/get`, {
         method: 'GET'
     })
         .then(response => response.json())
@@ -28,7 +27,7 @@ async function makeboxes() {
                 );
                 return "error";
             }
-            fetch(URL + `/v1/config/envhints`, {
+            fetch(`/v1/config/envhints`, {
                 method: 'GET'
             })
                 .then(response => response.json())
@@ -113,10 +112,19 @@ async function makeboxes() {
                                 element.appendChild(optionElement);
                             });
 
-                            element.className = 'input envinput envdropdown';
+                            element.className = 'input geninput dropdowninput';
                             element.id = `input_${key}`;
                             element.value = data[key];
 
+                            element.required = envhints[key]?.required || envhints[ending]?.required ? true : false;
+                            if (element.required) {
+                                // Create a new span element
+                                let span = document.createElement('span');
+                                span.textContent = '*';
+                                span.style = 'color: red;';
+                                span.className = 'required red';
+                                label.appendChild(span);
+                            }
 
                             div.onclick = element.onclick = function () {
                                 element.focus();
@@ -125,7 +133,7 @@ async function makeboxes() {
                         } else {
                             // Create a new input element
                             let input = document.createElement('input');
-                            input.className = 'input envinput';
+                            input.className = 'input geninput';
 
                             input.type = ending != "" ? envhints[ending].type : envhints[key].type;
 
@@ -195,12 +203,11 @@ async function submit() {
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const URL = window.location.origin;
 
     const ifDEPARTMENTS = ["_DEPARTMENT_NAME", "_START_LETTER", "_ROLE_ID"]
 
     let data = {};
-    let inputs = document.getElementsByTagName('input');
+    let inputs = document.getElementsByClassName('input');
     for (let i = 0; i < inputs.length; i++) {
         data[inputs[i].id.replace('input_', '')] = inputs[i].value;
         if (inputs[i].required && inputs[i].value == "") {
@@ -240,7 +247,7 @@ async function submit() {
     });
     data = { ...data, ...JSON.parse(JSON.stringify(newdepartment)) };
 
-    fetch(URL + `/v1/config/submit`, {
+    fetch(`/v1/config/submit`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -249,7 +256,7 @@ async function submit() {
     })
         .then(response => response.json())
         .then(async data => {
-            if (data.status == 'ok') {
+            if (data.status == 'OK') {
                 announcement(
                     "Config submitted!",
                     "The config has been submitted successfully!",
@@ -303,7 +310,7 @@ async function removeVariable(key) {
     })
         .then(response => response.json())
         .then(async data => {
-            if (data.status == 'ok') {
+            if (data.status == 'OK') {
                 await makeboxes();
 
                 announcement(

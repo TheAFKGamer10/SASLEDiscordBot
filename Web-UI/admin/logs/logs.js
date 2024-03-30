@@ -11,8 +11,8 @@ function logspageloaded() {
     }
     let selectrowsdropdown = document.getElementById('rows');
 
-    const URL = window.location.origin;
-    fetch(URL + `/v1/bot/logs/get?limit=${selectrowsdropdown.value}&URL=${URL}`, {
+    const URL = window.location.hostname;
+    fetch(`/v1/bot/logs/get?limit=${selectrowsdropdown.value}&URL=${URL}`, {
         method: 'GET'
     })
         .then(response => response.json())

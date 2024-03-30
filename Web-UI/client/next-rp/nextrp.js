@@ -1,11 +1,10 @@
 async function nextrppageloaded() {
-    const URL = window.location.origin;
-    fetch(URL + `/v1/checkCookies?cookie=userid`, {
+    fetch(`/v1/checkCookies?perm=2`, {
         method: 'GET'
     })
-        .then(response => response.text())
+        .then(response => response.json())
         .then(isadmin => {
-            if (isadmin === 'true') {
+            if (isadmin.perm) {
                 let createbuttonarea = document.getElementById('headernextto');
                 let createbutton = document.createElement('button');
                 createbutton.innerHTML = 'Create RP';
@@ -17,7 +16,7 @@ async function nextrppageloaded() {
             }
         });
 
-    return fetch(URL + `/v1/bot/rp`, {
+    return fetch(`/v1/bot/rp`, {
         method: 'GET'
     })
         .then(response => response.json())
@@ -25,7 +24,6 @@ async function nextrppageloaded() {
             if (rpinfo.status === 'warning' || rpinfo.status === 'error') {
                 document.getElementById('Time').innerHTML = rpinfo.message;
                 document.getElementById('Countdownh3').innerHTML = '';
-
                 return;
             }
             const userLocale = navigator.language;

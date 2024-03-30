@@ -12,6 +12,10 @@
             "title": "Admin Home",
             "link": "/admin"
         },
+        "Users": {
+            "title": "Users",
+            "link": "/admin/users"
+        },
         "ENV": {
             "title": "Configuration",
             "link": "/admin/env"

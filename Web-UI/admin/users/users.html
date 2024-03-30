@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Home</title>
+    <title>Users</title>
     <link rel="stylesheet" type="text/css" href="/public/css/main.css" />
-    <link rel="stylesheet" type="text/css" href="/public/css/topbar.css" />
+    <link rel="stylesheet" type="text/css" href="./users/main.css" />
   </head>
-  <body id="body" class="light" onload="pageloaded()">
+  <body id="body" class="light" onload="pageloaded(); userspageloaded()">
     <div id="top-bar" class="top-bar">
       <div id="top-bar-left" class="top-bar-left"></div>
       <div id="top-bar-right" class="top-bar-right">
@@ -18,7 +18,6 @@
         </div>
       </div>
     </div>
-
     <div id="announcement" class="announcement">
       <div id="announcement-text" class="announcement-text">
         <h1 id="announcement-text-h1"></h1>
@@ -27,12 +26,14 @@
       <button onclick="closeAnnouncement()">X</button>
     </div>
 
-    <h1>Dashboard</h1>
-    <p id="data">This has all of the information in it.</p>
+    <div id="header" class="header">
+      <h1 class="headertext" id="headertext">Users</h1>
+    </div>
+    
+    <div id="data" class="data"></div>
 
     <div id="footer" class="footer"></div>
-
-    <script type="text/javascript" src="/admin/admin.js"></script>
     <script type="text/javascript" src="/main.js"></script>
+    <script type="text/javascript" src="/admin/users/users.js"></script>
   </body>
 </html>
