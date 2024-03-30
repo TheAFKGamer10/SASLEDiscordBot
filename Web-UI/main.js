@@ -190,12 +190,12 @@ function pageloaded() {
                     }
 
                     if (window.innerWidth > 800) {
-                        document.getElementById('top-bar-left').style.display = 'block';
+                        // document.getElementById('top-bar-left').style.display = 'block';
                         document.querySelector('.menu').style.display = 'none';
                         document.querySelector('.menu').classList.remove('show');
                         document.querySelector('.hamburger-button').style.display = 'none';
                     } else {
-                        document.getElementById('top-bar-left').style.display = 'none';
+                        // document.getElementById('top-bar-left').style.display = 'none';
                         document.querySelector('.menu').style.display = 'block';
                         document.querySelector('.menu').style.justifyContent = 'center';
                         document.querySelector('.menu').style.alignItems = 'center';
@@ -222,12 +222,12 @@ function changeld() {
     if (body.classList.contains("dark")) {
         body.classList.remove("dark");
         body.classList.add("light");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" height="25px" /> `;
+        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" /> `;
         sessionStorage.setItem("lightdark", "light");
     } else {
         body.classList.remove("light");
         body.classList.add("dark");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" height="25px" /> `;
+        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" /> `;
         sessionStorage.setItem("lightdark", "dark");
     }
 }
@@ -240,20 +240,20 @@ window.addEventListener("DOMContentLoaded", function () {
     if (savedColor === "light") {
         body.classList.remove("dark");
         body.classList.add("light");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" height="25px" /> `;
+        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" /> `;
     } else if (savedColor === "dark") {
         body.classList.remove("light");
         body.classList.add("dark");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" height="25px" /> `;
+        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" /> `;
     } else {
         if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
             body.classList.remove("light");
             body.classList.add("dark");
-            ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" height="25px" /> `;
+            ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" /> `;
         } else {
             body.classList.remove("dark");
             body.classList.add("light");
-            ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" height="25px" /> `;
+            ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" /> `;
         }
     }
 });
