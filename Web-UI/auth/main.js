@@ -20,9 +20,8 @@ async function login() {
         },
         body: JSON.stringify({ "username": username, "password": password}),
     })
-        .then((response) => response.text())
+        .then((response) => response.json())
         .then((data) => {
-            data = JSON.parse(data);
             if (data.status == "OK") {
                 window.location.href = next !== '' && next !== null ? next : '/';
             } else {

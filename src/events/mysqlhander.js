@@ -89,6 +89,21 @@ module.exports = async (thingtodo, table, sqlstring) => {
                 });
             });
         }
+        if (thingtodo == 'update') {
+            return new Promise((resolve, reject) => {
+                mysqlconnection.connect(function (err) {
+                    if (err) reject(err);
+                    mysqlconnection.query(sqlstring, function (err, result, fields) {
+                        if (err) reject(err);
+                        close().then(() => {
+                            resolve(result);
+                        }).catch((error) => {
+                            reject(error);
+                        }); 
+                    });
+                });
+            });
+        }
         if (thingtodo == 'delete') {
             connect().then((result) => {
                 mysqlconnection.query(`DELETE FROM ${table} WHERE ${sqlstring}`, function (err, result) {

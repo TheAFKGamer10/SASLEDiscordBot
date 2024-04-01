@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/public/img/RPLogoShort.png" type="image/png">
+    <title>Create A New User</title>
+    <link rel="stylesheet" type="text/css" href="/public/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/public/css/form.css" />
+  </head>
+  <body id="body" class="light" onload="pageloaded(); createpageloaded()">
+    <div id="top-bar" class="top-bar">
+      <div id="top-bar-left" class="top-bar-left"></div>
+      <div id="top-bar-right" class="top-bar-right">
+        <div id="colourmode" class="colourmode">
+          <button id="lightdarkbutton" class="ldbutton" onclick="changeld()">
+            <img id="ldicon" class="ldicon" src="/public/img/sun.svg" height="25px" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="announcement" class="announcement">
+      <div id="announcement-text" class="announcement-text">
+        <h1 id="announcement-text-h1"></h1>
+        <p id="announcement-text-p"></p>
+      </div>
+      <button onclick="closeAnnouncement()">X</button>
+    </div>
+
+    <h1>Edit A User</h1>
+    <div id="config" class="config"></div>
+    <br />
+    <button id="sumbitbtn" class="submitbtn" onclick="submit()">Submit</button>
+
+    <div id="footer" class="footer"></div>
+
+    <script type="text/javascript" src="/admin/users/edit/edit.js"></script>
+    <script type="text/javascript" src="/main.js"></script>
+    </script>
+  </body>
+</html>

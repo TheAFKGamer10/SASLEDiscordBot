@@ -25,35 +25,38 @@ function userspageloaded() {
                 };
                 createbuttonarea.appendChild(createbutton);
             }
+
+            fetch(`/v1/users/get`, {
+                method: 'GET'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'error') {
+                        announcement('Error', data.message, 'danger', false);
+                        return;
+                    }
+                    let dataarea = document.getElementById('data');
+
+                    usershtml = `<tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Permission</th>
+                        ${isadmin.perm ? `<th></th>` : ''}
+                    </tr>`;
+                    for (let i = 0; i < data.length; i++) {
+                        usershtml += `<tr>
+                            <td>${data[i].id}</td>
+                            <td>${data[i].username}</td>
+                            <td>${data[i].permission}</td>
+                            ${isadmin.perm ? `<td><button id="editbtn" class="editbtn" onclick="window.location.href = '/admin/users/edit?id=${data[i].id}';">Edit</button></td>` : ''}
+                        </tr>`;
+                    }
+
+                    dataarea.innerHTML = `<table>${usershtml}</table>`;
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+
         });
-    fetch(`/v1/users/get`, {
-        method: 'GET'
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'error') {
-                announcement('Error', data.message, 'danger', false);
-                return;
-            }
-            let dataarea = document.getElementById('data');
-
-            usershtml = `<tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Permission</th>
-            </tr>`;
-            for (let i = 0; i < data.length; i++) {
-                usershtml += `<tr>
-                    <td>${data[i].id}</td>
-                    <td>${data[i].username}</td>
-                    <td>${data[i].permission}</td>
-                </tr>`;
-            }
-
-            dataarea.innerHTML = `<table>${usershtml}</table>`;
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-
 }

@@ -11,6 +11,12 @@ const getenv = require('./api/getenv');
 const bcrypt = require('bcrypt');
 const beforerun = require('./beforeruntime');
 beforerun();
+async function start() {
+    const result = await require('./auth/bot-auth/auth')();
+    if (typeof result === 'number') {
+        process.exit(result);
+    }
+}
 
 
 const app = express();
@@ -41,30 +47,30 @@ app.use((question, answer, next) => {
 });
 const PORT = env.parsed.WEB_PORT || 3000;
 
-app.listen(PORT, async () => {
-    // await require('./auth/bot-auth/auth')();
-    console.log(`Server is running on port ${PORT}`);
-    const botProcess = spawn('node', ['src/index.js']);
-    botProcess.stdout.on('data', (data) => {
-        console.log(data.toString());
-    });
-    botProcess.stderr.on('data', (data) => {
-        console.error(data.toString());
-    });
-    botProcess.on('exit', (code) => {
-        console.log(`Bot process exited with code ${code}`);
+start().then(() => {
+    app.listen(PORT, async () => {
+        console.log(`Server is running on port ${PORT}`);
+        // const botProcess = spawn('node', ['src/index.js']);
+        // botProcess.stdout.on('data', (data) => {
+        //     console.log(data.toString());
+        // });
+        // botProcess.stderr.on('data', (data) => {
+        //     console.error(data.toString());
+        // });
+        // botProcess.on('exit', (code) => {
+        //     console.log(`Bot process exited with code ${code}`);
+        // });
     });
 });
 
 // Authentication
 app.get('/login', (question, answer) => { answer.sendFile(path.join(__dirname, 'auth', 'login.html')); });
 app.post('/v1/process-login', async (question, answer) => {
-    let users
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         try {
             const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
             mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`).then(async (result) => {
-                users = result;
+                let users = result;
                 if (!users || users.length === 0) {
                     return answer.send({ "status": "error", "message": "User Not Found. Please check your username and password." });
                 }
@@ -329,28 +335,49 @@ app.post('/v1/bot/rp/create', async (question, answer) => {
 app.get('/v1/users/get', async (question, answer) => {
     if (!question.session.role || question.session.role > '1') {
         return answer.status(401).send('Unauthorized');
-    }
+    };
     const userRoles = require('./api/json/userRoles.json');
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-        let users = (await mysql('select', 'users', `SELECT * FROM users`));
-        users = users.map(user => {
-            delete user.password;
-            user.permission = userRoles[user.permission] || 'Unknown';
-            return user;
-        });
-        answer.send(users);
+        if (question.query.id !== '' && question.query.id !== null && question.query.id !== undefined) {
+            let users = (await mysql('select', 'users', `SELECT * FROM users WHERE id = '${question.query.id}'`));
+            if (users.length === 0) {
+                return answer.send({ "status": "error", "message": "User not found" });
+            }
+            users = users.map(user => {
+                delete user.password;
+                user.permission = userRoles[user.permission] || 'Unknown';
+                return user;
+            });
+            return answer.send(users);
+        } else {
+            let users = (await mysql('select', 'users', `SELECT * FROM users`));
+            users = users.map(user => {
+                delete user.password;
+                user.permission = userRoles[user.permission] || 'Unknown';
+                return user;
+            });
+            answer.send(users);
+        };
     } else {
         const fs = require('fs');
         const path = require('path');
         const existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
         const parsedData = JSON.parse(existingData);
         const result = [];
-        let count = 1;
-        Object.keys(parsedData).forEach(key => {
-            result.push({ "id": count++, "username": key, "permission": userRoles[parsedData[key].permission] || 'Unknown' });
-        });
-        answer.send(result);
+        if (question.query.id !== '' && question.query.id !== null && question.query.id !== undefined) {
+            if (!parsedData[question.query.id]) {
+                return answer.send({ "status": "error", "message": "User not found" });
+            }
+            result.push({ "username": question.query.id, "permission": userRoles[parsedData[question.query.id].permission] || 'Unknown' });
+            return answer.send(result);
+        } else {
+            let count = 1;
+            Object.keys(parsedData).forEach(key => {
+                result.push({ "id": count++, "username": key, "permission": userRoles[parsedData[key].permission] || 'Unknown' });
+            });
+            answer.send(result);
+        }
     }
 });
 app.post('/v1/users/create', async (question, answer) => {
@@ -386,6 +413,40 @@ app.post('/v1/users/create', async (question, answer) => {
     }
     answer.send({ "status": "OK" });
 });
+app.post('/v1/users/edit', async (question, answer) => {
+    if (!question.session.role || question.session.role > '0') {
+        return answer.status(401).send('Unauthorized');
+    }
+    const userRoles = require('./api/json/userRoles.json');
+    question.body.permission = Object.keys(userRoles).find(key => userRoles[key] === question.body.permission) || 99;
+
+    if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
+        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
+        let result = (await mysql('update', 'users', `UPDATE users SET permission = ${question.body.permission}, username = '${question.body.username}' WHERE id = ${question.body.id}`));
+        if (question.body.password !== '' && question.body.password !== null && question.body.password !== undefined) {
+            result = (await mysql('update', 'users', `UPDATE users SET password = '${await bcrypt.hash(question.body.password, 10)}' WHERE id = '${question.body.id}'`));
+        }
+    } else {
+        const fs = require('fs');
+        const path = require('path');
+        const existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
+        const users = JSON.parse(existingData);
+
+        if (!users[question.body.username]) {
+            return answer.send({ "status": "error", "message": "User does not exist" });
+        }
+
+        users[question.body.username].permission = question.body.permission;
+        const userList = Object.keys(users);
+        const userIndex = userList.indexOf(question.body.username);
+        const newUsername = (userIndex + 1).toString();
+        users[newUsername] = users[question.body.username];
+        delete users[question.body.username];
+
+        fs.writeFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), JSON.stringify(users, null, 4));
+    }
+    answer.send({ "status": "OK" });
+});
 
 
 
@@ -411,6 +472,15 @@ app.get('/admin/users/create', (question, answer) => {
     }
     answer.sendFile(path.join(__dirname, 'admin/users/create', 'create.html'));
 });
+app.get('/admin/users/edit', (question, answer) => {
+    if (!question.session.userid || question.session.role > '0') {
+        question.session.destroy();
+        answer.clearCookie(package.name + '-userid');
+        answer.clearCookie(package.name + '-role');
+        return answer.redirect(`/login?next=${question.url}`);
+    }
+    answer.sendFile(path.join(__dirname, 'admin/users/edit', 'edit.html'));
+});
 app.get('/admin/env', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin/config-env', 'configenv.html')); });
 app.get('/admin/logs', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin/logs', 'logs.html')); });
 
@@ -421,7 +491,6 @@ app.get('/admin/logs', (question, answer) => { answer.sendFile(path.join(__dirna
 app.get('/', (question, answer) => {
     answer.sendFile(path.join(__dirname, '/index.html'));
 });
-app.get('/favicon.ico', (question, answer) => { answer.sendFile(path.join(__dirname, 'public/img/favicon.ico')); });
 app.get('/next-rp', (question, answer) => { answer.sendFile(path.join(__dirname, 'client/next-rp/nextrp.html')); });
 app.get('/next-rp/create', (question, answer) => {
     if (!question.session.role || question.session.role > '2') {
