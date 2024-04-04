@@ -50,16 +50,16 @@ const PORT = env.parsed.WEB_PORT || 3000;
 start().then(() => {
     app.listen(PORT, async () => {
         console.log(`Server is running on port ${PORT}`);
-        // const botProcess = spawn('node', ['src/index.js']);
-        // botProcess.stdout.on('data', (data) => {
-        //     console.log(data.toString());
-        // });
-        // botProcess.stderr.on('data', (data) => {
-        //     console.error(data.toString());
-        // });
-        // botProcess.on('exit', (code) => {
-        //     console.log(`Bot process exited with code ${code}`);
-        // });
+        const botProcess = spawn('node', ['src/index.js']);
+        botProcess.stdout.on('data', (data) => {
+            console.log(data.toString());
+        });
+        botProcess.stderr.on('data', (data) => {
+            console.error(data.toString());
+        });
+        botProcess.on('exit', (code) => {
+            console.log(`Bot process exited with code ${code}`);
+        });
     });
 });
 
@@ -177,11 +177,20 @@ app.get('/v1/users/perms', async (question, answer) => {
     }
     answer.send(require('./api/json/userRoles.json'));
 });
-app.post('/v1/config/submit', (question, answer) => {
+app.post('/v1/config/submit', async (question, answer) => {
     if (!question.session.role || question.session.role > '1') {
         return answer.status(401).send('Unauthorized');
     }
-    writeenv(question.body);
+    await writeenv(question.body);
+    const pushcmds = spawn('node', ['src/regester-commands.js']);
+    pushcmds.stderr.on('data', (data) => {
+        console.error(data.toString());
+    });
+    pushcmds.on('exit', (code) => {
+        if (code !== 0) {
+            console.log(`Bot process exited with code ${code}`);
+        }
+    });
     answer.send({ "status": "OK" });
 });
 // app.post('/v1/config/removeVariable', async (req, res) => {

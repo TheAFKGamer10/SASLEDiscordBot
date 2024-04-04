@@ -39,7 +39,7 @@
     },
     "JOIN_WEBSITE": {
         "type": "URL",
-        "required": true,
+        "required": false,
         "onlyifDB": false,
         "description": "The URL of the website you want to show users after they join a department",
         "default": "https://example.com/info"
