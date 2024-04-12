@@ -1,6 +1,11 @@
-.env*
+*.env*
 !.env.example
 node_module*
 *test*
+temp*
 
 nodejs-portable*
+
+# For the WEB-UI
+users.json
+next-rp.json
