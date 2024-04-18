@@ -45,14 +45,10 @@ module.exports = async (interaction) => {
     }
     await getusers();
 
-    var NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
-    function getDepartID() {
-        NewDepartID = Math.floor(Math.random().toFixed(2) * 89) + 10;
-        if (CurrentUsersNumbers.includes(NewDepartID)) {
-            getDepartID();
-        }
-    }
-    getDepartID();
+    let NewDepartID;
+    do {
+        NewDepartID = Math.floor(Math.random() * 90) + 10;
+    } while (CurrentUsersNumbers.includes(NewDepartID));
 
     let replyContent = `You have been added to ${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}!`;
     if (env.parsed.JOIN_WEBSITE !== "") {
