@@ -34,16 +34,21 @@ body {
   position: fixed;
   left: 0;
   bottom: 0;
-  width: 90dvw;
+  width: 90%;
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  padding: 10px;
+  /* padding: 10px; */
+  padding-top: 10px;
   z-index: 1;
   display: block;
   justify-content: center;
   align-items: center;
   text-decoration: none;
+}
+
+.smallfooter {
+  font-size: 10px;
 }
 
 .footerlink {
@@ -56,19 +61,6 @@ body {
   text-decoration: underline;
 }
 
-
-.light {
-  .footer {
-    background-color: var(--light-mode-color);
-    color: var(--light-mode-text-color);
-  }
-}
-.dark {
-  .footer {
-    background-color: var(--dark-mode-color);
-    color: var(--dark-mode-text-color);
-  }
-}
 
 @media screen and (min-height: 100vh) {
   body {

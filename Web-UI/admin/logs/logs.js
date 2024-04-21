@@ -9,10 +9,12 @@ function logspageloaded() {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
     }
-    let selectrowsdropdown = document.getElementById('rows');
 
-    const URL = window.location.hostname;
-    fetch(`/v1/bot/logs/get?limit=${selectrowsdropdown.value}&URL=${URL}`, {
+    if (window.innerWidth < 800) {
+        announcement('Caution', 'This page may not be formated properly for mobile devices.', 'warning', true);
+    }
+
+    fetch(`/v1/bot/logs/get?limit=${document.getElementById('rows').value}`, {
         method: 'GET'
     })
         .then(response => response.json())

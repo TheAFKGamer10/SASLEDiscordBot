@@ -10,6 +10,17 @@ function userspageloaded() {
         }
     }
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const reason = urlParams.get('reason');
+    if (reason == 'created') {
+        announcement('Success', 'User created successfully.', 'success', true);
+    } else if (reason == 'edited') {
+        announcement('Success', 'User edited successfully.', 'success', true);
+    } else if (reason == 'deleted') {
+        announcement('Success', 'User deleted successfully.', 'success', true);
+    }
+
+
     fetch(`/v1/checkCookies?perm=0`, {
         method: 'GET'
     })

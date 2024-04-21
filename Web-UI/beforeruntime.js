@@ -2,6 +2,7 @@ module.exports = async () => {
     const fs = require('fs');
     const path = require('path');
     const bcrypt = require('bcrypt');
+    const crypto = require('crypto');
     const env = require('dotenv').config();
     const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
 
@@ -10,7 +11,7 @@ module.exports = async () => {
         mysql('connect').then(async (result) => {
             await mysql('select', 'users', `SELECT * FROM users WHERE username = '${env.parsed.ROOT_USERNAME}'`).then(async (result) => {
                 if (!result || result.length === 0) {
-                    await mysql('insert', 'users', `('${env.parsed.ROOT_USERNAME}', '${await bcrypt.hash(env.parsed.ROOT_PASSWORD, 10)}', '0')`);
+                    await mysql('insert', 'users', `('${env.parsed.ROOT_USERNAME}', '${await bcrypt.hash(env.parsed.ROOT_PASSWORD, 10)}', '0', '${crypto.randomBytes(16).toString('hex')}')`);
                 }
             });
         });
@@ -27,7 +28,8 @@ module.exports = async () => {
             if (!users.hasOwnProperty(env.parsed.ROOT_USERNAME)) {
                 users[env.parsed.ROOT_USERNAME] = {
                     password: await bcrypt.hash(env.parsed.ROOT_PASSWORD, 10),
-                    permission: '0'
+                    permission: '0',
+                    accesskey: crypto.randomBytes(16).toString('hex')
                 };
                 fs.writeFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), JSON.stringify(users));
             }

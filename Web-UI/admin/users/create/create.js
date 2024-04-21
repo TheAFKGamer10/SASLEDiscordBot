@@ -213,12 +213,7 @@ async function submit() {
         .then(response => response.json())
         .then(async data => {
             if (data.status == 'OK') {
-                announcement(
-                    "User Creates!",
-                    "The user has been created successfully!",
-                    "success",
-                    true
-                );
+                window.location.href = '/admin/users?reason=created';
             } else {
                 announcement(
                     "Error!",

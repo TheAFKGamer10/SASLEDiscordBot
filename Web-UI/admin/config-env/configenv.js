@@ -103,8 +103,7 @@ async function makeboxes() {
                         div.appendChild(textdiv);
 
                         if (envhints[key].type === 'dropdown') {
-                            let element;
-                            element = document.createElement('select');
+                            let element = document.createElement('select');
                             envhints[key].options.forEach(option => {
                                 let optionElement = document.createElement('option');
                                 optionElement.value = option;
@@ -366,4 +365,10 @@ async function connectionstringmouseoutPass() {
         sessionStorage.setItem('MYSQL_CONNECTION_STRING', obj.value);
     }
     obj.blur();
+}
+
+
+window.onbeforeunload = () => {
+    sessionStorage.removeItem('MYSQL_CONNECTION_STRING');
+    sessionStorage.removeItem('const_MYSQL_CONNECTION_STRING');
 }

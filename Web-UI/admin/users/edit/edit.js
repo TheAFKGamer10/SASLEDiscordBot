@@ -21,6 +21,12 @@ async function createpageloaded() {
         .then(response => response.json())
         .then(async user => {
             if (user.status === 'error') {
+                if (user.message === 'User not found') {
+                    document.getElementById('sumbitbtn').style.display = 'none';
+                    document.getElementById('config').innerHTML = `<h1 style="color: red;">User not found!</h1>`;
+                    announcement('Error', 'User not found!', 'danger', false);
+                    return;
+                }
                 announcement('Error', user.message, 'danger', false);
                 return;
             }
@@ -32,6 +38,8 @@ async function createpageloaded() {
             })
                 .then(response => response.json())
                 .then(async roles => {
+                    console.log(user);
+
                     let data = {
                         "Username": {
                             "type": "text",
@@ -228,12 +236,7 @@ async function submit() {
         .then(response => response.json())
         .then(async data => {
             if (data.status == 'OK') {
-                announcement(
-                    "User Updated!",
-                    "The user's data has been updated successfully!",
-                    "success",
-                    true
-                );
+                window.location.href = '/admin/users?reason=edited';
             } else {
                 announcement(
                     "Error!",
@@ -244,7 +247,6 @@ async function submit() {
             }
         })
         .catch((error) => {
-            console.error('Error:', error);
             announcement(
                 "Error!",
                 `An error occurred while submitting the config! Please check the console for error details. ${(error != undefined) ? `<br />Error: ${error}` : ""}`,

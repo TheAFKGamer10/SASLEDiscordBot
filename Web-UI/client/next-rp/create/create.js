@@ -124,7 +124,7 @@ async function createpageloaded() {
                     input.type = data[key].type;
                     input.required = data[key]?.required ? true : false;
                     input.id = `input_${key}`;
-                    input.value = data[key].default || '';
+                    input.placeholder = data[key].default || '';
 
                     if (input.required) {
                         // Create a new span element

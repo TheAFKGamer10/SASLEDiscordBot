@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="/public/img/RPLogoShort.png" type="image/png">
-    <title>Create A New User</title>
+    <title>Next Roleplay</title>
     <link rel="stylesheet" type="text/css" href="/public/css/main.css" />
     <link rel="stylesheet" type="text/css" href="/public/css/form.css" />
   </head>
-  <body id="body" class="light" onload="pageloaded(); createpageloaded()">
+  <body id="body" class="light" onload="pageloaded(); accountpageload()">
     <div id="top-bar" class="top-bar">
       <div id="top-bar-left" class="top-bar-left"></div>
       <div id="top-bar-right" class="top-bar-right"></div>
@@ -22,15 +22,13 @@
       <button onclick="closeAnnouncement()">X</button>
     </div>
 
-    <h1>Create A New User</h1>
-    <div id="config" class="config"></div>
-    <br />
+    <h1 id="title" class="title">Account</h1>
+    <div class="config"></div>
     <button id="sumbitbtn" class="submitbtn" onclick="submit()">Submit</button>
 
-    <div id="footer" class="footer"></div>
 
-    <script type="text/javascript" src="/admin/users/create/create.js"></script>
+    <div id="footer" class="footer"></div>
     <script type="text/javascript" src="/main.js"></script>
-    </script>
+    <script type="text/javascript" src="client/account/account.js"></script>
   </body>
 </html>

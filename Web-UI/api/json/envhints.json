@@ -88,14 +88,6 @@
         "description": "The ID of the channel you want to send roleplay announcements to",
         "default": "000000000000000000"
     },
-    "TIME_FORMAT": {
-        "type": "dropdown",
-        "required": true,
-        "onlyifDB": false,
-        "description": "The format you want the time to be displayed in.",
-        "default": "USA",
-        "options": ["USA", "EUROPE"]
-    },
     "ROOT_USERNAME": {
         "type": "text",
         "AdminOnly": true,

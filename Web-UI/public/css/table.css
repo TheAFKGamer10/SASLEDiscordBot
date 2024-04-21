@@ -73,6 +73,5 @@ table td:last-child {
 
 a,
 a:visited {
-  /* Make links not have a diffrernt colour */
   color: inherit;
 }

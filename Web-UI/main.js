@@ -1,6 +1,10 @@
 "use strict";
 
 function pageloaded() {
+    fetch('/v1/pageload', { // This chacks only the first request send to the page and does not request every a link is loaded.
+        method: "GET"
+    });
+
     fetch('/header.json')
         .catch(error => console.error('Error:', error))
         .then(response => response.json())
@@ -24,21 +28,22 @@ function pageloaded() {
             const topbarright = document.getElementById('top-bar-right');
             topbarright.appendChild(hamburgerButton);
 
-            const menu = document.createElement('div');
-            menu.className = 'menu';
-            topbarright.appendChild(menu);
+            const mobilemenu = document.createElement('div');
+            mobilemenu.className = 'menu';
+
+            topbarright.appendChild(mobilemenu);
 
             hamburgerButton.addEventListener('click', function () {
-                menu.classList.toggle('show');
+                mobilemenu.classList.toggle('show');
             });
 
             let closeButton = document.createElement('button');
             closeButton.textContent = 'X';
             closeButton.className = 'close-button';
             closeButton.onclick = function () {
-                document.querySelector('.menu').classList.toggle('show');
+                mobilemenu.classList.toggle('show');
             };
-            document.querySelector('.menu').appendChild(closeButton);
+            mobilemenu.appendChild(closeButton);
 
 
             logoutButton.onclick = function () {
@@ -86,7 +91,7 @@ function pageloaded() {
                             handburgeritem.onclick = function () {
                                 window.location.href = links[key].link;
                             };
-                            document.querySelector('.menu').appendChild(handburgeritem);
+                            mobilemenu.appendChild(handburgeritem);
                         });
 
                         let dropdown = document.createElement('div');
@@ -142,23 +147,15 @@ function pageloaded() {
                             dropdownMenu.classList.toggle('show');
                             dropdownContentMenu.classList.toggle('show');
                         };
-                        document.querySelector('.menu').appendChild(showItemsButton);
+                        mobilemenu.appendChild(showItemsButton);
 
                         dropdownMenu.appendChild(dropdownContentMenu);
-                        document.querySelector('.menu').appendChild(dropdownMenu);
+                        mobilemenu.appendChild(dropdownMenu);
 
                         dropdownarea.appendChild(dropdownContent);
                         dropdown.appendChild(dropdownarea);
                         topbarleft.appendChild(dropdown);
 
-
-                        // Footer
-                        if (document.getElementById('footer')) {
-                            document.getElementById('footer').innerHTML = ` <!-- Plaese do not remove footer. It helps the developer of this softwear. But, it is open source, do what every you want (While still following the license). -->
-                                <p><a href="https://github.com/TheAFKGamer10/SASLEDiscordBot" target="_blank" class="footerlink">FiveM Discord Bot</a> by <a href="https://afkht.us/foot" target="_blank" class="footerlink">The AFK Gamer</a></p>
-                                <p style="font-size: 8px;">FiveM Discord Bot is not an official Discord or FiveM product. It is not affiliated with nor endorsed by Discord Inc. or Cfx.re.</p>
-                            `;
-                        }
                     } else {
                         topbarleft.style.marginBottom = '0px';
                         objkeys.forEach(key => {
@@ -179,37 +176,109 @@ function pageloaded() {
                             handburgeritem.onclick = function () {
                                 window.location.href = links[key].link;
                             };
-                            document.querySelector('.menu').appendChild(handburgeritem);
+                            mobilemenu.appendChild(handburgeritem);
                         });
                     }
 
                     if (data.cookie) {
                         topbarleft.appendChild(logoutButton);
+
+                        // Account
+                        let account = document.createElement('button');
+                        account.id = 'account';
+                        account.className = 'topbarbutton';
+                        account.onclick = function () {
+                            window.location.href = '/account';
+                        };
+                        account.textContent = 'Account';
+
+                        mobilemenu.appendChild(account);
+                        topbarright.appendChild(account);
+
+                        // Footer
+                        if (document.getElementById('footer')) {
+                            document.getElementById('footer').innerHTML = ` <!-- Plaese do not remove footer. It helps the developer of this softwear. -->
+                                <p class="bigfooter"><a href="https://github.com/TheAFKGamer10/SASLEDiscordBot" target="_blank" class="footerlink">FiveM Discord Bot</a> by <a href="https://afkht.us/foot" target="_blank" class="footerlink">The AFK Gamer</a></p>
+                                <p class="smallfooter">FiveM Discord Bot is not an official Discord or FiveM product. It is not affiliated with nor endorsed by Discord Inc. or Cfx.re.</p>
+                            `;
+                        }
                     } else {
                         topbarleft.appendChild(loginButton);
                     }
 
+
+                    // Light Dark Mode
+                    const colourmodeDiv = document.createElement('div');
+                    colourmodeDiv.id = 'colourmode';
+                    colourmodeDiv.className = 'colourmode';
+
+                    const lightdarkbutton = document.createElement('button');
+                    lightdarkbutton.id = 'lightdarkbutton';
+                    lightdarkbutton.className = 'ldbutton';
+                    lightdarkbutton.onclick = changeld;
+
+                    const ldicon = document.createElement('img');
+                    ldicon.id = 'ldicon';
+                    ldicon.className = 'ldicon';
+
+                    lightdarkbutton.appendChild(ldicon);
+                    colourmodeDiv.appendChild(lightdarkbutton);
+                    topbarright.appendChild(colourmodeDiv);
+
+                    const body = document.getElementById("body");
+                    const savedColor = sessionStorage.getItem("lightdark");
+                    if (savedColor === "light") {
+                        body.classList.remove("dark");
+                        body.classList.add("light");
+                        ldicon.src = "/public/img/sun.svg";
+                    } else if (savedColor === "dark") {
+                        body.classList.remove("light");
+                        body.classList.add("dark");
+                        ldicon.src = "/public/img/moon.svg";
+                    } else {
+                        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                            body.classList.remove("light");
+                            body.classList.add("dark");
+                            ldicon.src = "/public/img/moon.svg";
+                        } else {
+                            body.classList.remove("dark");
+                            body.classList.add("light");
+                            ldicon.src = "/public/img/sun.svg";
+                        }
+                    }
+
+
                     if (window.innerWidth > 800) {
                         // document.getElementById('top-bar-left').style.display = 'block';
-                        document.querySelector('.menu').style.display = 'none';
-                        document.querySelector('.menu').classList.remove('show');
+                        mobilemenu.style.display = 'none';
+                        mobilemenu.classList.remove('show');
                         document.querySelector('.hamburger-button').style.display = 'none';
                     } else {
                         // document.getElementById('top-bar-left').style.display = 'none';
-                        document.querySelector('.menu').style.display = 'block';
-                        document.querySelector('.menu').style.justifyContent = 'center';
-                        document.querySelector('.menu').style.alignItems = 'center';
+                        mobilemenu.style.display = 'block';
+                        mobilemenu.style.justifyContent = 'center';
+                        mobilemenu.style.alignItems = 'center';
 
                         if (data.cookie) {
-                            document.querySelector('.menu').appendChild(logoutButton);
+                            mobilemenu.appendChild(logoutButton);
                         } else {
-                            document.querySelector('.menu').appendChild(loginButton);
+                            mobilemenu.appendChild(loginButton);
                         }
 
+                        let colourmodeDiv = document.getElementById('colourmode');
                         loginButton.classList.remove('topbarbutton');
                         logoutButton.classList.remove('topbarbutton');
                         loginButton.classList.add('handburgeritem');
                         logoutButton.classList.add('handburgeritem');
+                        topbarright.prepend(colourmodeDiv);
+
+                        if (data.cookie) {
+                            let account = document.getElementById('account');
+                            account.classList.remove('topbarbutton');
+                            account.classList.add('handburgeritem');
+                            topbarright.removeChild(account);
+                            mobilemenu.insertBefore(account, mobilemenu.lastChild);
+                        }
                     }
                 });
         });
@@ -231,33 +300,6 @@ function changeld() {
         sessionStorage.setItem("lightdark", "dark");
     }
 }
-
-// Add the following code to restore the saved color on page reload
-window.addEventListener("DOMContentLoaded", function () {
-    const body = document.getElementById("body");
-    const ldbutton = document.getElementById("lightdarkbutton");
-    const savedColor = sessionStorage.getItem("lightdark");
-    if (savedColor === "light") {
-        body.classList.remove("dark");
-        body.classList.add("light");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" /> `;
-    } else if (savedColor === "dark") {
-        body.classList.remove("light");
-        body.classList.add("dark");
-        ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" /> `;
-    } else {
-        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-            body.classList.remove("light");
-            body.classList.add("dark");
-            ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/moon.svg" /> `;
-        } else {
-            body.classList.remove("dark");
-            body.classList.add("light");
-            ldbutton.innerHTML = `<img id="ldicon" class="ldicon" src="/public/img/sun.svg" /> `;
-        }
-    }
-});
-
 
 function closeAnnouncement() {
     document.getElementById('announcement').style.display = 'none';

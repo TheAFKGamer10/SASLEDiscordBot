@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
+const { default: rateLimit } = require('express-rate-limit');
 const crypto = require('crypto');
 const { spawn } = require('child_process');
 let env = require('dotenv').config();
@@ -29,6 +30,14 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 24 * 60 * 60 * 1000 }
+}));
+app.use(rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 150, // limit each IP to 100 requests per windowMs
+    handler: (req, res) => {
+        console.log('Rate limited');
+        res.status(429).send('Too many requests');
+    }
 }));
 app.use((question, answer, next) => {
     if (question.cookies[package.name + '-userid']) {
@@ -87,6 +96,7 @@ app.post('/v1/process-login', async (question, answer) => {
 
                             answer.cookie(package.name + '-userid', encrypteduserid);
                             answer.cookie(package.name + '-role', encryptedrole);
+                            answer.cookie(package.name + '-accesskey', user.accesskey);
                             answer.send({ "status": "OK" });
                             return;
                         }
@@ -99,8 +109,11 @@ app.post('/v1/process-login', async (question, answer) => {
             console.log(e);
         }
     } else {
-        const users = require('./auth/data/users.json');
-        const user = users[question.body.username];
+        const fs = require('fs');
+        const path = require('path');
+        let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
+        let parsedData = JSON.parse(existingData);
+        const user = parsedData[question.body.username];
         if (!user) {
             return answer.send({ "status": "error", "message": "User Not Found. Please check your username and password." });
         }
@@ -116,6 +129,7 @@ app.post('/v1/process-login', async (question, answer) => {
 
                 answer.cookie(package.name + '-userid', encrypteduserid);
                 answer.cookie(package.name + '-role', encryptedrole);
+                answer.cookie(package.name + '-accesskey', user.accesskey);
                 answer.send({ "status": "OK" });
             } else {
                 answer.send({ "status": "error", "message": "Invalid Password. Please check your username and password." });
@@ -129,9 +143,25 @@ app.get('/logout', (question, answer) => {
     question.session.destroy();
     answer.clearCookie(package.name + '-userid');
     answer.clearCookie(package.name + '-role');
-    answer.redirect('/');
+    answer.clearCookie(package.name + '-accesskey');
+    if (question.query.next == '/login') {
+        return answer.redirect(`/login${question.query.afterlogin ? `?next=${question.query.afterlogin}` : ''}${question.query.reason ? `${question.query.next ? `&` : `?`}reason=${question.query.reason}` : ''}`);
+    } else if (question.query.next) {
+        return answer.redirect(`${question.query.next}`);
+    } else {
+        answer.redirect('/');
+    }
 });
-
+app.get('/account', (question, answer) => {
+    if (!question.session.userid) {
+        question.session.destroy();
+        answer.clearCookie(package.name + '-userid');
+        answer.clearCookie(package.name + '-role');
+        answer.clearCookie(package.name + '-accesskey');
+        return answer.redirect(`/login?next=${question.url}&reason=restricted`);
+    }
+    answer.sendFile(path.join(__dirname, 'client', 'account', 'account.html'));
+});
 
 
 // API
@@ -149,6 +179,51 @@ app.get('/v1/stat', (question, answer) => {
         "name": package.name
     };
     answer.send(res);
+});
+app.get('/v1/pageload', (question, answer) => {
+    if (!question.session.userid) { return answer.send({ "status": "OK" }); }
+
+    if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
+        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
+        mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.session.userid}'`).then(async (result) => {
+            let users = JSON.parse(JSON.stringify(result))[0];
+
+            if (users.accesskey !== question.cookies[package.name + '-accesskey']) {
+                question.session.destroy();
+                answer.clearCookie(package.name + '-userid');
+                answer.clearCookie(package.name + '-role');
+                answer.clearCookie(package.name + '-accesskey');
+                return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
+            }
+        }).catch(error => {
+            question.session.destroy();
+            answer.clearCookie(package.name + '-userid');
+            answer.clearCookie(package.name + '-role');
+            answer.clearCookie(package.name + '-accesskey');
+            return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
+        });
+    } else {
+        const fs = require('fs');
+        const path = require('path');
+        let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
+        let parsedData = JSON.parse(existingData);
+        const user = parsedData[question.session.userid];
+        if (!user || user.accesskey !== question.cookies[package.name + '-accesskey']) {
+            question.session.destroy();
+            answer.clearCookie(package.name + '-userid');
+            answer.clearCookie(package.name + '-role');
+            answer.clearCookie(package.name + '-accesskey');
+            return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
+        } else if (user.accesskey == question.cookies[package.name + '-accesskey']) {
+            return answer.send({ "status": "OK" });
+        } else {
+            question.session.destroy();
+            answer.clearCookie(package.name + '-userid');
+            answer.clearCookie(package.name + '-role');
+            answer.clearCookie(package.name + '-accesskey');
+            return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
+        }
+    }
 });
 app.get('/v1/config/get', async (question, answer) => {
     if (!question.session.role || question.session.role > '1') {
@@ -265,7 +340,7 @@ app.get('/v1/bot/logs/get', async (question, answer) => {
         return answer.status(401).send('Unauthorized');
     }
     if (env.parsed.MYSQL_CONNECTION_STRING == '' || env.parsed.MYSQL_CONNECTION_STRING == null) {
-        return answer.send({ "status": "error", "message": `MySQL Connection String is not set. Please set it in the .env file or <a href='${question.query.URL}/admin/env'>in the panel</a>.` });
+        return answer.send({ "status": "error", "message": `MySQL Connection String is not set. Please set it in the .env file or <a href='/admin/env'>in the panel</a>.` });
     }
     let limit = question.query.limit || 10;
     const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
@@ -332,7 +407,7 @@ app.post('/v1/bot/rp/create', async (question, answer) => {
         }
         try {
             await client.login(env.parsed.BOT_TOKEN); // Don't ask my why it needs to login again, but it does, dont touch.
-            const fetchedChannel = await client.channels.fetch(env.parsed.LOG_CHANNEL_ID);
+            const fetchedChannel = await client.channels.fetch(env.parsed.ROLEPLAY_ANOUNCEMENT_CHANNEL_ID);
             await fetchedChannel.send(output);
             client.destroy();
         } catch (error) {
@@ -355,6 +430,7 @@ app.get('/v1/users/get', async (question, answer) => {
             }
             users = users.map(user => {
                 delete user.password;
+                delete user.accesskey;
                 user.permission = userRoles[user.permission] || 'Unknown';
                 return user;
             });
@@ -363,6 +439,7 @@ app.get('/v1/users/get', async (question, answer) => {
             let users = (await mysql('select', 'users', `SELECT * FROM users`));
             users = users.map(user => {
                 delete user.password;
+                delete user.accesskey;
                 user.permission = userRoles[user.permission] || 'Unknown';
                 return user;
             });
@@ -371,14 +448,15 @@ app.get('/v1/users/get', async (question, answer) => {
     } else {
         const fs = require('fs');
         const path = require('path');
-        const existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
-        const parsedData = JSON.parse(existingData);
+        let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
+        let parsedData = JSON.parse(existingData);
         const result = [];
         if (question.query.id !== '' && question.query.id !== null && question.query.id !== undefined) {
-            if (!parsedData[question.query.id]) {
+            let users_name = Object.keys(parsedData)[question.query.id - 1];
+            if (!parsedData[users_name]) {
                 return answer.send({ "status": "error", "message": "User not found" });
             }
-            result.push({ "username": question.query.id, "permission": userRoles[parsedData[question.query.id].permission] || 'Unknown' });
+            result.push({ "username": users_name, "permission": userRoles[parsedData[users_name].permission] || 'Unknown' });
             return answer.send(result);
         } else {
             let count = 1;
@@ -387,6 +465,36 @@ app.get('/v1/users/get', async (question, answer) => {
             });
             answer.send(result);
         }
+    }
+});
+app.get('/v1/users/singleuserinfo', async (question, answer) => {
+    if (!question.session.role) {
+        return answer.status(401).send('Unauthorized');
+    }
+    if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
+        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
+        let users = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.session.userid}'`));
+        if (users.length === 0) {
+            return answer.send({ "status": "error", "message": "User not found" });
+        }
+        users = users.map(user => {
+            delete user.id;
+            delete user.permission;
+            delete user.accesskey;
+            user.password = '';
+            return user;
+        }
+        );
+        answer.send(users[0]);
+    } else {
+        const fs = require('fs');
+        const path = require('path');
+        let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
+        let parsedData = JSON.parse(existingData);
+        if (!parsedData[question.session.userid]) {
+            return answer.send({ "status": "error", "message": "User not found" });
+        }
+        return answer.send({ "username": question.session.userid, "password": '' });
     }
 });
 app.post('/v1/users/create', async (question, answer) => {
@@ -402,12 +510,12 @@ app.post('/v1/users/create', async (question, answer) => {
         if (alreadyExists.length > 0) {
             return answer.send({ "status": "error", "message": "User already exists" });
         }
-        let result = (await mysql('insert', 'users', `('${question.body.username}', '${await bcrypt.hash(question.body.password, 10)}', ${question.body.permission})`));
+        let result = (await mysql('insert', 'users', `('${question.body.username}', '${await bcrypt.hash(question.body.password, 10)}', ${question.body.permission}, '${crypto.randomBytes(16).toString('hex')}')`));
     } else {
         const fs = require('fs');
         const path = require('path');
-        const existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
-        const users = JSON.parse(existingData);
+        let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
+        let users = JSON.parse(existingData);
 
         if (users[question.body.username]) {
             return answer.send({ "status": "error", "message": "User already exists" });
@@ -415,11 +523,52 @@ app.post('/v1/users/create', async (question, answer) => {
 
         users[question.body.username] = {
             "password": await bcrypt.hash(question.body.password, 10),
-            "permission": question.body.permission
+            "permission": question.body.permission,
+            "accesskey": crypto.randomBytes(16).toString('hex')
         };
 
         fs.writeFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), JSON.stringify(users, null, 4));
     }
+    answer.send({ "status": "OK" });
+});
+app.post('/v1/users/useredit', async (question, answer) => {
+    if (!question.session.role) {
+        return answer.status(401).send('Unauthorized');
+    }
+    const data = question.body;
+
+    if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
+        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
+        let usernameExists = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${data.username}'`));
+        if (usernameExists.length > 0) {
+            return answer.send({ "status": "error", "error": "Username already exists" });
+        }
+        let result = (await mysql('update', 'users', `UPDATE users SET username = '${data.username}', accesskey = '${crypto.randomBytes(16).toString('hex')}' WHERE username = '${question.session.userid}'`));
+        if (data.password !== '' && data.password !== null && data.password !== undefined) {
+            result = (await mysql('update', 'users', `UPDATE users SET password = '${await bcrypt.hash(data.password, 10)}' WHERE username = '${data.username}'`));
+        }
+    } else {
+        const fs = require('fs');
+        const path = require('path');
+        let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
+        let users = JSON.parse(existingData);
+
+        if (data.username !== question.session.userid && users[data.username]) {
+            return answer.send({ "status": "error", "error": "Username already exists" });
+        }
+
+        if (data.username !== question.session.userid) {
+            users[data.username] = users[question.session.userid];
+            delete users[question.session.userid];
+        }
+        if (data.password !== '' && data.password !== null && data.password !== undefined) {
+            users[data.username].password = await bcrypt.hash(data.password, 10);
+        }
+        users[data.username].accesskey = crypto.randomBytes(16).toString('hex');
+
+        fs.writeFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), JSON.stringify(users, null, 4));
+    }
+
     answer.send({ "status": "OK" });
 });
 app.post('/v1/users/edit', async (question, answer) => {
@@ -431,26 +580,35 @@ app.post('/v1/users/edit', async (question, answer) => {
 
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-        let result = (await mysql('update', 'users', `UPDATE users SET permission = ${question.body.permission}, username = '${question.body.username}' WHERE id = ${question.body.id}`));
+        let usernameExists = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`));
+        if (usernameExists.length > 0 && usernameExists[0].id != question.body.id) {
+            return answer.send({ "status": "error", "message": "Username already exists" });
+        }
+        let result = (await mysql('update', 'users', `UPDATE users SET permission = ${question.body.permission}, username = '${question.body.username}', accesskey = '${crypto.randomBytes(16).toString('hex')}' WHERE id = ${question.body.id}`));
         if (question.body.password !== '' && question.body.password !== null && question.body.password !== undefined) {
             result = (await mysql('update', 'users', `UPDATE users SET password = '${await bcrypt.hash(question.body.password, 10)}' WHERE id = '${question.body.id}'`));
         }
     } else {
         const fs = require('fs');
         const path = require('path');
-        const existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
-        const users = JSON.parse(existingData);
+        let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
+        let users = JSON.parse(existingData);
+        let keys = Object.keys(users);
 
-        if (!users[question.body.username]) {
-            return answer.send({ "status": "error", "message": "User does not exist" });
+        if (keys.indexOf(question.body.username) != -1 && keys.indexOf(question.body.username) + 1 != question.body.id) {
+            return answer.send({ "status": "error", "message": "Username already exists" });
         }
 
+        if (keys.indexOf(question.body.username) == -1) {
+            users[question.body.username] = users[keys[question.body.id - 1]];
+            delete users[keys[question.body.id - 1]];
+        }
+        if (question.body.password !== '' && question.body.password !== null && question.body.password !== undefined) {
+            users[question.body.username].password = await bcrypt.hash(question.body.password, 10);
+        }
+        users[question.body.username].accesskey = crypto.randomBytes(16).toString('hex');
         users[question.body.username].permission = question.body.permission;
-        const userList = Object.keys(users);
-        const userIndex = userList.indexOf(question.body.username);
-        const newUsername = (userIndex + 1).toString();
-        users[newUsername] = users[question.body.username];
-        delete users[question.body.username];
+
 
         fs.writeFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), JSON.stringify(users, null, 4));
     }
@@ -465,7 +623,8 @@ app.use('/admin', (question, answer, next) => {
         question.session.destroy();
         answer.clearCookie(package.name + '-userid');
         answer.clearCookie(package.name + '-role');
-        return answer.redirect(`/login?next=${question.originalUrl}`);
+        answer.clearCookie(package.name + '-accesskey');
+        return answer.redirect(`/login?next=${question.originalUrl}&reason=restricted`);
     } else {
         next();
     }
@@ -477,6 +636,7 @@ app.get('/admin/users/create', (question, answer) => {
         question.session.destroy();
         answer.clearCookie(package.name + '-userid');
         answer.clearCookie(package.name + '-role');
+        answer.clearCookie(package.name + '-accesskey');
         return answer.redirect(`/login?next=${question.url}`);
     }
     answer.sendFile(path.join(__dirname, 'admin/users/create', 'create.html'));
@@ -486,6 +646,7 @@ app.get('/admin/users/edit', (question, answer) => {
         question.session.destroy();
         answer.clearCookie(package.name + '-userid');
         answer.clearCookie(package.name + '-role');
+        answer.clearCookie(package.name + '-accesskey');
         return answer.redirect(`/login?next=${question.url}`);
     }
     answer.sendFile(path.join(__dirname, 'admin/users/edit', 'edit.html'));
@@ -506,6 +667,7 @@ app.get('/next-rp/create', (question, answer) => {
         question.session.destroy();
         answer.clearCookie(package.name + '-userid');
         answer.clearCookie(package.name + '-role');
+        answer.clearCookie(package.name + '-accesskey');
         return answer.redirect(`/login?next=${question.url}`);
     }
     answer.sendFile(path.join(__dirname, 'client/next-rp/create/create.html'));

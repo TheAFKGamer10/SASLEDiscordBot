@@ -3,13 +3,14 @@
         "type": "text",
         "required": true,
         "description": "The planed Area of Patrol for the server",
-        "default": ""
+        "default": "Los Santos, Blaine County, Statewide, etc."
     },
     "Timestamp": {
         "type": "text",
         "required": true,
         "descriptionusehtml": true,
-        "description": "When should the RP start. Accepts <a href=\"https://www.unixtimestamp.com/\" target=\"_blank\">Unix Timestamps</a> and relative times.<br />Relative: days:hours:minutes (Ex. 1:12:30 = 1 day, 12 hours, 30 minutes) or just minutes (Ex. 30 = 30 minutes)"
+        "description": "When should the RP start. Accepts <a href=\"https://www.unixtimestamp.com/\" target=\"_blank\">Unix Timestamps</a> and relative time.<br />Relative: days:hours:minutes (Ex. 1:12:30 = 1 day, 12 hours, 30 minutes) or just minutes (Ex. 30 = 30 minutes)",
+        "default": "1:12:30 or 1713589200"
     },
     "Ping": {
         "type": "checkbox",

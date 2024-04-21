@@ -90,6 +90,7 @@
   justify-content: center;
   align-items: center;
   height: 100%;
+  margin: 0 5px;
 }
 .ldbutton {
   padding: 5px;
@@ -163,6 +164,7 @@
 
 .warning {
   background-color: #f4b400;
+  color: var(--light-mode-text-color);
 }
 
 .danger {
@@ -175,6 +177,7 @@
 
 .info {
   background-color: #5bc0de;
+  color: var(--light-mode-text-color);
 }
 
 /*Dropdown*/
@@ -274,7 +277,7 @@
     font-size: 25px;
     margin-bottom: 20px;
     text-align: center;
-    width: 80%;
+    width: 100%;
     height: 8%;
     border-radius: 5px;
     padding: none;
@@ -283,7 +286,7 @@
 
   .hamburger-button { 
     display: flex;
-    margin-left: 10px;
+    margin: 0 5px;
     cursor: pointer;
     border-radius: 3px;
     border: none;
@@ -313,8 +316,11 @@
     font-size: 20px;
     cursor: pointer;
     border-radius: 3px;
-    padding: none;
+    aspect-ratio: 1/1;
     border: none;
+    width: 35px;
+    text-align: center;
+    align-items: center;
   }
 
   .hamburger-dropdown-content {
@@ -325,7 +331,7 @@
   .hamburger-dropdown {
     position: relative;
     display: none;
-    width: 70%;
+    width: 85%;
   }
   .hamburger-dropdown.show {
     display: inline-block;
