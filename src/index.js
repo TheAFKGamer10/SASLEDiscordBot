@@ -21,7 +21,6 @@ if (env.parsed.MYSQL_CONNECTION_STRING !== '') {
 }
 
 const flags = process.argv.slice(2);
-console.log('Flags:', flags);
 
 async function envcheck() {
     requireditems = ['BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'LOG_CHANNEL_ID', 'LEO_ROLE_ID', 'CADET_ROLE_ID', 'LIST_OF_DEPARTMENTS'];
