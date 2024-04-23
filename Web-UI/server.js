@@ -59,7 +59,13 @@ const PORT = env.parsed.WEB_PORT || 3000;
 start().then(() => {
     app.listen(PORT, async () => {
         console.log(`Server is running on port ${PORT}`);
-        const botProcess = spawn('node', ['src/index.js']);
+        const flags = process.argv.slice(2);
+        let botProcess;
+        if (flags.includes('--petro')) {
+            botProcess = spawn('node', ['src/index.js', '--petro']);
+        } else {
+            botProcess = spawn('node', ['src/index.js']);
+        }
         botProcess.stdout.on('data', (data) => {
             console.log(data.toString());
         });
