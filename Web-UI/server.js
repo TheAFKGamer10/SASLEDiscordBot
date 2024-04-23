@@ -40,17 +40,27 @@ app.use(rateLimit({
     }
 }));
 app.use((question, answer, next) => {
-    if (question.cookies[package.name + '-userid']) {
-        let parts = question.cookies[package.name + '-userid'].split(':');
-        const decipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(parts.shift(), 'hex'));
-        let decrypteduserid = decipher.update(parts.join(':'), 'hex', 'utf8') + decipher.final('utf8');
+    try {
+        if (question.cookies[package.name + '-userid'] && question.cookies[package.name + '-role'] && question.cookies[package.name + '-accesskey']) {
+            let parts = question.cookies[package.name + '-userid'].split(':');
+            const decipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(parts.shift(), 'hex'));
+            let decrypteduserid = decipher.update(parts.join(':'), 'hex', 'utf8') + decipher.final('utf8');
 
-        let roleparts = question.cookies[package.name + '-role'].split(':');
-        const roledecipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(roleparts.shift(), 'hex'));
-        let decryptedrole = roledecipher.update(roleparts.join(':'), 'hex', 'utf8') + roledecipher.final('utf8');
+            let roleparts = question.cookies[package.name + '-role'].split(':');
+            const roledecipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(roleparts.shift(), 'hex'));
+            let decryptedrole = roledecipher.update(roleparts.join(':'), 'hex', 'utf8') + roledecipher.final('utf8');
 
-        question.session.userid = decrypteduserid;
-        question.session.role = decryptedrole;
+            let accesskeyparts = question.cookies[package.name + '-accesskey'].split(':');
+            const accesskeydecipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(accesskeyparts.shift(), 'hex'));
+            let decryptedaccesskey = accesskeydecipher.update(accesskeyparts.join(':'), 'hex', 'utf8') + accesskeydecipher.final('utf8');
+
+            question.session.userid = decrypteduserid;
+            question.session.role = decryptedrole;
+            question.session.accesskey = decryptedaccesskey;
+
+        }
+    } catch (e) {
+        console.log(e);
     }
     next();
 });
@@ -100,9 +110,13 @@ app.post('/v1/process-login', async (question, answer) => {
                             const cipherrole = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
                             let encryptedrole = iv.toString('hex') + ':' + cipherrole.update(`${user.permission}`, 'utf8', 'hex') + cipherrole.final('hex');
 
+                            iv = crypto.randomBytes(16);
+                            const cipheraccesskey = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
+                            let encryptedaccesskey = iv.toString('hex') + ':' + cipheraccesskey.update(user.accesskey, 'utf8', 'hex') + cipheraccesskey.final('hex');
+
                             answer.cookie(package.name + '-userid', encrypteduserid);
                             answer.cookie(package.name + '-role', encryptedrole);
-                            answer.cookie(package.name + '-accesskey', user.accesskey);
+                            answer.cookie(package.name + '-accesskey', encryptedaccesskey);
                             answer.send({ "status": "OK" });
                             return;
                         }
@@ -133,9 +147,13 @@ app.post('/v1/process-login', async (question, answer) => {
                 const cipherrole = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
                 let encryptedrole = iv.toString('hex') + ':' + cipherrole.update(`${user.permission}`, 'utf8', 'hex') + cipherrole.final('hex');
 
+                iv = crypto.randomBytes(16);
+                const cipheraccesskey = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
+                let encryptedaccesskey = iv.toString('hex') + ':' + cipheraccesskey.update(user.accesskey, 'utf8', 'hex') + cipheraccesskey.final('hex');
+
                 answer.cookie(package.name + '-userid', encrypteduserid);
                 answer.cookie(package.name + '-role', encryptedrole);
-                answer.cookie(package.name + '-accesskey', user.accesskey);
+                answer.cookie(package.name + '-accesskey', encryptedaccesskey);
                 answer.send({ "status": "OK" });
             } else {
                 answer.send({ "status": "error", "message": "Invalid Password. Please check your username and password." });
@@ -194,7 +212,7 @@ app.get('/v1/pageload', (question, answer) => {
         mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.session.userid}'`).then(async (result) => {
             let users = JSON.parse(JSON.stringify(result))[0];
 
-            if (users.accesskey !== question.cookies[package.name + '-accesskey']) {
+            if (users.accesskey !== question.session.accesskey) {
                 question.session.destroy();
                 answer.clearCookie(package.name + '-userid');
                 answer.clearCookie(package.name + '-role');
@@ -214,13 +232,13 @@ app.get('/v1/pageload', (question, answer) => {
         let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
         let parsedData = JSON.parse(existingData);
         const user = parsedData[question.session.userid];
-        if (!user || user.accesskey !== question.cookies[package.name + '-accesskey']) {
+        if (!user || user.accesskey !== question.session.accesskey) {
             question.session.destroy();
             answer.clearCookie(package.name + '-userid');
             answer.clearCookie(package.name + '-role');
             answer.clearCookie(package.name + '-accesskey');
             return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
-        } else if (user.accesskey == question.cookies[package.name + '-accesskey']) {
+        } else if (user.accesskey == question.session.accesskey) {
             return answer.send({ "status": "OK" });
         } else {
             question.session.destroy();
