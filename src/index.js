@@ -19,11 +19,13 @@ if (process.env.MYSQL_CONNECTION_STRING !== '') {
     console.log('No database connection found. Some functionality will be disabled.');
 }
 
+const flags = process.argv.slice(2);
+
 async function envcheck() {
     requireditems = ['BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'LOG_CHANNEL_ID', 'LEO_ROLE_ID', 'CADET_ROLE_ID', 'ListOfDepartments'];
     empty = [];
     depsreq = [];
-    
+
     JSON.parse(env.parsed.ListOfDepartments).forEach(element => {
         depsreq.push(element.toUpperCase() + '_START_LETTER');
         depsreq.push(element.toUpperCase() + '_DEPARTMENT_NAME');
@@ -33,7 +35,7 @@ async function envcheck() {
             requireditems.push('JOIN_SERVER_ROLE_ID');
         }
     });
-    
+
     Object.keys(env.parsed).forEach(element => {
         if (requireditems.includes(element) && env.parsed[element] == '') {
             empty.push(element);
@@ -50,20 +52,20 @@ async function envcheck() {
         process.exit(126);
     }
 }
-envcheck();
+if (!flags.includes('--petro')) { envcheck(); };
 
 client.on('ready', async () => {
     if (hasdb) {
         mysqlfile('connect');
     }
     if (process.env.UPTIME_KUMA_URL !== '') {
-        setInterval(function() {
+        setInterval(function () {
             fetch(process.env.UPTIME_KUMA_URL, {
                 method: 'GET',
             }).then((response) => {
                 if (response.status !== 200) {
                     console.log(`Uptime Kuma: Error: ${response.status}`);
-                } 
+                }
             }).catch((error) => {
                 console.log(`Uptime Kuma: Error: ${error}`);
             });
