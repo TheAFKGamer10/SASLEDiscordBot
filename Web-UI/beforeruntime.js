@@ -8,6 +8,10 @@ module.exports = async () => {
 
 
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
+        if (!/^mysql:\/\/[^:@]+:[^:@]+@[^:@]+:\d+\/[^:@]+$/.test(env.parsed.MYSQL_CONNECTION_STRING)) {
+            console.error('Invalid MySQL connection string. Please check your .env file.');
+            process.exit(1);
+        }
         mysql('connect').then(async (result) => {
             await mysql('select', 'users', `SELECT * FROM users WHERE username = '${env.parsed.ROOT_USERNAME}'`).then(async (result) => {
                 if (!result || result.length === 0) {

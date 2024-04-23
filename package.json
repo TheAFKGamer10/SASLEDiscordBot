@@ -10,7 +10,9 @@
     "update-start": "npm run update && npm run pushcmds && npm run start",
     "express": "node Web-UI/server.js",
     "dev": "nodemon src/index.js",
-    "express-dev": "nodemon Web-UI/server.js"
+    "express-dev": "nodemon Web-UI/server.js", 
+    "petro-start": "node src/index.js --petro",
+    "petro-express": "node Web-UI/server.js --petro"
   },
   "author": "TheAFKGamer10",
   "repository": {

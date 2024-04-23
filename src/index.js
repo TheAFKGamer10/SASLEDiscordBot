@@ -20,6 +20,9 @@ if (env.parsed.MYSQL_CONNECTION_STRING !== '') {
     console.log('No database connection found. Some functionality will be disabled.');
 }
 
+const flags = process.argv.slice(2);
+console.log('Flags:', flags);
+
 async function envcheck() {
     requireditems = ['BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'LOG_CHANNEL_ID', 'LEO_ROLE_ID', 'CADET_ROLE_ID', 'LIST_OF_DEPARTMENTS'];
     empty = [];
@@ -51,7 +54,7 @@ async function envcheck() {
         process.exit(126);
     }
 }
-envcheck();
+if (!flags.includes('--petro')) { envcheck(); }; // Petro is used in pterodactyl and they can not check for varuibles that are not there yet.
 
 client.on('ready', async () => {
     if (hasdb) {
