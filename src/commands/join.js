@@ -64,15 +64,16 @@ module.exports = async (interaction) => {
         replyContent += `\nFind more information here ${env.parsed.JOIN_WEBSITE}`;
     }
 
-    interaction.editReply({ content: replyContent, ephemeral: true });
-    interaction.member.roles.add(env.parsed.LEO_ROLE_ID);
-    interaction.member.roles.add(env.parsed.CADET_ROLE_ID);
-    interaction.member.roles.add(`${env.parsed[CurrentDepartment + '_ROLE_ID']}`);
-    interaction.member.edit({ nick: `${env.parsed[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
+    await interaction.editReply({ content: replyContent, ephemeral: true });
+    await interaction.member.roles.add(env.parsed.LEO_ROLE_ID);
+    await interaction.member.roles.add(env.parsed.CADET_ROLE_ID);
+    await interaction.member.roles.add(`${env.parsed[CurrentDepartment + '_ROLE_ID']}`);
+    await interaction.member.edit({ nick: `${env.parsed[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
     console.log(`${NewDepartID} has joined ${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}`);
 
-    mysql('insert', 'departmentjoins', `(false, '${UsersName}', '${interaction.member.id}', '${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}', 'N/A', '0', '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
-
+    if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
+        mysql('insert', 'departmentjoins', `(false, '${UsersName}', '${interaction.member.id}', '${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}', 'N/A', '0', '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
+    }
     const embed = new EmbedBuilder()
         .setTitle("Member Joined Department")
         .setDescription(`<@${interaction.member.user.id}> has joined <@&${env.parsed[CurrentDepartment + '_ROLE_ID']}>.`)
@@ -85,11 +86,11 @@ module.exports = async (interaction) => {
     var DepartmentroleMembers = guild.roles.cache.get(env.parsed[CurrentDepartment + '_ROLE_ID']).members;
 
     if (!Array.from(LEOroleMembers.keys()).includes(interaction.member.id) || !Array.from(CADETroleMembers.keys()).includes(interaction.member.id) || !Array.from(DepartmentroleMembers.keys()).includes(interaction.member.id)) {
-        interaction.member.roles.add(env.parsed.LEO_ROLE_ID);
-        interaction.member.roles.add(env.parsed.CADET_ROLE_ID);
-        interaction.member.roles.add(`${env.parsed[CurrentDepartment + '_ROLE_ID']}`);
+        await interaction.member.roles.add(env.parsed.LEO_ROLE_ID);
+        await interaction.member.roles.add(env.parsed.CADET_ROLE_ID);
+        await interaction.member.roles.add(`${env.parsed[CurrentDepartment + '_ROLE_ID']}`);
     }
     if (!interaction.member.displayName.includes(" | ")) {
-        interaction.member.edit({ nick: `${env.parsed[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
+        await interaction.member.edit({ nick: `${env.parsed[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}` });
     }
 }

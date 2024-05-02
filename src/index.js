@@ -53,7 +53,7 @@ async function envcheck() {
         process.exit(126);
     }
 }
-if (!flags.includes('--petro')) { envcheck(); }; // Petro is used in pterodactyl and they can not check for varuibles that are not there yet.
+if (!flags.includes('--petro')) { envcheck(); }; // Petro is used in pterodactyl and they can not check for values that are not there yet.
 
 client.on('ready', async () => {
     if (hasdb) {

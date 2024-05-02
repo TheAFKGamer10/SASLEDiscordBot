@@ -194,12 +194,7 @@ async function submit() {
         .then(response => response.json())
         .then(async data => {
             if (data.status == 'OK') {
-                announcement(
-                    "Config submitted!",
-                    "The config has been submitted successfully!",
-                    "success",
-                    true
-                );
+                window.location.href = `/next-rp?created=rp`;
             } else {
                 announcement(
                     "Error!",

@@ -3,6 +3,7 @@
 node_module*
 *test*
 temp*
+*petro*
 
 nodejs-portable*
 

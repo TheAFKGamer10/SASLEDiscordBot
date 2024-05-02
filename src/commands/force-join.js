@@ -63,7 +63,9 @@ module.exports = async (interaction) => {
     (await member).setNickname(`${env.parsed[CurrentDepartment + '_START_LETTER']}-0${NewDepartID} | ${UsersName}`);
     console.log(`${NewDepartID} has joined ${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}`);
 
-    mysql('insert', 'departmentjoins', `(true, '${UsersName}', '${userid}', '${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}', '${interaction.member.displayName}', '${interaction.member.id}', '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
+    if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
+        mysql('insert', 'departmentjoins', `(true, '${UsersName}', '${userid}', '${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}', '${interaction.member.displayName}', '${interaction.member.id}', '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
+    }
 
     const embed = new EmbedBuilder()
         .setTitle("Member Force Joined Department")

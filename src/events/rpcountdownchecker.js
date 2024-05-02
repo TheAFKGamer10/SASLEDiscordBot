@@ -1,7 +1,7 @@
 let { client, EmbedBuilder, env, fs } = require('./../importdefaults.js');
 
 module.exports = async function (hasdb) {
-    let nextRpData
+    let nextRpData;
 
     const secondtimer = setInterval(async () => {
         if (new Date().getSeconds() == 1) {
@@ -15,7 +15,7 @@ module.exports = async function (hasdb) {
             if (hasdb) {
                 try {
                     const mysql = require('./mysqlhander.js');
-                    nextRpData = (await mysql('select', 'rp', `SELECT * FROM rp`))
+                    nextRpData = (await mysql('select', 'rp', `SELECT * FROM rp`));
                     for (let i = 0; i < nextRpData.length; i++) {
                         let currentTime = new Date();
 
@@ -44,7 +44,7 @@ module.exports = async function (hasdb) {
                                 await client.login(env.parsed.BOT_TOKEN); // Don't ask my why it needs to login again, but it does, dont touch.
                                 const fetchedChannel = await client.channels.fetch(env.parsed.ROLEPLAY_ANOUNCEMENT_CHANNEL_ID);
                                 await fetchedChannel.send(content);
-                                client.destroy();
+                                // client.destroy();
                             }
                             await mysql('delete', 'rp', `timestamp = '${time}'`);
                         }
@@ -74,7 +74,7 @@ module.exports = async function (hasdb) {
                     if (currentstring == time) {
                         if (nextRpData[time].pingatrptime) {
                             let content = `## Roleplay Is Happing Now:\n\nAOP: **${nextRpData[time].aop}**`;
-                            if (nextRpData[time].ping == 1) {
+                            if (nextRpData[time].pingatrptime == 1) {
                                 content += `\nPing: ||@everyone||`;
                             }
                             if (nextRpData[time].training == 1) {
@@ -84,7 +84,7 @@ module.exports = async function (hasdb) {
                             await client.login(env.parsed.BOT_TOKEN); // Don't ask my why it needs to login again, but it does, dont touch.
                             const fetchedChannel = await client.channels.fetch(env.parsed.ROLEPLAY_ANOUNCEMENT_CHANNEL_ID);
                             await fetchedChannel.send(content);
-                            client.destroy();
+                            // client.destroy();
 
                         }
                         delete nextRpData[time];

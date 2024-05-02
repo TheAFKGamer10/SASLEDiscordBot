@@ -422,22 +422,25 @@ app.post('/v1/bot/rp/create', async (question, answer) => {
         fs.writeFileSync(path.join(__dirname, '..', 'src', 'files', 'next-rp.json'), JSON.stringify(mergedData, null, 4));
     }
 
-    if (ping) {
-        const { client } = require("../src/importdefaults");
-        var output = `## Roleplay Will Be Happening Soon:\n\nAOP: **${aop}**\nTime: **<t:${timestamp}:f>**\nPing: ||@everyone||`;
 
-        if (training) {
-            output += `\nTraining: <@&${env.parsed.CADET_ROLE_ID}> training **will** he happening!`;
-        }
-        try {
-            await client.login(env.parsed.BOT_TOKEN); // Don't ask my why it needs to login again, but it does, dont touch.
-            const fetchedChannel = await client.channels.fetch(env.parsed.ROLEPLAY_ANOUNCEMENT_CHANNEL_ID);
-            await fetchedChannel.send(output);
-            client.destroy();
-        } catch (error) {
-            console.log(error);
-        }
+    const { client } = require("../src/importdefaults");
+    var output = `## Roleplay Will Be Happening Soon:\n\nAOP: **${aop}**\nTime: **<t:${timestamp}:f>**`;
+
+    if (ping) {
+        output += `\nPing: ||@everyone||`;
     }
+    if (training) {
+        output += `\nTraining: <@&${env.parsed.CADET_ROLE_ID}> training **will** he happening!`;
+    }
+    try {
+        await client.login(env.parsed.BOT_TOKEN); // Don't ask my why it needs to login again, but it does, dont touch.
+        const fetchedChannel = await client.channels.fetch(env.parsed.ROLEPLAY_ANOUNCEMENT_CHANNEL_ID);
+        await fetchedChannel.send(output);
+        // client.destroy();
+    } catch (error) {
+        console.log(error);
+    }
+
     answer.send({ "status": "OK" });
 });
 app.get('/v1/users/get', async (question, answer) => {

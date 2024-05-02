@@ -1,4 +1,20 @@
 async function nextrppageloaded() {
+    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('announcement').style.display = 'flex';
+        document.getElementById('announcement-text-h1').innerHTML = h1;
+        document.getElementById('announcement-text-p').innerHTML = p;
+        document.getElementById("announcement").className = `announcement ${type}`;
+        if (shouldtimeout) {
+            setTimeout(closeAnnouncement, 5 * 1000);
+        }
+    }
+    
+    let created = new URLSearchParams(window.location.search).get("created");
+    if (created == "rp") {
+        announcement("Success", "You have successfully scheduled roleplay.", "success", true);
+    } 
+
     fetch(`/v1/checkCookies?perm=2`, {
         method: 'GET'
     })
