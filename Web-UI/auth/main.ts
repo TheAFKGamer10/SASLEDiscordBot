@@ -1,10 +1,10 @@
 function loginpageloaded() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -24,19 +24,19 @@ function loginpageloaded() {
 }    
 
 async function login() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
     }
 
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
+    let username = (document.getElementById("username") as HTMLInputElement).value;
+    let password = (document.getElementById("password") as HTMLInputElement).value;
     let next = new URLSearchParams(window.location.search).get("next");
     fetch(`/v1/process-login`, { //${next !== '' && next !== null ? `?next=${next}` : ''}
         method: "POST",

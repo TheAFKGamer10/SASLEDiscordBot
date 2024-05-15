@@ -1,12 +1,12 @@
-const { client, EmbedBuilder, env } = require("../importdefaults");
-const mysql = require('../events/mysqlhander.js');
+import { client, EmbedBuilder, env } from "../importdefaults";
+import mysql from '../events/mysqlhander.js';
 
-module.exports = async (interaction) => {
+export default async (interaction: { deferReply?: any; member?: any; editReply?: any; commandName?: any; options?: any; }) => {
     const { commandName, options } = interaction;
 
     await interaction.deferReply({ ephemeral: true });
 
-    const CurrentUsersNumbers = [];
+    const CurrentUsersNumbers: number[] = [];
     const guild = client.guilds.cache.get(env.parsed.GUILD_ID);
     let members = await guild.members.fetch();
     const AllReadyInDepartment = interaction.member.roles.cache.has(env.parsed.LEO_ROLE_ID);
@@ -14,8 +14,8 @@ module.exports = async (interaction) => {
     const department = options.getString('department');
 
     async function getusers() {
-        members.forEach((member) => {
-            MembersList = member.displayName;
+        members.forEach((member: { displayName: any; }) => {
+            let MembersList = member.displayName;
 
             if (MembersList.includes(" | ")) {
                 const UserDepartID = MembersList.split(' | ')[0];
@@ -57,7 +57,7 @@ module.exports = async (interaction) => {
         NewDepartID = Math.floor(Math.random() * 90) + 10;
     } while (CurrentUsersNumbers.includes(NewDepartID));
 
-    CurrentDepartment = department.toUpperCase();
+    const CurrentDepartment = department.toUpperCase();
 
     let replyContent = `You have been added to ${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}!`;
     if (env.parsed.JOIN_WEBSITE !== "") {

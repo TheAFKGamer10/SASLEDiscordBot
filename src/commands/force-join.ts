@@ -1,12 +1,12 @@
 const { client, EmbedBuilder, env } = require("../importdefaults");
 const mysql = require('../events/mysqlhander.js');
 
-module.exports = async (interaction) => {
+export default async (interaction: { deferReply?: any; options?: any; editReply?: any; member?: any; commandName?: any; }) => {
     const { commandName, options } = interaction;
 
     await interaction.deferReply({ ephemeral: true });
 
-    const CurrentUsersNumbers = [];
+    const CurrentUsersNumbers: number[] = [];
     const guild = client.guilds.cache.get(env.parsed.GUILD_ID);
     let members = await guild.members.fetch();
     const member = guild.members.fetch(interaction.options.getUser('user'));
@@ -19,8 +19,8 @@ module.exports = async (interaction) => {
     const CurrentDepartment = options.getString('department').toUpperCase();
 
     async function getusers() {
-        members.forEach((member) => {
-            MembersList = member.displayName;
+        members.forEach((member: { displayName: any; }) => {
+            let MembersList = member.displayName;
 
             if (MembersList.includes(" | ")) {
                 const UserDepartID = MembersList.split(' | ')[0];

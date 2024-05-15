@@ -1,19 +1,22 @@
-const express = require('express');
-const path = require('path');
-const session = require('express-session');
-const { default: rateLimit } = require('express-rate-limit');
-const crypto = require('crypto');
-const { spawn } = require('child_process');
+import express, { Request, Response, NextFunction } from 'express';
+import path from 'path';
+import session from 'express-session';
+import { default as rateLimit } from 'express-rate-limit';
+import * as crypto from 'crypto';
+import { spawn } from 'child_process';
 let env = require('dotenv').config();
-const cookieParser = require('cookie-parser');
-const package = require('../package.json');
-const writeenv = require('./api/writeenv');
-const getenv = require('./api/getenv');
-const bcrypt = require('bcrypt');
-const beforerun = require('./beforeruntime');
+import cookieParser from 'cookie-parser';
+
+import pkg from '../package.json';
+import writeenv from './api/writeenv';
+import getenv from './api/getenv';
+import bcrypt from 'bcrypt';
+import beforerun from './beforeruntime';
+import auth from './auth/bot-auth/auth';
+
 beforerun();
-async function start() {
-    const result = await require('./auth/bot-auth/auth')();
+async function start(): Promise<void> {
+    const result = await auth();
     if (typeof result === 'number') {
         process.exit(result);
     }
@@ -31,36 +34,58 @@ app.use(session({
     saveUninitialized: true,
     cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
+
 app.use(rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
     max: 150, // limit each IP to 100 requests per windowMs
-    handler: (req, res) => {
+    handler: (question: any, answer: Response<any>) => {
         console.log('Rate limited');
-        res.status(429).send('Too many requests');
+        answer.status(429).send('Too many requests');
     }
 }));
-app.use((question, answer, next) => {
+
+declare module 'express-serve-static-core' {
+    interface Request {
+        session: {
+            userid: string | number;
+            role: any;
+            accesskey: any;
+            destroy: () => void;
+        };
+    }
+}
+
+app.use((question: Request, answer: Response, next: NextFunction) => {
+    if (question.url.includes('/logout')) {
+        answer.clearCookie(pkg.name + '-userid');
+        answer.clearCookie(pkg.name + '-role');
+        answer.clearCookie(pkg.name + '-accesskey');
+        return next();
+    }
     try {
-        if (question.cookies[package.name + '-userid'] && question.cookies[package.name + '-role'] && question.cookies[package.name + '-accesskey']) {
-            let parts = question.cookies[package.name + '-userid'].split(':');
-            const decipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(parts.shift(), 'hex'));
+        if (question.cookies[pkg.name + '-userid'] && question.cookies[pkg.name + '-role'] && question.cookies[pkg.name + '-accesskey'] && question.cookies[pkg.name + '-userid'] !== 'null' && question.cookies[pkg.name + '-role'] !== 'null' && question.cookies[pkg.name + '-accesskey'] !== 'null') {
+            let parts = question.cookies[pkg.name + '-userid'].split(':');
+            const decipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(parts.shift() || '', 'hex'));
             let decrypteduserid = decipher.update(parts.join(':'), 'hex', 'utf8') + decipher.final('utf8');
 
-            let roleparts = question.cookies[package.name + '-role'].split(':');
-            const roledecipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(roleparts.shift(), 'hex'));
+            let roleparts = question.cookies[pkg.name + '-role'].split(':');
+            const roledecipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(roleparts.shift() || '', 'hex'));
             let decryptedrole = roledecipher.update(roleparts.join(':'), 'hex', 'utf8') + roledecipher.final('utf8');
 
-            let accesskeyparts = question.cookies[package.name + '-accesskey'].split(':');
-            const accesskeydecipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(accesskeyparts.shift(), 'hex'));
+            let accesskeyparts = question.cookies[pkg.name + '-accesskey'].split(':');
+            const accesskeydecipher = crypto.createDecipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), Buffer.from(accesskeyparts.shift() || '', 'hex'));
             let decryptedaccesskey = accesskeydecipher.update(accesskeyparts.join(':'), 'hex', 'utf8') + accesskeydecipher.final('utf8');
 
             question.session.userid = decrypteduserid;
             question.session.role = decryptedrole;
             question.session.accesskey = decryptedaccesskey;
-
         }
     } catch (e) {
         console.log(e);
+        answer.clearCookie(pkg.name + '-userid');
+        answer.clearCookie(pkg.name + '-role');
+        answer.clearCookie(pkg.name + '-accesskey');
+        answer.redirect(`/logout?next=/login&reason=restricted`);
     }
     next();
 });
@@ -72,61 +97,59 @@ start().then(() => {
         const flags = process.argv.slice(2);
         let botProcess;
         if (flags.includes('--petro')) {
-            botProcess = spawn('node', ['src/index.js', '--petro']);
+            botProcess = spawn('node', [path.join(__dirname, '..', 'src', 'index.js'), '--petro']);
         } else {
-            botProcess = spawn('node', ['src/index.js']);
+            botProcess = spawn('node', [path.join(__dirname, '..', 'src', 'index.js')]);
         }
-        botProcess.stdout.on('data', (data) => {
+        botProcess.stdout.on('data', (data: { toString: () => any; }) => {
             console.log(data.toString());
         });
-        botProcess.stderr.on('data', (data) => {
+        botProcess.stderr.on('data', (data: { toString: () => any; }) => {
             console.error(data.toString());
         });
-        botProcess.on('exit', (code) => {
+        botProcess.on('exit', (code: any) => {
             console.log(`Bot process exited with code ${code}`);
         });
     });
 });
 
 // Authentication
-app.get('/login', (question, answer) => { answer.sendFile(path.join(__dirname, 'auth', 'login.html')); });
-app.post('/v1/process-login', async (question, answer) => {
+app.get('/login', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'auth', 'login.html')); });
+app.post('/v1/process-login', async (question: { body: { username: string | number; password: any; }; }, answer: { send: (arg0: { status: string; message?: string; }) => void; cookie: (arg0: string, arg1: string) => void; }) => {
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         try {
             const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-            mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`).then(async (result) => {
+            mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`).then(async (result: any) => {
                 let users = result;
                 if (!users || users.length === 0) {
                     return answer.send({ "status": "error", "message": "User Not Found. Please check your username and password." });
                 }
-                if (users.length > 0) {
-                    for (let user of users) {
-                        if (await bcrypt.compare(question.body.password, user.password)) {
-                            let iv = crypto.randomBytes(16);
-                            const cipher = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
-                            let encrypteduserid = iv.toString('hex') + ':' + cipher.update(question.body.username, 'utf8', 'hex') + cipher.final('hex');
+                for (let user of users) {
+                    if (await bcrypt.compare(question.body.password, user.password)) {
+                        let iv = crypto.randomBytes(16);
+                        const cipher = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
+                        let encrypteduserid = iv.toString('hex') + ':' + cipher.update(question.body.username.toString(), 'utf8', 'hex') + cipher.final('hex');
 
-                            iv = crypto.randomBytes(16);
-                            const cipherrole = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
-                            let encryptedrole = iv.toString('hex') + ':' + cipherrole.update(`${user.permission}`, 'utf8', 'hex') + cipherrole.final('hex');
+                        iv = crypto.randomBytes(16);
+                        const cipherrole = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
+                        let encryptedrole = iv.toString('hex') + ':' + cipherrole.update(`${user.permission}`, 'utf8', 'hex') + cipherrole.final('hex');
 
-                            iv = crypto.randomBytes(16);
-                            const cipheraccesskey = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
-                            let encryptedaccesskey = iv.toString('hex') + ':' + cipheraccesskey.update(user.accesskey, 'utf8', 'hex') + cipheraccesskey.final('hex');
+                        iv = crypto.randomBytes(16);
+                        const cipheraccesskey = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
+                        let encryptedaccesskey = iv.toString('hex') + ':' + cipheraccesskey.update(user.accesskey, 'utf8', 'hex') + cipheraccesskey.final('hex');
 
-                            answer.cookie(package.name + '-userid', encrypteduserid);
-                            answer.cookie(package.name + '-role', encryptedrole);
-                            answer.cookie(package.name + '-accesskey', encryptedaccesskey);
-                            answer.send({ "status": "OK" });
-                            return;
-                        }
+                        answer.cookie(pkg.name + '-userid', encrypteduserid);
+                        answer.cookie(pkg.name + '-role', encryptedrole);
+                        answer.cookie(pkg.name + '-accesskey', encryptedaccesskey);
+                        answer.send({ "status": "OK" });
+                        return;
                     }
                 }
                 answer.send({ "status": "error", "message": "Invalid Password. Please check your username and password." });
             });
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e);
+            answer.send({ "status": "error", "message": "An error occurred. Please try again later." });
         }
     } else {
         const fs = require('fs');
@@ -141,7 +164,7 @@ app.post('/v1/process-login', async (question, answer) => {
             if (await bcrypt.compare(question.body.password, user.password)) {
                 let iv = crypto.randomBytes(16);
                 const cipher = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
-                let encrypteduserid = iv.toString('hex') + ':' + cipher.update(question.body.username, 'utf8', 'hex') + cipher.final('hex');;
+                let encrypteduserid = iv.toString('hex') + ':' + cipher.update(String(question.body.username), 'utf8', 'hex') + cipher.final('hex');
 
                 iv = crypto.randomBytes(16);
                 const cipherrole = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
@@ -151,23 +174,24 @@ app.post('/v1/process-login', async (question, answer) => {
                 const cipheraccesskey = crypto.createCipheriv('aes-256-cbc', crypto.createHash('sha256').update(env.parsed.COOKIE_SECRET).digest(), iv);
                 let encryptedaccesskey = iv.toString('hex') + ':' + cipheraccesskey.update(user.accesskey, 'utf8', 'hex') + cipheraccesskey.final('hex');
 
-                answer.cookie(package.name + '-userid', encrypteduserid);
-                answer.cookie(package.name + '-role', encryptedrole);
-                answer.cookie(package.name + '-accesskey', encryptedaccesskey);
+                answer.cookie(pkg.name + '-userid', encrypteduserid);
+                answer.cookie(pkg.name + '-role', encryptedrole);
+                answer.cookie(pkg.name + '-accesskey', encryptedaccesskey);
                 answer.send({ "status": "OK" });
             } else {
                 answer.send({ "status": "error", "message": "Invalid Password. Please check your username and password." });
             }
         } catch (e) {
             console.log(e);
+            answer.send({ "status": "error", "message": "An error occurred. Please try again later." });
         }
     }
 });
-app.get('/logout', (question, answer) => {
+app.get('/logout', (question: Request, answer: Response) => {
     question.session.destroy();
-    answer.clearCookie(package.name + '-userid');
-    answer.clearCookie(package.name + '-role');
-    answer.clearCookie(package.name + '-accesskey');
+    answer.clearCookie(pkg.name + '-userid');
+    answer.clearCookie(pkg.name + '-role');
+    answer.clearCookie(pkg.name + '-accesskey');
     if (question.query.next == '/login') {
         return answer.redirect(`/login${question.query.afterlogin ? `?next=${question.query.afterlogin}` : ''}${question.query.reason ? `${question.query.next ? `&` : `?`}reason=${question.query.reason}` : ''}`);
     } else if (question.query.next) {
@@ -176,55 +200,49 @@ app.get('/logout', (question, answer) => {
         answer.redirect('/');
     }
 });
-app.get('/account', (question, answer) => {
+app.get('/account', (question: { session: { userid: any; destroy: () => void; }; url: any; }, answer: { clearCookie: (arg0: string) => void; redirect: (arg0: string) => any; sendFile: (arg0: any) => void; }) => {
     if (!question.session.userid) {
-        question.session.destroy();
-        answer.clearCookie(package.name + '-userid');
-        answer.clearCookie(package.name + '-role');
-        answer.clearCookie(package.name + '-accesskey');
-        return answer.redirect(`/login?next=${question.url}&reason=restricted`);
+        return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=restricted`);
     }
     answer.sendFile(path.join(__dirname, 'client', 'account', 'account.html'));
 });
 
 
 // API
-app.all('/api/*', (question, answer) => {
+app.all('/api/*', (answer: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
     return answer.status(401).send('Unauthorized');
 });
-app.use('/v1/', (req, res, next) => {
+app.use('/v1/', (question: any, answer: any, next: () => void) => {
     env = require('dotenv').config();
     next();
 });
-app.get('/v1/stat', (question, answer) => {
-    res = {
+app.get('/v1/stat', (answer: { send: (arg0: any) => void; }) => {
+    answer.send({
         "status": "OK",
-        "version": package.version,
-        "name": package.name
-    };
-    answer.send(res);
+        "version": pkg.version,
+        "name": pkg.name
+    });
 });
-app.get('/v1/pageload', (question, answer) => {
+app.get('/v1/pageload', (question: {
+    query: any;
+    cookies: any; session: { userid: string | number; accesskey: any; destroy: () => void; }; url: any; 
+}, answer: { send: (arg0: { status?: string; redirect?: string; }) => any; clearCookie: (arg0: string) => void; redirect: (arg0: string) => any; }) => {
     if (!question.session.userid) { return answer.send({ "status": "OK" }); }
+    
+    if (!question.cookies[pkg.name + '-userid'] || !question.cookies[pkg.name + '-role'] || !question.cookies[pkg.name + '-accesskey'] || question.cookies[pkg.name + '-userid'] == undefined || question.cookies[pkg.name + '-role'] == undefined || question.cookies[pkg.name + '-accesskey'] == undefined) {
+        return answer.send({"redirect": `/logout?next=/login&afterlogin=${question.query.l}&reason=restricted`});
+    }
 
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-        mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.session.userid}'`).then(async (result) => {
+        mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.session.userid}'`).then(async (result: any) => {
             let users = JSON.parse(JSON.stringify(result))[0];
 
             if (users.accesskey !== question.session.accesskey) {
-                question.session.destroy();
-                answer.clearCookie(package.name + '-userid');
-                answer.clearCookie(package.name + '-role');
-                answer.clearCookie(package.name + '-accesskey');
-                return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
+                return answer.send({"redirect": `/logout?next=/login&afterlogin=${question.query.l}&reason=restricted`});
             }
-        }).catch(error => {
-            question.session.destroy();
-            answer.clearCookie(package.name + '-userid');
-            answer.clearCookie(package.name + '-role');
-            answer.clearCookie(package.name + '-accesskey');
-            return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
+        }).catch(() => {
+            return answer.send({"redirect": `/logout?next=/login&afterlogin=${question.query.l}&reason=restricted`});
         });
     } else {
         const fs = require('fs');
@@ -233,28 +251,20 @@ app.get('/v1/pageload', (question, answer) => {
         let parsedData = JSON.parse(existingData);
         const user = parsedData[question.session.userid];
         if (!user || user.accesskey !== question.session.accesskey) {
-            question.session.destroy();
-            answer.clearCookie(package.name + '-userid');
-            answer.clearCookie(package.name + '-role');
-            answer.clearCookie(package.name + '-accesskey');
-            return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
+            return answer.send({"redirect": `/logout?next=/login&afterlogin=${question.query.l}&reason=restricted`});
         } else if (user.accesskey == question.session.accesskey) {
             return answer.send({ "status": "OK" });
         } else {
-            question.session.destroy();
-            answer.clearCookie(package.name + '-userid');
-            answer.clearCookie(package.name + '-role');
-            answer.clearCookie(package.name + '-accesskey');
-            return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=accountchange`);
+            return answer.send({"redirect": `/logout?next=/login&afterlogin=${question.query.l}&reason=restricted`});
         }
     }
 });
-app.get('/v1/config/get', async (question, answer) => {
-    if (!question.session.role || question.session.role > '1') {
+app.get('/v1/config/get', async (question: Request, answer: Response) => {
+    if (!question.session.role || question.session.role > 1) {
         return answer.status(401).send('Unauthorized');
     }
-    result = await getenv();
-    if (question.session.role > '0') {
+    let result: { [key: string]: any } = await getenv();
+    if (question.session.role > 0) {
         const envhints = require('./api/json/envhints.json');
         Object.keys(envhints).forEach(key => {
             if (envhints[key].AdminOnly) {
@@ -264,48 +274,48 @@ app.get('/v1/config/get', async (question, answer) => {
     }
     answer.send(result);
 });
-app.get('/v1/config/envhints', async (question, answer) => {
+app.get('/v1/config/envhints', async (question: Request, answer: Response) => {
     if (!question.session.role) {
         return answer.status(401).send('Unauthorized');
     }
     answer.send(require('./api/json/envhints.json'));
 });
-app.get('/v1/users/perms', async (question, answer) => {
+app.get('/v1/users/perms', async (question: Request, answer: Response) => {
     if (!question.session.role) {
         return answer.status(401).send('Unauthorized');
     }
     answer.send(require('./api/json/userRoles.json'));
 });
-app.post('/v1/config/submit', async (question, answer) => {
-    if (!question.session.role || question.session.role > '1') {
+app.post('/v1/config/submit', async (question: Request, answer: Response) => {
+    if (!question.session.role || Number(question.session.role) > 1) {
         return answer.status(401).send('Unauthorized');
     }
     await writeenv(question.body);
-    const pushcmds = spawn('node', ['src/regester-commands.js']);
-    pushcmds.stderr.on('data', (data) => {
+    const pushcmds = spawn('node', [path.join(__dirname, '..', 'src', 'regester-commands.js')]);
+    pushcmds.stderr.on('data', (data: { toString: () => any; }) => {
         console.error(data.toString());
     });
-    pushcmds.on('exit', (code) => {
+    pushcmds.on('exit', (code: number) => {
         if (code !== 0) {
             console.log(`Bot process exited with code ${code}`);
         }
     });
     answer.send({ "status": "OK" });
 });
-// app.post('/v1/config/removeVariable', async (req, res) => {
-//     if (!req.cookies.userid) {
-//         return res.status(401).send('Unauthorized');
+// app.post('/v1/config/removeVariable', async (question, answer) => {
+//     if (!question.cookies.userid) {
+//         return answer.status(401).send('Unauthorized');
 //     }
 
 //     const fs = require('fs');
-//     let key = req.body.key;
+//     let key = question.body.key;
 //     let envdir = path.join(__dirname, '..', '.env');
 //     let fileContent = fs.readFileSync(envdir, 'utf-8');
 //     let fileLines = fileContent.split('\n');
 //     let lineIndex = fileLines.findIndex(line => line.startsWith(key + ' = '));
 
 //     if (lineIndex === -1) {
-//         return res.status(400).send('Variable not found');
+//         return answer.status(400).send('Variable not found');
 //     }
 
 //     fileLines.splice(lineIndex, 1);
@@ -313,18 +323,18 @@ app.post('/v1/config/submit', async (question, answer) => {
 
 //     fs.writeFile(envdir, updatedContent, 'utf-8', async (err) => {
 //         if (err) {
-//             return res.status(500).send('Error removing variable');
+//             return answer.status(500).send('Error removing variable');
 //         }
-//         res.send({ "status": "OK" });
+//         answer.send({ "status": "OK" });
 //     });
 // });
-app.get('/v1/checkCookies', async (question, answer) => {
+app.get('/v1/checkCookies', async (question: { query: { cookie: any; perm: any; }; cookies: { [x: string]: any; }; session: { role: number; }; }, answer: { json: (arg0: {}) => void; }) => {
     let cookie = question.query.cookie;
     let perm = question.query.perm;
-    let result = {};
+    let result: {perm?: boolean; cookie?: boolean;} = {}; // Add type annotation to specify that result is an object with a cookie property of type boolean
 
     if (cookie !== '' && cookie !== null && cookie !== undefined) {
-        result.cookie = !!question.cookies[package.name + '-' + cookie];
+        result.cookie = !!question.cookies[pkg.name + '-' + cookie];
     }
 
     if (perm !== '' && perm !== null && perm !== undefined) {
@@ -333,34 +343,34 @@ app.get('/v1/checkCookies', async (question, answer) => {
 
     answer.json(result);
 });
-app.get('/v1/bot/rp', async (question, answer) => {
+app.get('/v1/bot/rp', async (question: any, answer: { send: (arg0: { status?: string; message?: string; aop?: string; time?: string; training?: string; servertimeoffset?: number; }) => void; }) => {
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
         let nextRpData = (await mysql('select', 'rp', `SELECT * FROM rp`));
         let keys = Object.keys(nextRpData);
         if (keys.length === 0) { return answer.send({ "status": "warning", "message": "No RP Scheduled" }) }
-        result = {
+
+        answer.send({
             "aop": nextRpData[keys[0]].aop,
             "time": nextRpData[keys[0]].timestamp,
             "training": nextRpData[keys[0]].training,
             "servertimeoffset": new Date().getTimezoneOffset()
-        }
-        answer.send(result);
+        });
     } else {
         let nextRpData = require('../src/files/next-rp.json');
         let keys = Object.keys(nextRpData);
         if (keys.length === 0) { return answer.send({ "status": "warning", "message": "No RP Scheduled" }) }
-        result = {
+
+        answer.send({
             "aop": nextRpData[keys[0]].aop,
             "time": Object.keys(nextRpData)[0],
             "training": nextRpData[keys[0]].training,
             "servertimeoffset": new Date().getTimezoneOffset()
-        }
-        answer.send(result);
+        });
     }
 });
-app.get('/v1/bot/logs/get', async (question, answer) => {
-    if (!question.session.role || question.session.role > '1') {
+app.get('/v1/bot/logs/get', async (question: Request, answer: Response) => {
+    if (!question.session.role || Number(question.session.role) > 1) {
         return answer.status(401).send('Unauthorized');
     }
     if (env.parsed.MYSQL_CONNECTION_STRING == '' || env.parsed.MYSQL_CONNECTION_STRING == null) {
@@ -376,9 +386,9 @@ app.get('/v1/bot/logs/get', async (question, answer) => {
     }
     answer.send(result);
 });
-app.get('/v1/bot/rp/create/fields', async (question, answer) => { answer.send(require('./api/json/CreateFields.json')); });
-app.post('/v1/bot/rp/create', async (question, answer) => {
-    if (!question.session.role || question.session.role > '2') {
+app.get('/v1/bot/rp/create/fields', async (question: any, answer: { send: (arg0: any) => void; }) => { answer.send(require('./api/json/CreateFields.json')); });
+app.post('/v1/bot/rp/create', async (question: Request, answer: Response) => {
+    if (!question.session.role || question.session.role > 2) {
         return answer.status(401).send('Unauthorized');
     }
     let time = question.body.timestamp;
@@ -439,12 +449,14 @@ app.post('/v1/bot/rp/create', async (question, answer) => {
         // client.destroy();
     } catch (error) {
         console.log(error);
+        answer.send({ "status": "error", "message": "An error occurred while sending the message. Please check the console for more information." });
+        return;
     }
 
     answer.send({ "status": "OK" });
 });
-app.get('/v1/users/get', async (question, answer) => {
-    if (!question.session.role || question.session.role > '1') {
+app.get('/v1/users/get', async (question: Request, answer: Response) => {
+    if (!question.session.role || Number(question.session.role) > 1) {
         return answer.status(401).send('Unauthorized');
     };
     const userRoles = require('./api/json/userRoles.json');
@@ -453,9 +465,9 @@ app.get('/v1/users/get', async (question, answer) => {
         if (question.query.id !== '' && question.query.id !== null && question.query.id !== undefined) {
             let users = (await mysql('select', 'users', `SELECT * FROM users WHERE id = '${question.query.id}'`));
             if (users.length === 0) {
-                return answer.send({ "status": "error", "message": "User not found" });
+                return answer.send([{ "status": "error", "message": "User not found" }]);
             }
-            users = users.map(user => {
+            users = users.map((user: { password: any; accesskey: any; permission: string | number; }) => {
                 delete user.password;
                 delete user.accesskey;
                 user.permission = userRoles[user.permission] || 'Unknown';
@@ -464,7 +476,7 @@ app.get('/v1/users/get', async (question, answer) => {
             return answer.send(users);
         } else {
             let users = (await mysql('select', 'users', `SELECT * FROM users`));
-            users = users.map(user => {
+            users = users.map((user: { password: any; accesskey: any; permission: string | number; }) => {
                 delete user.password;
                 delete user.accesskey;
                 user.permission = userRoles[user.permission] || 'Unknown';
@@ -477,11 +489,11 @@ app.get('/v1/users/get', async (question, answer) => {
         const path = require('path');
         let existingData = fs.readFileSync(path.join(__dirname, 'auth', 'data', 'users.json'), 'utf-8');
         let parsedData = JSON.parse(existingData);
-        const result = [];
+        const result: { username: string; permission: any; id?: number; }[] = [];
         if (question.query.id !== '' && question.query.id !== null && question.query.id !== undefined) {
-            let users_name = Object.keys(parsedData)[question.query.id - 1];
+            let users_name = Object.keys(parsedData)[Number(question.query.id) - 1];
             if (!parsedData[users_name]) {
-                return answer.send({ "status": "error", "message": "User not found" });
+                return answer.send([{ "status": "error", "message": "User not found" }]);
             }
             result.push({ "username": users_name, "permission": userRoles[parsedData[users_name].permission] || 'Unknown' });
             return answer.send(result);
@@ -494,7 +506,7 @@ app.get('/v1/users/get', async (question, answer) => {
         }
     }
 });
-app.get('/v1/users/singleuserinfo', async (question, answer) => {
+app.get('/v1/users/singleuserinfo', async (question: Request, answer: Response) => {
     if (!question.session.role) {
         return answer.status(401).send('Unauthorized');
     }
@@ -504,7 +516,7 @@ app.get('/v1/users/singleuserinfo', async (question, answer) => {
         if (users.length === 0) {
             return answer.send({ "status": "error", "message": "User not found" });
         }
-        users = users.map(user => {
+        users = users.map((user: { id: any; permission: any; accesskey: any; password: string; }) => {
             delete user.id;
             delete user.permission;
             delete user.accesskey;
@@ -524,8 +536,8 @@ app.get('/v1/users/singleuserinfo', async (question, answer) => {
         return answer.send({ "username": question.session.userid, "password": '' });
     }
 });
-app.post('/v1/users/create', async (question, answer) => {
-    if (!question.session.role || question.session.role > '0') {
+app.post('/v1/users/create', async (question: Request, answer: Response) => {
+    if (!question.session.role || Number(question.session.role) > 0) {
         return answer.status(401).send('Unauthorized');
     }
     const userRoles = require('./api/json/userRoles.json');
@@ -558,7 +570,7 @@ app.post('/v1/users/create', async (question, answer) => {
     }
     answer.send({ "status": "OK" });
 });
-app.post('/v1/users/useredit', async (question, answer) => {
+app.post('/v1/users/useredit', async (question: Request, answer: Response) => {
     if (!question.session.role) {
         return answer.status(401).send('Unauthorized');
     }
@@ -598,8 +610,8 @@ app.post('/v1/users/useredit', async (question, answer) => {
 
     answer.send({ "status": "OK" });
 });
-app.post('/v1/users/edit', async (question, answer) => {
-    if (!question.session.role || question.session.role > '0') {
+app.post('/v1/users/edit', async (question: Request, answer: Response) => {
+    if (!question.session.role || Number(question.session.role) > 0) {
         return answer.status(401).send('Unauthorized');
     }
     const userRoles = require('./api/json/userRoles.json');
@@ -645,66 +657,50 @@ app.post('/v1/users/edit', async (question, answer) => {
 
 
 // Admin
-app.use('/admin', (question, answer, next) => {
-    if (!question.session.userid || question.session.role > '1') {
-        question.session.destroy();
-        answer.clearCookie(package.name + '-userid');
-        answer.clearCookie(package.name + '-role');
-        answer.clearCookie(package.name + '-accesskey');
-        return answer.redirect(`/login?next=${question.originalUrl}&reason=restricted`);
+app.use('/admin', (question: Request, answer: Response, next: NextFunction) => {
+    if (!question.session.userid || question.session.role > 1) {
+        return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     } else {
         next();
     }
 });
-app.get('/admin', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin', 'admin.html')); });
-app.get('/admin/users', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin/users', 'users.html')); });
-app.get('/admin/users/create', (question, answer) => {
-    if (!question.session.userid || question.session.role > '0') {
-        question.session.destroy();
-        answer.clearCookie(package.name + '-userid');
-        answer.clearCookie(package.name + '-role');
-        answer.clearCookie(package.name + '-accesskey');
-        return answer.redirect(`/login?next=${question.url}`);
+app.get('/admin', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'admin', 'admin.html')); });
+app.get('/admin/users', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'admin/users', 'users.html')); });
+app.get('/admin/users/create', (question: {
+    originalUrl: any; session: { userid: any; role: number; destroy: () => void; }; url: any; 
+}, answer: { clearCookie: (arg0: string) => void; redirect: (arg0: string) => any; sendFile: (arg0: any) => void; }) => {
+    if (!question.session.userid || question.session.role > 0) {
+        return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     }
     answer.sendFile(path.join(__dirname, 'admin/users/create', 'create.html'));
 });
-app.get('/admin/users/edit', (question, answer) => {
-    if (!question.session.userid || question.session.role > '0') {
-        question.session.destroy();
-        answer.clearCookie(package.name + '-userid');
-        answer.clearCookie(package.name + '-role');
-        answer.clearCookie(package.name + '-accesskey');
-        return answer.redirect(`/login?next=${question.url}`);
+app.get('/admin/users/edit', (question: Request, answer: Response) => {
+    if (!question.session.userid || question.session.role > 0) {
+        return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     }
     answer.sendFile(path.join(__dirname, 'admin/users/edit', 'edit.html'));
 });
-app.get('/admin/env', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin/config-env', 'configenv.html')); });
-app.get('/admin/logs', (question, answer) => { answer.sendFile(path.join(__dirname, 'admin/logs', 'logs.html')); });
+app.get('/admin/env', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'admin/config-env', 'configenv.html')); });
+app.get('/admin/logs', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'admin/logs', 'logs.html')); });
 
 
 
 
 // Public Pages
-app.get('/', (question, answer) => {
+app.get('/', (question: Request, answer: Response) => {
     answer.sendFile(path.join(__dirname, '/index.html'));
 });
-app.get('/next-rp', (question, answer) => { answer.sendFile(path.join(__dirname, 'client/next-rp/nextrp.html')); });
-app.get('/next-rp/create', (question, answer) => {
-    if (!question.session.role || question.session.role > '2') {
-        question.session.destroy();
-        answer.clearCookie(package.name + '-userid');
-        answer.clearCookie(package.name + '-role');
-        answer.clearCookie(package.name + '-accesskey');
-        return answer.redirect(`/login?next=${question.url}`);
+app.get('/next-rp', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'client/next-rp/nextrp.html')); });
+app.get('/next-rp/create', (question: {
+    originalUrl: any; session: { role: number; destroy: () => void; }; url: any; 
+}, answer: { clearCookie: (arg0: string) => void; redirect: (arg0: string) => any; sendFile: (arg0: any) => void; }) => {
+    if (!question.session.role || question.session.role > 2) {
+        return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     }
     answer.sendFile(path.join(__dirname, 'client/next-rp/create/create.html'));
 });
 
 
 // Restricted Pages
-app.all('/auth/data/*', (question, answer) => { answer.status(403).send('Forbidden'); });
-app.all('/templates/*', (question, answer) => { answer.status(403).send('Forbidden'); });
-
-
-/* This Must Be At The Bottom */
-app.get('/*', (question, answer) => { answer.sendFile(path.join(__dirname + question.url)); });
+app.get('/favicon.png', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'public', 'img', 'RPLogoShort.png')); });
+app.get('/*', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname + question.url)); });

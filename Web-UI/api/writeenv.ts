@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 const envdir = path.join(__dirname, '../..', '.env');
 
-module.exports = async (data) => {
+export default async (data: { [x: string]: any; }) => {
     try {
         let fileContent = fs.readFileSync(envdir, 'utf-8');
         let fileLines = fileContent.split('\n');

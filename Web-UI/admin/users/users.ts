@@ -1,10 +1,10 @@
 function userspageloaded() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -27,8 +27,8 @@ function userspageloaded() {
         .then(response => response.json())
         .then(isadmin => {
             if (isadmin.perm) {
-                let createbuttonarea = document.getElementById('header');
-                let createbutton = document.createElement('button');
+                let createbuttonarea = document.getElementById('header') as HTMLDivElement;
+                let createbutton = document.createElement('button') as HTMLButtonElement;
                 createbutton.innerHTML = 'Create User';
                 createbutton.className = 'createbtn';
                 createbutton.onclick = function () {
@@ -46,9 +46,9 @@ function userspageloaded() {
                         announcement('Error', data.message, 'danger', false);
                         return;
                     }
-                    let dataarea = document.getElementById('data');
+                    let dataarea = document.getElementById('data') as HTMLDivElement;
 
-                    usershtml = `<tr>
+                    let usershtml = `<tr>
                         <th>ID</th>
                         <th>Username</th>
                         <th>Permission</th>

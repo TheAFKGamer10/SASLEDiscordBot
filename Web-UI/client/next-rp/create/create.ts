@@ -1,18 +1,5 @@
 "use strict";
-
-async function createpageloaded() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
-        if (shouldtimeout) {
-            setTimeout(closeAnnouncement, 5 * 1000);
-        }
-    }
-
-    const URL = window.location.origin;
+async function rpcreatepageloaded() {
     fetch(`/v1/bot/rp/create/fields`, {
         method: 'GET',
         headers: {
@@ -22,39 +9,39 @@ async function createpageloaded() {
 
         .then(response => response.json())
         .then(async data => {
-            let form = document.getElementById('config');
+            let form = document.getElementById('config') as HTMLDivElement;
             form.innerHTML = ''; // Empty the div with id 'config'
 
             Object.keys(data).forEach((key) => {
                 if (data[key].type === 'dropdown') {
-                    let element;
+                    let element: HTMLDivElement | HTMLSelectElement;
                     if (data[key].type === 'dropdown') {
-                        element = document.createElement('select');
-                        data[key].options.forEach(option => {
-                            let optionElement = document.createElement('option');
-                            optionElement.value = option;
-                            optionElement.textContent = option;
+                        element = document.createElement('select') as HTMLSelectElement;
+                        data[key].options.forEach((option: string | null) => {
+                            let optionElement = document.createElement('option') as HTMLOptionElement;
+                            optionElement.value = option as string;
+                            optionElement.textContent = option as string;
                             element.appendChild(optionElement);
                         });
                     } else {
-                        element = document.createElement('div');
+                        element = document.createElement('div') as HTMLDivElement;
                     }
                     element.className = 'block';
                 }
 
 
                 // Create a new div element
-                let div = document.createElement('div');
+                let div = document.createElement('div') as HTMLDivElement;
                 div.className = 'block';
 
                 // Create a new label element
-                let label = document.createElement('label');
-                label.for = key.replace(/_/g, ' ');
+                let label = document.createElement('label') as HTMLLabelElement;
+                // label.for = key.replace(/_/g, ' ');
                 label.textContent = key.replace(/_/g, ' ');
                 label.className = 'inputlabel';
 
                 // Create a new description element
-                let description = document.createElement('p');
+                let description = document.createElement('p') as HTMLParagraphElement;
                 if (data[key]?.descriptionusehtml) {
                     description.innerHTML = data[key]?.description || "";
                 } else {
@@ -63,7 +50,7 @@ async function createpageloaded() {
                 description.id = `description_${key}`;
                 description.className = 'description';
 
-                let textdiv = document.createElement('div');
+                let textdiv = document.createElement('div') as HTMLDivElement;
                 textdiv.className = 'textdiv';
                 textdiv.appendChild(label);
                 textdiv.appendChild(description);
@@ -71,20 +58,20 @@ async function createpageloaded() {
 
                 if (data[key].type === 'dropdown') {
                     let element;
-                    element = document.createElement('select');
-                    data[key].options.forEach(option => {
-                        let optionElement = document.createElement('option');
-                        optionElement.value = option;
-                        optionElement.textContent = option;
+                    element = document.createElement('select') as HTMLSelectElement;
+                    data[key].options.forEach((option: string | null) => {
+                        let optionElement = document.createElement('option') as HTMLOptionElement;
+                        optionElement.value = option ? option : '';
+                        optionElement.textContent = option ? option : '';
                         element.appendChild(optionElement);
                     });
 
                     element.required = data[key]?.required ? true : false;
                     if (element.required) {
                         // Create a new span element
-                        let span = document.createElement('span');
+                        let span = document.createElement('span') as HTMLSpanElement;
                         span.textContent = '*';
-                        span.style = 'color: red;';
+                        span.style.setProperty('color', 'red');
                         span.className = 'required red';
                         label.appendChild(span);
                     }
@@ -98,14 +85,14 @@ async function createpageloaded() {
                     };
                     div.appendChild(element);
                 } else if (data[key].type === 'checkbox') {
-                    let element = document.createElement('input');
+                    let element = document.createElement('input') as HTMLInputElement;
                     element.type = 'checkbox';
                     element.required = data[key]?.required ? true : false;
                     if (element.required) {
                         // Create a new span element
-                        let span = document.createElement('span');
+                        let span = document.createElement('span') as HTMLSpanElement;
                         span.textContent = '*';
-                        span.style = 'color: red;';
+                        span.style.setProperty('color', 'red'); 
                         span.className = 'required red';
                         label.appendChild(span);
                     }
@@ -119,7 +106,7 @@ async function createpageloaded() {
                     div.appendChild(element);
                 } else {
                     // Create a new input element
-                    let input = document.createElement('input');
+                    let input = document.createElement('input') as HTMLInputElement;
                     input.className = 'input geninput';
                     input.type = data[key].type;
                     input.required = data[key]?.required ? true : false;
@@ -128,9 +115,9 @@ async function createpageloaded() {
 
                     if (input.required) {
                         // Create a new span element
-                        let span = document.createElement('span');
+                        let span = document.createElement('span') as HTMLSpanElement;
                         span.textContent = '*';
-                        span.style = 'color: red;';
+                        span.style.setProperty('color', 'red');
                         span.className = 'required red';
                         label.appendChild(span);
                     }
@@ -148,13 +135,13 @@ async function createpageloaded() {
         });
 }
 
-async function submit() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+async function createrpsubmit() {
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -163,9 +150,10 @@ async function submit() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const URL = window.location.origin;
 
-    let data = {};
-    let inputs = document.getElementsByClassName('input');
+    let data: any = {};
+    let inputs = document.getElementsByClassName('input') as HTMLCollectionOf<HTMLInputElement>;
     for (let i = 0; i < inputs.length; i++) {
+        
         if (inputs[i].type === 'checkbox') {
             data[inputs[i].id.replace('input_', '').toLowerCase().replace(/\s/g, '')] = inputs[i].checked;
         } else {

@@ -1,12 +1,12 @@
 "use strict";
 
-async function createpageloaded() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+async function usereditpageloaded() {
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -22,8 +22,8 @@ async function createpageloaded() {
         .then(async user => {
             if (user.status === 'error') {
                 if (user.message === 'User not found') {
-                    document.getElementById('sumbitbtn').style.display = 'none';
-                    document.getElementById('config').innerHTML = `<h1 style="color: red;">User not found!</h1>`;
+                    (document.getElementById('sumbitbtn') as HTMLButtonElement).style.display = 'none';
+                    (document.getElementById('config') as HTMLDivElement).innerHTML = `<h1 style="color: red;">User not found!</h1>`;
                     announcement('Error', 'User not found!', 'danger', false);
                     return;
                 }
@@ -40,7 +40,7 @@ async function createpageloaded() {
                 .then(async roles => {
                     console.log(user);
 
-                    let data = {
+                    let data: any = {
                         "Username": {
                             "type": "text",
                             "description": "The username of the user.",
@@ -61,15 +61,15 @@ async function createpageloaded() {
                         }
                     };
 
-                    let form = document.getElementById('config');
+                    let form = document.getElementById('config') as HTMLDivElement;
                     form.innerHTML = ''; // Empty the div with id 'config'
 
                     Object.keys(data).forEach((key) => {
                         if (data[key].type === 'dropdown') {
-                            let element;
+                            let element: HTMLDivElement | HTMLSelectElement;
                             if (data[key].type === 'dropdown') {
                                 element = document.createElement('select');
-                                data[key].options.forEach(option => {
+                                data[key].options.forEach((option: string) => { // Add type annotation to option
                                     let optionElement = document.createElement('option');
                                     optionElement.value = option;
                                     optionElement.textContent = option;
@@ -88,7 +88,7 @@ async function createpageloaded() {
 
                         // Create a new label element
                         let label = document.createElement('label');
-                        label.for = key.replace(/_/g, ' ');
+                        // label.for = key.replace(/_/g, ' ');
                         label.textContent = key.replace(/_/g, ' ');
                         label.className = 'inputlabel';
 
@@ -109,12 +109,11 @@ async function createpageloaded() {
                         div.appendChild(textdiv);
 
                         if (data[key].type === 'dropdown') {
-                            let element;
-                            element = document.createElement('select');
-                            data[key].options.forEach(option => {
-                                let optionElement = document.createElement('option');
-                                optionElement.value = option;
-                                optionElement.textContent = option;
+                            let element = document.createElement('select') as HTMLSelectElement;
+                            data[key].options.forEach((option: string | null) => {
+                                let optionElement = document.createElement('option') as HTMLOptionElement;
+                                optionElement.value = option as string;
+                                optionElement.textContent = option as string;
                                 element.appendChild(optionElement);
                             });
 
@@ -123,7 +122,7 @@ async function createpageloaded() {
                                 // Create a new span element
                                 let span = document.createElement('span');
                                 span.textContent = '*';
-                                span.style = 'color: red;';
+                                span.style.setProperty('color', 'red');
                                 span.className = 'required red';
                                 label.appendChild(span);
                             }
@@ -144,7 +143,7 @@ async function createpageloaded() {
                                 // Create a new span element
                                 let span = document.createElement('span');
                                 span.textContent = '*';
-                                span.style = 'color: red;';
+                                span.style.setProperty('color', 'red');
                                 span.className = 'required red';
                                 label.appendChild(span);
                             }
@@ -169,7 +168,7 @@ async function createpageloaded() {
                                 // Create a new span element
                                 let span = document.createElement('span');
                                 span.textContent = '*';
-                                span.style = 'color: red;';
+                                span.style.setProperty('color', 'red');
                                 span.className = 'required red';
                                 label.appendChild(span);
                             }
@@ -189,23 +188,23 @@ async function createpageloaded() {
 };
 
 
-async function submit() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+async function userseditsubmit() {
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const URL = window.location.origin;
 
-    let data = {};
-    let inputs = document.getElementsByClassName('input');
+    let data: any = {}; // Declare 'data' only once
+
+    let inputs = document.getElementsByClassName('input') as HTMLCollectionOf<HTMLInputElement>;
     for (let i = 0; i < inputs.length; i++) {
         if (inputs[i].type === 'checkbox') {
             data[inputs[i].id.replace('input_', '').toLowerCase().replace(/\s/g, '')] = inputs[i].checked;

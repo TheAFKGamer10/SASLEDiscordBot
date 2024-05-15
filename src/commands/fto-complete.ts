@@ -1,6 +1,6 @@
-const { client, EmbedBuilder, env } = require('../importdefaults.js');
+import { client, EmbedBuilder, env } from '../importdefaults.js';
 
-module.exports = async (interaction) => {
+export default async (interaction: { deferReply?: any; member?: any; editReply?: any; commandName?: any; options?: any; }) => {
     await interaction.deferReply();
     const { commandName, options } = interaction;
     const TrainingCars = require('../../config/fto-complete/TrainingCars.config.json');
@@ -37,7 +37,7 @@ module.exports = async (interaction) => {
     let cadetdepartmentshort;
     let cadetdepartmentid;
     let ftodepartment;
-    departmentList.forEach((CurrentDepartment) => {
+    departmentList.forEach((CurrentDepartment: string) => {
         if (fto_callsign.includes('D')) {
             ftodepartment = 'Federal';
         }
@@ -51,19 +51,21 @@ module.exports = async (interaction) => {
         }
     });
 
-    formatedcars = [];
-    TrainingCars[cadetdepartmentshort].forEach((CurrentCar) => {
-        formatedcars.push(`${CurrentCar}\n`);
+    let formatedcars: string = '';
+    TrainingCars[cadetdepartmentshort as unknown as string].forEach((CurrentCar: any) => {
+        formatedcars += `${CurrentCar}\n`;
     });
-    formatedcars = formatedcars.toString().replace(/[\[\]\,']+/g, '');
 
     const now = new Date();
-    function pad(n) {
-        return n < 10 ? '0' + n : n
+    function pad(n: string | number) {
+        return Number(n) < 10 ? '0' + n : n
     }
     const localDateTime = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()) + " " + pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
 
-    let blurb = blurbs[cadetdepartmentshort].replace(/\n/g, "\n> ");
+    let blurb = '';
+    if (cadetdepartmentshort) {
+        blurb = blurbs[cadetdepartmentshort].replace(/\n/g, "\n> ");
+    }
 
     const report_id = (await mysql('select', 'cadettrainings', `SELECT id FROM cadettrainings`)).length + 1;
 
@@ -74,7 +76,10 @@ module.exports = async (interaction) => {
         mysql('insert', 'cadettrainings', `(0, '${cadet_fullname}', ${cadet_id}, '${fto_fullname}', ${fto_id}, '${new Date(new Date().getTime()).toISOString().replace(/T/, ' ').replace(/\..+/, '')}')`);
     }
 
-    const departmentlogo = logos[cadetdepartmentshort];
+    let departmentlogo = '';
+    if (cadetdepartmentshort) {
+        departmentlogo = logos[cadetdepartmentshort];
+    };
     const passedlogo = logos[status];
 
     interaction.editReply({
@@ -95,15 +100,15 @@ ${status === 'ACCEPTED' ? `<:${departmentlogo}> ▬▬ **Vehicle Spawning** ▬�
 Name: ${cadet_fullname.split(' | ')[1]}
 Date Of FTO: ${localDateTime.split(' ')[0]}
 Time Of FTO: ${localDateTime.split(' ')[1]}
-Rank: ${cadetdepartment.split(' (')[0]} Cadet
-Callsign: ${cadet_callsign}
+Rank: ${cadetdepartment!.split(' (')[0]} Cadet
+Callsign: ${cadet_callsign!}
 \`\`\`
 **FTO Forum**
 \`\`\`
-Name: ${fto_fullname.split(' | ')[1]}
-Date Of FTO: ${localDateTime.split(' ')[0]}
-Time Of FTO: ${localDateTime.split(' ')[1]}
-Rank: ${ftodepartment.split(' (')[0]} FTO
+Name: ${fto_fullname!.split(' | ')[1]}
+Date Of FTO: ${localDateTime!.split(' ')[0]}
+Time Of FTO: ${localDateTime!.split(' ')[1]}
+Rank: ${ftodepartment!.split(' (')[0]} FTO
 Callsign: ${fto_callsign}
 \`\`\`
 

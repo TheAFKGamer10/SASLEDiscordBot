@@ -1,17 +1,24 @@
 "use strict";
 
 function pageloaded() {
-    fetch('/v1/pageload', { // This chacks only the first request send to the page and does not request every a link is loaded.
+    fetch(`/v1/pageload?l=${window.location.pathname}`, { // This chacks only the first request send to the page and does not request every a link is loaded.
         method: "GET"
-    });
+    })
+        .catch(error => console.error('Error:', error))
+        .then((response: Response | void) => response!.json())
+        .then((data: any) => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        });
 
     fetch('/header.json')
         .catch(error => console.error('Error:', error))
-        .then(response => response.json())
+        .then((response: Response | void) => response!.json())
         .then(links => {
-            let topbarleft = document.getElementById('top-bar-left');
-            let logoutButton = document.createElement('button');
-            let loginButton = document.createElement('button');
+            let topbarleft = document.getElementById('top-bar-left') as HTMLDivElement;
+            let logoutButton = document.createElement('button') as HTMLButtonElement;
+            let loginButton = document.createElement('button') as HTMLButtonElement;
             logoutButton.textContent = "Logout";
             logoutButton.className = 'topbarbutton';
             loginButton.textContent = "Login";
@@ -19,16 +26,16 @@ function pageloaded() {
 
 
 
-            const hamburgerButton = document.createElement('button');
-            const hamburgerIcon = document.createElement('img');
+            const hamburgerButton = document.createElement('button') as HTMLButtonElement;
+            const hamburgerIcon = document.createElement('img') as HTMLImageElement; // Change the type to HTMLImageElement
             hamburgerIcon.src = '/img/bars.svg';
             hamburgerIcon.className = 'hamburger-icon';
             hamburgerButton.appendChild(hamburgerIcon);
             hamburgerButton.className = 'hamburger-button';
-            const topbarright = document.getElementById('top-bar-right');
+            const topbarright = document.getElementById('top-bar-right') as HTMLDivElement;
             topbarright.appendChild(hamburgerButton);
 
-            const mobilemenu = document.createElement('div');
+            const mobilemenu = document.createElement('div') as HTMLDivElement;
             mobilemenu.className = 'menu';
 
             topbarright.appendChild(mobilemenu);
@@ -37,7 +44,7 @@ function pageloaded() {
                 mobilemenu.classList.toggle('show');
             });
 
-            let closeButton = document.createElement('button');
+            let closeButton = document.createElement('button') as HTMLButtonElement;
             closeButton.textContent = 'X';
             closeButton.className = 'close-button';
             closeButton.onclick = function () {
@@ -69,15 +76,15 @@ function pageloaded() {
                 },
             })
                 .catch(error => console.error('Error:', error))
-                .then((response) => response.json())
-                .then((data) => {
+                .then((response: Response | void) => response!.json())
+                .then((data: any) => {
                     let objkeys = Object.keys(links);
                     if (data.perm) {
                         objkeys.forEach(key => {
                             if (key == "ifAdmin") {
                                 return;
                             }
-                            let button = document.createElement('button');
+                            let button = document.createElement('button') as HTMLButtonElement;
                             button.textContent = links[key].title;
                             button.className = 'topbarbutton';
                             button.onclick = function () {
@@ -85,7 +92,7 @@ function pageloaded() {
                             };
                             topbarleft.appendChild(button);
 
-                            let handburgeritem = document.createElement('button');
+                            let handburgeritem = document.createElement('button') as HTMLButtonElement;
                             handburgeritem.textContent = links[key].title;
                             handburgeritem.className = 'handburgeritem';
                             handburgeritem.onclick = function () {
@@ -94,24 +101,24 @@ function pageloaded() {
                             mobilemenu.appendChild(handburgeritem);
                         });
 
-                        let dropdown = document.createElement('div');
+                        let dropdown = document.createElement('div') as HTMLDivElement;
                         dropdown.className = 'dropdown';
                         dropdown.onclick = function () {
                             window.location.href = '/admin';
                         };
-                        let button = document.createElement('button');
+                        let button = document.createElement('button') as HTMLButtonElement;
                         button.textContent = 'Administration';
                         button.className = 'dropbtn topbarbutton';
-                        const arrowIcon = document.createElement('img');
+                        const arrowIcon = document.createElement('img') as HTMLImageElement;
                         arrowIcon.src = '/img/down-arrow.svg';
                         arrowIcon.className = 'arrow-icon';
                         button.appendChild(arrowIcon);
                         dropdown.appendChild(button);
 
-                        let dropdownarea = document.createElement('div');
+                        let dropdownarea = document.createElement('div') as HTMLDivElement;
                         dropdownarea.className = 'dropdown-area';
 
-                        let dropdownContent = document.createElement('div');
+                        let dropdownContent = document.createElement('div') as HTMLDivElement;
                         dropdownContent.className = 'dropdown-content topbarbutton';
                         Object.keys(links.ifAdmin).forEach(key => {
                             if (links.ifAdmin[key].title == null) {
@@ -124,9 +131,9 @@ function pageloaded() {
                         });
 
 
-                        let dropdownMenu = document.createElement('div');
+                        let dropdownMenu = document.createElement('div') as HTMLDivElement;
                         dropdownMenu.className = 'hamburger-dropdown';
-                        let dropdownContentMenu = document.createElement('div');
+                        let dropdownContentMenu = document.createElement('div') as HTMLDivElement;
                         dropdownContentMenu.className = 'hamburger-dropdown-content';
 
                         Object.keys(links.ifAdmin).forEach(key => {
@@ -136,9 +143,9 @@ function pageloaded() {
                             dropdownContentMenu.appendChild(a);
                         });
 
-                        let showItemsButton = document.createElement('button');
+                        let showItemsButton = document.createElement('button') as HTMLButtonElement;
                         showItemsButton.textContent = 'Administration';
-                        const HamburgerarrowIcon = document.createElement('img');
+                        const HamburgerarrowIcon = document.createElement('img') as HTMLImageElement;
                         HamburgerarrowIcon.src = '/img/down-arrow.svg';
                         HamburgerarrowIcon.className = 'arrow-icon';
                         showItemsButton.appendChild(HamburgerarrowIcon);
@@ -162,7 +169,7 @@ function pageloaded() {
                             if (key == "ifAdmin") {
                                 return;
                             }
-                            let button = document.createElement('button');
+                            let button = document.createElement('button') as HTMLButtonElement;
                             button.textContent = links[key].title;
                             button.className = 'topbarbutton';
                             button.onclick = function () {
@@ -170,7 +177,7 @@ function pageloaded() {
                             };
                             topbarleft.appendChild(button);
 
-                            let handburgeritem = document.createElement('button');
+                            let handburgeritem = document.createElement('button') as HTMLButtonElement;
                             handburgeritem.textContent = links[key].title;
                             handburgeritem.className = 'handburgeritem';
                             handburgeritem.onclick = function () {
@@ -184,7 +191,7 @@ function pageloaded() {
                         topbarleft.appendChild(logoutButton);
 
                         // Account
-                        let account = document.createElement('button');
+                        let account = document.createElement('button') as HTMLButtonElement;
                         account.id = 'account';
                         account.className = 'topbarbutton';
                         account.onclick = function () {
@@ -196,28 +203,23 @@ function pageloaded() {
                         topbarright.appendChild(account);
 
                         // Footer
-                        if (document.getElementById('footer')) {
-                            document.getElementById('footer').innerHTML = ` <!-- Plaese do not remove footer. It helps the developer of this softwear. -->
-                                <p class="bigfooter"><a href="https://github.com/TheAFKGamer10/SASLEDiscordBot" target="_blank" class="footerlink">FiveM Discord Bot</a> by <a href="https://afkht.us/foot" target="_blank" class="footerlink">The AFK Gamer</a></p>
-                                <p class="smallfooter">FiveM Discord Bot is not an official Discord or FiveM product. It is not affiliated with nor endorsed by Discord Inc. or Cfx.re.</p>
-                            `;
-                        }
+                        (document.getElementById('footer') as HTMLDivElement).innerHTML = ` <!-- Plaese do not remove footer. It helps the developer of this software. --><p class="bigfooter"><a href="https://github.com/TheAFKGamer10/SASLEDiscordBot" target="_blank" class="footerlink">FiveM Discord Bot</a> by <a href="https://afkht.us/foot" target="_blank" class="footerlink">The AFK Gamer</a></p><p class="smallfooter">FiveM Discord Bot is not an official Discord or FiveM product. It is not affiliated with nor endorsed by Discord Inc. or Cfx.re.</p>`;
                     } else {
                         topbarleft.appendChild(loginButton);
                     }
 
 
                     // Light Dark Mode
-                    const colourmodeDiv = document.createElement('div');
+                    const colourmodeDiv = document.createElement('div') as HTMLDivElement;
                     colourmodeDiv.id = 'colourmode';
                     colourmodeDiv.className = 'colourmode';
 
-                    const lightdarkbutton = document.createElement('button');
+                    const lightdarkbutton = document.createElement('button') as HTMLButtonElement;
                     lightdarkbutton.id = 'lightdarkbutton';
                     lightdarkbutton.className = 'ldbutton';
                     lightdarkbutton.onclick = changeld;
 
-                    const ldicon = document.createElement('img');
+                    const ldicon = document.createElement('img') as HTMLImageElement;
                     ldicon.id = 'ldicon';
                     ldicon.className = 'ldicon';
 
@@ -225,7 +227,7 @@ function pageloaded() {
                     colourmodeDiv.appendChild(lightdarkbutton);
                     topbarright.appendChild(colourmodeDiv);
 
-                    const body = document.getElementById("body");
+                    const body = document.getElementById("body") as HTMLBodyElement;
                     const savedColor = sessionStorage.getItem("lightdark");
                     if (savedColor === "light") {
                         body.classList.remove("dark");
@@ -252,7 +254,7 @@ function pageloaded() {
                         // document.getElementById('top-bar-left').style.display = 'block';
                         mobilemenu.style.display = 'none';
                         mobilemenu.classList.remove('show');
-                        document.querySelector('.hamburger-button').style.display = 'none';
+                        hamburgerButton.style.display = 'none';
                     } else {
                         // document.getElementById('top-bar-left').style.display = 'none';
                         mobilemenu.style.display = 'block';
@@ -265,7 +267,7 @@ function pageloaded() {
                             mobilemenu.appendChild(loginButton);
                         }
 
-                        let colourmodeDiv = document.getElementById('colourmode');
+                        let colourmodeDiv = document.getElementById('colourmode') as HTMLDivElement;
                         loginButton.classList.remove('topbarbutton');
                         logoutButton.classList.remove('topbarbutton');
                         loginButton.classList.add('handburgeritem');
@@ -273,7 +275,7 @@ function pageloaded() {
                         topbarright.prepend(colourmodeDiv);
 
                         if (data.cookie) {
-                            let account = document.getElementById('account');
+                            let account = document.getElementById('account') as HTMLButtonElement;
                             account.classList.remove('topbarbutton');
                             account.classList.add('handburgeritem');
                             topbarright.removeChild(account);
@@ -286,8 +288,8 @@ function pageloaded() {
 
 
 function changeld() {
-    const ldbutton = document.getElementById("lightdarkbutton");
-    const body = document.getElementById("body");
+    const ldbutton = document.getElementById("lightdarkbutton") as HTMLButtonElement;
+    const body = document.getElementById("body") as HTMLBodyElement;
     if (body.classList.contains("dark")) {
         body.classList.remove("dark");
         body.classList.add("light");
@@ -302,7 +304,10 @@ function changeld() {
 }
 
 function closeAnnouncement() {
-    document.getElementById('announcement').style.display = 'none';
+    const announcement = document.getElementById('announcement') as HTMLDivElement;
+    if (announcement) {
+        announcement.style.display = 'none';
+    }
 }
 
 var previousWidth = window.innerWidth;

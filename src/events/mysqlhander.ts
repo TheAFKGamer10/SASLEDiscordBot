@@ -1,7 +1,7 @@
 // SQL Help by: https://www.w3schools.com/nodejs/nodejs_mysql.asp
 // Table Types: https://www.w3schools.com/mysql/mysql_datatypes.asp
 
-module.exports = async (thingtodo, table, sqlstring) => {
+export default async (thingtodo: string, table: string, sqlstring: any) => {
     try {
         const env = require('dotenv').config();
         const mysql = require('mysql2');
@@ -9,7 +9,7 @@ module.exports = async (thingtodo, table, sqlstring) => {
 
         async function connect() {
             return new Promise((resolve, reject) => {
-                mysqlconnection.connect(function (err) {
+                mysqlconnection.connect(function (err: any) {
                     if (err) reject(err);
                     resolve('Connected to database.');
                 });
@@ -18,7 +18,7 @@ module.exports = async (thingtodo, table, sqlstring) => {
 
         async function close() {
             return new Promise((resolve, reject) => {
-                mysqlconnection.end(function (err) {
+                mysqlconnection.end(function (err: any) {
                     if (err) reject(err);
                     resolve('Closed connection to database.');
                 });
@@ -28,13 +28,13 @@ module.exports = async (thingtodo, table, sqlstring) => {
         if (thingtodo == 'connect') {
             return new Promise((resolve, reject) => {
                 connect().then((result) => {
-                    mysqlconnection.query('CREATE TABLE IF NOT EXISTS cadettrainings (id INT AUTO_INCREMENT PRIMARY KEY, passed BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, fto_username VARCHAR(64), fto_id BIGINT, timestamp TEXT)', function (err, result) {
+                    mysqlconnection.query('CREATE TABLE IF NOT EXISTS cadettrainings (id INT AUTO_INCREMENT PRIMARY KEY, passed BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, fto_username VARCHAR(64), fto_id BIGINT, timestamp TEXT)', function (err: any, result: any) {
                         if (err) reject(err);
-                        mysqlconnection.query('CREATE TABLE IF NOT EXISTS departmentjoins (id INT AUTO_INCREMENT PRIMARY KEY, forced BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, department VARCHAR(64), admin_forced_username VARCHAR(64), admin_forced_id BIGINT, timestamp TEXT)', function (err, result) {
+                        mysqlconnection.query('CREATE TABLE IF NOT EXISTS departmentjoins (id INT AUTO_INCREMENT PRIMARY KEY, forced BOOL, cadet_username VARCHAR(64), cadet_id BIGINT, department VARCHAR(64), admin_forced_username VARCHAR(64), admin_forced_id BIGINT, timestamp TEXT)', function (err: any, result: any) {
                             if (err) reject(err);
-                            mysqlconnection.query('CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(64), password VARCHAR(64), permission TINYTEXT, accesskey TINYTEXT)', function (err, result) {
+                            mysqlconnection.query('CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(64), password VARCHAR(64), permission TINYTEXT, accesskey TINYTEXT)', function (err: any, result: any) {
                                 if (err) reject(err);
-                                mysqlconnection.query('CREATE TABLE IF NOT EXISTS rp (id INT AUTO_INCREMENT PRIMARY KEY, aop VARCHAR(64), timestamp TEXT, ping BOOL, training BOOL, pingatrptime BOOL)', function (err, result) {
+                                mysqlconnection.query('CREATE TABLE IF NOT EXISTS rp (id INT AUTO_INCREMENT PRIMARY KEY, aop VARCHAR(64), timestamp TEXT, ping BOOL, training BOOL, pingatrptime BOOL)', function (err: any, result: any) {
                                     if (err) reject(err);
                                     close().then(() => {
                                         resolve('Tables created. Connection closed.');
@@ -66,7 +66,7 @@ module.exports = async (thingtodo, table, sqlstring) => {
                     valuestemplate = '(aop, timestamp, ping, training, pingatrptime)';
                 }
 
-                mysqlconnection.query(`INSERT INTO ${table} ${valuestemplate} VALUES ${sqlstring}`, function (err, result) {
+                mysqlconnection.query(`INSERT INTO ${table} ${valuestemplate} VALUES ${sqlstring}`, function (err: any, result: any) {
                     if (err) throw err;
                     return result;
                 });
@@ -77,9 +77,9 @@ module.exports = async (thingtodo, table, sqlstring) => {
         }
         if (thingtodo == 'select') {
             return new Promise((resolve, reject) => {
-                mysqlconnection.connect(function (err) {
+                mysqlconnection.connect(function (err: any) {
                     if (err) reject(err);
-                    mysqlconnection.query(sqlstring, function (err, result, fields) {
+                    mysqlconnection.query(sqlstring, function (err: any, result: unknown, fields: any) {
                         if (err) reject(err);
                         close().then(() => {
                             resolve(result);
@@ -92,9 +92,9 @@ module.exports = async (thingtodo, table, sqlstring) => {
         }
         if (thingtodo == 'update') {
             return new Promise((resolve, reject) => {
-                mysqlconnection.connect(function (err) {
+                mysqlconnection.connect(function (err: any) {
                     if (err) reject(err);
-                    mysqlconnection.query(sqlstring, function (err, result, fields) {
+                    mysqlconnection.query(sqlstring, function (err: any, result: unknown, fields: any) {
                         if (err) reject(err);
                         close().then(() => {
                             resolve(result);
@@ -107,7 +107,7 @@ module.exports = async (thingtodo, table, sqlstring) => {
         }
         if (thingtodo == 'delete') {
             connect().then((result) => {
-                mysqlconnection.query(`DELETE FROM ${table} WHERE ${sqlstring}`, function (err, result) {
+                mysqlconnection.query(`DELETE FROM ${table} WHERE ${sqlstring}`, function (err: any, result: any) {
                     if (err) throw err;
                     close().then(() => {
                         return result;

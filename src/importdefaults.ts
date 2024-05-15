@@ -1,5 +1,5 @@
 const env = require('dotenv').config();
-const fs = require('fs');
+import fs from 'fs';
 const { Client, IntentsBitField, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 
 const client = new Client(
@@ -21,9 +21,4 @@ const client = new Client(
     }
 );
 
-module.exports = {
-    client,
-    EmbedBuilder,
-    env,
-    fs
-};
+export { env, client, fs, EmbedBuilder };

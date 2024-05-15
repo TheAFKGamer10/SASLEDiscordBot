@@ -1,10 +1,10 @@
 function accountpageload() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -16,12 +16,12 @@ function accountpageload() {
     })
         .then(response => response.json())
         .then(data => {
-            if (data == undefined || data == null || data == {}) {
+            if (data == undefined || data == null || Object.keys(data).length === 0) {
                 announcement('Error', 'You are not logged in.', 'danger', false);
                 return;
             }
 
-            const envhints = {
+            const envhints: { [key: string]: { type: string, description: string, required: boolean, default: string, options?: string[], readonly?: boolean, descriptionusehtml?: boolean } } = {
                 "username": {
                     "type": "text",
                     "description": "Your username",
@@ -39,17 +39,17 @@ function accountpageload() {
             Object.keys(data).forEach(key => {
                 
                 // Create a new div element
-                let div = document.createElement('div');
+                let div = document.createElement('div') as HTMLDivElement;
                 div.className = 'block';
 
                 // Create a new label element
-                let label = document.createElement('label');
-                label.for = key.replace(/_/g, ' ');
+                let label = document.createElement('label') as HTMLLabelElement;
+                // label.for = key.replace(/_/g, ' ');
                 label.textContent = (key.charAt(0).toUpperCase() + key.slice(1)).replace(/_/g, ' ');
                 label.className = 'inputlabel';
 
                 // Create a new description element
-                let description = document.createElement('p');
+                let description = document.createElement('p') as HTMLParagraphElement;
                 if (envhints[key]?.descriptionusehtml) {
                     description.innerHTML = envhints[key]?.description || "";
                 } else {
@@ -58,16 +58,16 @@ function accountpageload() {
                 description.id = `description_${key}`;
                 description.className = 'description';
 
-                let textdiv = document.createElement('div');
+                let textdiv = document.createElement('div') as HTMLDivElement;
                 textdiv.className = 'textdiv';
                 textdiv.appendChild(label);
                 textdiv.appendChild(description);
                 div.appendChild(textdiv);
 
                 if (envhints[key].type === 'dropdown') {
-                    let element = document.createElement('select');
-                    envhints[key].options.forEach(option => {
-                        let optionElement = document.createElement('option');
+                    let element = document.createElement('select') as HTMLSelectElement;
+                    envhints[key].options!.forEach(option => {
+                        let optionElement = document.createElement('option') as HTMLOptionElement;
                         optionElement.value = option;
                         optionElement.textContent = option;
                         element.appendChild(optionElement);
@@ -80,9 +80,9 @@ function accountpageload() {
                     element.required = envhints[key]?.required ? true : false;
                     if (element.required) {
                         // Create a new span element
-                        let span = document.createElement('span');
+                        let span = document.createElement('span') as HTMLSpanElement;
                         span.textContent = '*';
-                        span.style = 'color: red;';
+                        span.style.setProperty('color', 'red');
                         span.className = 'required red';
                         label.appendChild(span);
                     }
@@ -97,7 +97,7 @@ function accountpageload() {
                     div.appendChild(element);
                 } else {
                     // Create a new input element
-                    let input = document.createElement('input');
+                    let input = document.createElement('input') as HTMLInputElement;
                     input.className = 'input geninput';
 
                     input.type = envhints[key].type;
@@ -108,9 +108,9 @@ function accountpageload() {
                     input.required = envhints[key]?.required ? true : false;
                     if (envhints[key].required) {
                         // Create a new span element
-                        let span = document.createElement('span');
+                        let span = document.createElement('span') as HTMLSpanElement;
                         span.textContent = '*';
-                        span.style = 'color: red;';
+                        span.style.setProperty('color', 'red');
                         span.className = 'required red';
                         label.appendChild(span);
                     }
@@ -130,20 +130,20 @@ function accountpageload() {
         });
 };
 
-function submit() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+function accountsubmit() {
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
     }
 
-    let data = {};
-    let elements = document.getElementsByClassName('geninput');
+    let data: any = {};
+    let elements = document.getElementsByClassName('geninput') as HTMLCollectionOf<HTMLInputElement>;
     for (let i = 0; i < elements.length; i++) {
         let element = elements[i];
         let key = element.id.replace('input_', '');

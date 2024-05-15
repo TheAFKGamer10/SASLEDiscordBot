@@ -1,7 +1,7 @@
-const { client, EmbedBuilder, env } = require("../importdefaults");
-const rules = require("../../config/rules.config.json");
+import { client, EmbedBuilder, env } from "../importdefaults";
+import rulesImport from "../../config/rules.config.json";
 
-module.exports = async (interaction) => {
+export default async (interaction: { reply?: any; deferReply?: any; editReply?: any; member?: any; channel?: any; commandName?: any; options?: any; }) => {
     const { commandName, options } = interaction;
     if (options.getString('category') === 'rulesoverview' && options.getString('rulenumber') !== null) {
         interaction.reply({ content: 'You can not select a rule from Rules Overview. Select a specific catogory to use this option.', ephemeral: true });
@@ -15,12 +15,16 @@ module.exports = async (interaction) => {
 
     let rulesembed = new EmbedBuilder()
     let rulelist = [];
-    let keysUpper = [];
-    let keysLower = [];
+    let keysUpper: (string | number)[] = [];
+    let keysLower: string[] = [];
     let category = options.getString('category');
     let LookingForRule = options.getString('rulenumber');
-    let outputrule = [];
-    let ListToObject = [];
+    let outputrule: {[x: string]: any; value: any; }[] = [];
+    let ListToObject: { name: any; value: any; inline: any; }[] = [];
+    interface Rules {
+        [key: string]: ({ name: string; value: string; inline?: undefined; } | { name: string; value: string; inline: boolean; })[];
+    }
+    const rules: Rules = rulesImport as unknown as Rules;
 
     if (options.getString('category') !== 'rulesoverview') {
         Object.keys(rules).forEach(key => {
@@ -33,14 +37,15 @@ module.exports = async (interaction) => {
             }
         });
 
-        rules[keysUpper[keysLower.indexOf(category)]].forEach(element => {
-            if (element.name.toLowerCase().replace(/ /g, '') == LookingForRule) {
+
+        rules[keysUpper[keysLower.indexOf(category)]].forEach((element: { name: string; value: string; inline?: undefined; } | { name: string; value: string; inline: boolean; }) => {
+            if ((element as unknown as { name: string; value: any; inline: any; }).name.toLowerCase().replace(/ /g, '') == LookingForRule) {
                 outputrule.push(
                     {
-                        name: element.name,
-                        value: element.value,
-                        inline: element.inline
-                    }
+                        name: (element as unknown as { name: string; value: any; inline: any; }).name,
+                        value: (element as unknown as { name: string; value: any; inline: any; }).value,
+                        inline: (element as unknown as { name: string; value: any; inline: any; }).inline
+                    } as { name: any; value: any; inline: any; } // Add type declaration for 'name' property
                 );
             }
             ListToObject.push(
@@ -48,7 +53,7 @@ module.exports = async (interaction) => {
                     name: element.name,
                     value: element.value,
                     inline: element.inline
-                }
+                } 
             );
         });
     }
@@ -100,3 +105,5 @@ module.exports = async (interaction) => {
         .setTimestamp();
     client.channels.cache.get(env.parsed.LOG_CHANNEL_ID).send({ embeds: [logembed] });
 }
+
+export {};

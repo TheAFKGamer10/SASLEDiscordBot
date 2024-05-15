@@ -1,12 +1,10 @@
-const { env } = require('./importdefaults');
-const { REST, Routes } = require('discord.js');
-const rules = require("./../config/rules.config.json");
-
-const rest = new REST({ version: '10' }).setToken(env.parsed.BOT_TOKEN);
+import { env } from './importdefaults';
+import { REST, Routes } from 'discord.js';
+import rules from "./../config/rules.config.json";
 
 var departmentList = JSON.parse(env.parsed.LIST_OF_DEPARTMENTS.split(", "));
-let departments = [];
-departmentList.forEach(CurrentDepartment => {
+let departments: { name: string; value: any; }[] = [];
+departmentList.forEach((CurrentDepartment: string) => {
   departments.push({
     name: `${env.parsed[CurrentDepartment + '_DEPARTMENT_NAME']}`,
     value: CurrentDepartment
@@ -29,6 +27,7 @@ Object.keys(rules).forEach(key => {
   }
 });
 
+console.log(departments);
 
 const commands = [
   {
@@ -157,7 +156,7 @@ const commands = [
 (async () => {
   try {
     console.log('Registering slash commands...');
-
+    const rest = new REST({ version: '10' }).setToken(env.parsed.BOT_TOKEN);
     await rest.put(
       Routes.applicationGuildCommands(
         env.parsed.CLIENT_ID,

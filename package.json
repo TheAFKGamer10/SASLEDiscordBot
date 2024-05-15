@@ -6,13 +6,16 @@
   "scripts": {
     "start": "node src/index.js",
     "pushcmds": "node src/regester-commands.js",
-    "update": "node scripts/update.js && npm run pushcmds",
-    "update-start": "npm run update && npm run pushcmds && npm run start",
     "express": "node Web-UI/server.js",
     "dev": "nodemon src/index.js",
-    "express-dev": "nodemon Web-UI/server.js", 
+    "express-dev": "nodemon Web-UI/server.js",
     "petro-start": "node src/index.js --petro",
-    "petro-express": "node Web-UI/server.js --petro"
+    "petro-express": "node Web-UI/server.js --petro",
+    "copy-files": "copyfiles -u 1 Web-UI/**/*.html Web-UI/**/*.css Web-UI/public/**/*.* Web-UI/**/*.json dist/Web-UI/",
+    "copy-config": "copyfiles -u 1 config/**/*.json dist/config/ && copyfiles -u 1 src/files/*.json dist/src/ && copyfiles .env .env.example CONTRIBUTORS.md LICENSE package-lock.json dist/",
+    "build": "rimraf dist/ && tsc --build && npm run copy-files && npm run copy-config && npm run minify",
+    "watch": "tsc -w --preserveWatchOutput --skipLibCheck && nodemon Web-UI/server.js --watch dist/",
+    "minify": "esbuild dist/**/*.js --minify --allow-overwrite --packages=external --outdir=dist/"
   },
   "author": "TheAFKGamer10",
   "repository": {
@@ -43,6 +46,14 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "@types/bcrypt": "^5.0.2",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.0",
+    "copyfiles": "^2.4.1",
+    "esbuild": "0.21.2",
+    "nodemon": "^3.1.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.4.5"
   }
 }

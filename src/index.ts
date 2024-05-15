@@ -1,18 +1,18 @@
-const { client, fs, env } = require("./importdefaults");
-const rules = require('./commands/rules');
-const join = require("./commands/join");
-const emebedRuleFinder = require("./events/emebedRuleFinder");
-const forcejoin = require("./commands/force-join");
-const ftocomplete = require("./commands/fto-complete");
-const ftotrain = require("./commands/fto-train");
-const rp = require("./commands/rp");
-const rpcountdownchecker = require("./events/rpcountdownchecker");
+import { client, fs, env } from "./importdefaults";
+import rules from './commands/rules';
+import join from "./commands/join";
+import emebedRuleFinder from "./events/emebedRuleFinder";
+import forcejoin from "./commands/force-join";
+import ftocomplete from "./commands/fto-complete";
+import ftotrain from "./commands/fto-train";
+import rp from "./commands/rp";
+import rpcountdownchecker from "./events/rpcountdownchecker";
 if (!fs.existsSync('./.env')) {
     console.log('No .env file found. Please create one before starting the bot again.');
     process.exit(126);
 }
 var hasdb = true;
-let mysqlfile;
+let mysqlfile: (arg0: string) => void;
 if (env.parsed.MYSQL_CONNECTION_STRING !== '') {
     mysqlfile = require("./events/mysqlhander");
 } else {
@@ -23,11 +23,11 @@ if (env.parsed.MYSQL_CONNECTION_STRING !== '') {
 const flags = process.argv.slice(2);
 
 async function envcheck() {
-    requireditems = ['BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'LOG_CHANNEL_ID', 'LEO_ROLE_ID', 'CADET_ROLE_ID', 'LIST_OF_DEPARTMENTS'];
-    empty = [];
-    depsreq = [];
+    let requireditems = ['BOT_TOKEN', 'CLIENT_ID', 'GUILD_ID', 'LOG_CHANNEL_ID', 'LEO_ROLE_ID', 'CADET_ROLE_ID', 'LIST_OF_DEPARTMENTS'];
+    let empty: string[] = [];
+    let depsreq: string[] = [];
 
-    JSON.parse(env.parsed.LIST_OF_DEPARTMENTS).forEach(element => {
+    JSON.parse(env.parsed.LIST_OF_DEPARTMENTS).forEach((element: string) => {
         depsreq.push(element.toUpperCase() + '_START_LETTER');
         depsreq.push(element.toUpperCase() + '_DEPARTMENT_NAME');
         depsreq.push(element.toUpperCase() + '_ROLE_ID');
@@ -79,7 +79,7 @@ client.on('ready', async () => {
 });
 
 
-client.on('interactionCreate', async (interaction) => {
+client.on('interactionCreate', async (interaction: { isAutocomplete?: any; reply?: any; commandName?: any; options?: any; }) => {
     const { commandName, options } = interaction;
     try {
         if (interaction.isAutocomplete()) {
@@ -91,25 +91,20 @@ client.on('interactionCreate', async (interaction) => {
         if (commandName === 'join') {
             join(interaction);
             return;
-        }
-        if (commandName === 'force-join') {
+        } else if (commandName === 'force-join') {
             forcejoin(interaction);
             return;
-        }
-        if (commandName === 'rules') {
+        } else if (commandName === 'rules') {
             rules(interaction);
             return;
-        }
-        if (commandName === 'rp') {
+        } else if (commandName === 'rp') {
             rp(interaction);
             return;
-        }
-        if (hasdb) { // If the bot has a database connection
+        } else if (hasdb) { // If the bot has a database connection
             if (commandName === 'fto-complete') {
                 ftocomplete(interaction)
                 return;
-            }
-            if (commandName === 'fto-train') {
+            } else if (commandName === 'fto-train') {
                 ftotrain(interaction);
                 return;
             }
@@ -122,6 +117,6 @@ client.on('interactionCreate', async (interaction) => {
 });
 
 
-client.login(env.parsed.BOT_TOKEN).catch((error) => {
+client.login(env.parsed.BOT_TOKEN).catch((error: any) => {
     console.log(error);
 });

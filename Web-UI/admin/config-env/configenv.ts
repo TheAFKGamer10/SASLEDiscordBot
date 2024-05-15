@@ -1,12 +1,12 @@
 "use strict";
 
 async function makeboxes() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -34,10 +34,10 @@ async function makeboxes() {
                 .then(envhints => {
                     const ifDEPARTMENTS = ["_DEPARTMENT_NAME", "_START_LETTER", "_ROLE_ID", "_PROBIB_ID"]
 
-                    let form = document.getElementById('config');
+                    let form = document.getElementById('config') as HTMLDivElement;
                     form.innerHTML = ''; // Empty the div with id 'config'
 
-                    let ifdb = [];
+                    let ifdb: string[] = [];
                     Object.keys(envhints).forEach((key) => {
                         if (envhints[key]?.onlyifDB === true) {
                             ifdb.push(key);
@@ -60,34 +60,34 @@ async function makeboxes() {
 
 
                         if (envhints[key].type === 'dropdown') {
-                            let element;
+                            let element: HTMLDivElement | HTMLSelectElement;
                             if (envhints[key].type === 'dropdown') {
-                                element = document.createElement('select');
-                                envhints[key].options.forEach(option => {
-                                    let optionElement = document.createElement('option');
-                                    optionElement.value = option;
-                                    optionElement.textContent = option;
+                                element = document.createElement('select') as HTMLSelectElement;
+                                envhints[key].options.forEach((option: string | null) => {
+                                    let optionElement = document.createElement('option') as HTMLOptionElement;
+                                    optionElement.value = option as string;
+                                    optionElement.textContent = option as string;
                                     element.appendChild(optionElement);
                                 });
                             } else {
-                                element = document.createElement('div');
+                                element = document.createElement('div') as HTMLDivElement;
                             }
                             element.className = 'block';
                         }
 
 
                         // Create a new div element
-                        let div = document.createElement('div');
+                        let div = document.createElement('div') as HTMLDivElement;
                         div.className = 'block';
 
                         // Create a new label element
-                        let label = document.createElement('label');
-                        label.for = key.replace(/_/g, ' ');
+                        let label = document.createElement('label') as HTMLLabelElement;
+                        // label.for = key.replace(/_/g, ' ');
                         label.textContent = key.replace(/_/g, ' ');
                         label.className = 'inputlabel';
 
                         // Create a new description element
-                        let description = document.createElement('p');
+                        let description = document.createElement('p') as HTMLParagraphElement;
                         if (envhints[key]?.descriptionusehtml || envhints[ending]?.descriptionusehtml) {
                             description.innerHTML = envhints[key]?.description || envhints[ending]?.description || "";
                         } else {
@@ -96,18 +96,18 @@ async function makeboxes() {
                         description.id = `description_${key}`;
                         description.className = 'description';
 
-                        let textdiv = document.createElement('div');
+                        let textdiv = document.createElement('div') as HTMLDivElement;
                         textdiv.className = 'textdiv';
                         textdiv.appendChild(label);
                         textdiv.appendChild(description);
                         div.appendChild(textdiv);
 
                         if (envhints[key].type === 'dropdown') {
-                            let element = document.createElement('select');
-                            envhints[key].options.forEach(option => {
-                                let optionElement = document.createElement('option');
-                                optionElement.value = option;
-                                optionElement.textContent = option;
+                            let element = document.createElement('select') as HTMLSelectElement;
+                            envhints[key].options.forEach((option: string | null) => {
+                                let optionElement = document.createElement('option') as HTMLOptionElement;
+                                optionElement.value = option as string;
+                                optionElement.textContent = option as string;
                                 element.appendChild(optionElement);
                             });
 
@@ -118,9 +118,9 @@ async function makeboxes() {
                             element.required = envhints[key]?.required || envhints[ending]?.required ? true : false;
                             if (element.required) {
                                 // Create a new span element
-                                let span = document.createElement('span');
+                                let span = document.createElement('span') as HTMLSpanElement;
                                 span.textContent = '*';
-                                span.style = 'color: red;';
+                                span.style.setProperty('color', 'red');
                                 span.className = 'required red';
                                 label.appendChild(span);
                             }
@@ -131,7 +131,7 @@ async function makeboxes() {
                             div.appendChild(element);
                         } else {
                             // Create a new input element
-                            let input = document.createElement('input');
+                            let input = document.createElement('input') as HTMLInputElement;
                             input.className = 'input geninput';
 
                             input.type = ending != "" ? envhints[ending].type : envhints[key].type;
@@ -150,7 +150,7 @@ async function makeboxes() {
                                 input.addEventListener('focusout', connectionstringmouseoutPass, true);
                                 sessionStorage.setItem('MYSQL_CONNECTION_STRING', data[key]);
                                 sessionStorage.setItem('const_MYSQL_CONNECTION_STRING', data[key]);
-                                input.value = data[key].replace(/(mysql:\/\/[^:@]+:)([^:@]+)(@[^:@]+:\d+\/[^:@]+)/, function (match, p1, p2, p3) {
+                                input.value = data[key].replace(/(mysql:\/\/[^:@]+:)([^:@]+)(@[^:@]+:\d+\/[^:@]+)/, function (match: any, p1: string, p2: string | any[], p3: string) {
                                     return p1 + '*'.repeat(p2.length) + p3;
                                 });
                             } else {
@@ -158,9 +158,9 @@ async function makeboxes() {
                             }
                             if (ending != "" ? envhints[ending].required : envhints[key].required) {
                                 // Create a new span element
-                                let span = document.createElement('span');
+                                let span = document.createElement('span') as HTMLSpanElement;
                                 span.textContent = '*';
-                                span.style = 'color: red;';
+                                span.style.setProperty('color', 'red');
                                 span.className = 'required red';
                                 label.appendChild(span);
                             }
@@ -189,13 +189,13 @@ async function envpageloaded() {
     makeboxes();
 }
 
-async function submit() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+function configsubmit() {
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -205,8 +205,8 @@ async function submit() {
 
     const ifDEPARTMENTS = ["_DEPARTMENT_NAME", "_START_LETTER", "_ROLE_ID"]
 
-    let data = {};
-    let inputs = document.getElementsByClassName('input');
+    let data: { [x: string]: any; MYSQL_CONNECTION_STRING?: any; LIST_OF_DEPARTMENTS?: any; } = {};
+    let inputs = document.getElementsByClassName('input') as HTMLCollectionOf<HTMLInputElement>;
     for (let i = 0; i < inputs.length; i++) {
         data[inputs[i].id.replace('input_', '')] = inputs[i].value;
         if (inputs[i].required && inputs[i].value == "") {
@@ -235,9 +235,9 @@ async function submit() {
             }
         }
     }
-    data.LIST_OF_DEPARTMENTS = JSON.stringify(data.LIST_OF_DEPARTMENTS.split(',').map(department => department.toUpperCase().trim()));
-    let newdepartment = {};
-    JSON.parse(data.LIST_OF_DEPARTMENTS).forEach((department) => {
+    data.LIST_OF_DEPARTMENTS = JSON.stringify(data.LIST_OF_DEPARTMENTS.split(',').map((department: string) => department.toUpperCase().trim()));
+    let newdepartment: { [key: string]: string } = {};
+    JSON.parse(data.LIST_OF_DEPARTMENTS).forEach((department: string) => {
         ifDEPARTMENTS.forEach((suffix) => {
             if (!Object.keys(data).includes(department + suffix)) {
                 newdepartment[department + suffix] = "";
@@ -285,13 +285,13 @@ async function submit() {
 
 }
 
-async function removeVariable(key) {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+async function removeVariable(key: string) {
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -337,34 +337,38 @@ async function removeVariable(key) {
 
 
 function mouseoverPass() {
-    let obj = document.getElementById('input_BOT_TOKEN');
-    obj.type = 'text';
+    let obj = document.getElementById('input_BOT_TOKEN') as HTMLInputElement;
+    if (obj !== null) {
+        obj.type = 'text';
+    }
 }
 
 function mouseoutPass() {
-    let obj = document.getElementById('input_BOT_TOKEN');
-    obj.type = 'password';
-    obj.blur();
+    let obj = document.getElementById('input_BOT_TOKEN') as HTMLInputElement;
+    if (obj !== null) {
+        obj.type = 'password';
+        obj.blur();
+    }
 }
 
 function connectionstringmouseoverPass() {
-    let obj = document.getElementById('input_MYSQL_CONNECTION_STRING');
-    if (obj.value.includes('*')) {
-        obj.value = sessionStorage.getItem('MYSQL_CONNECTION_STRING');
+    let obj = document.getElementById('input_MYSQL_CONNECTION_STRING') as HTMLInputElement;
+    if (obj !== null && obj.value.includes('*')) {
+        obj.value = sessionStorage.getItem('MYSQL_CONNECTION_STRING') ?? "";
     }
 }
 
 async function connectionstringmouseoutPass() {
-    let obj = document.getElementById('input_MYSQL_CONNECTION_STRING');
-    if (obj.value !== "") {
+    let obj = document.getElementById('input_MYSQL_CONNECTION_STRING') as HTMLInputElement;
+    if (obj !== null && obj.value !== "") {
         sessionStorage.setItem('MYSQL_CONNECTION_STRING', obj.value)
         obj.value = obj.value.replace(/(mysql:\/\/[^:@]+:)([^:@]+)(@[^:@]+:\d+\/[^:@]+)/, function (match, p1, p2, p3) {
             return p1 + '*'.repeat(p2.length) + p3;
         });
     } else {
-        sessionStorage.setItem('MYSQL_CONNECTION_STRING', obj.value);
+        sessionStorage.setItem('MYSQL_CONNECTION_STRING', obj?.value ?? "");
     }
-    obj.blur();
+    obj?.blur();
 }
 
 

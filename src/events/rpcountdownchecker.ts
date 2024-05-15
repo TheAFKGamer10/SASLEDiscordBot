@@ -1,6 +1,6 @@
-let { client, EmbedBuilder, env, fs } = require('./../importdefaults.js');
+import { client, env, fs } from './../importdefaults.js';
 
-module.exports = async function (hasdb) {
+export default async function (hasdb: any) {
     let nextRpData;
 
     const secondtimer = setInterval(async () => {

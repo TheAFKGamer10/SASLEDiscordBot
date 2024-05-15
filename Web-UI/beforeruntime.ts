@@ -1,4 +1,4 @@
-module.exports = async () => {
+export default async () => {
     const fs = require('fs');
     const path = require('path');
     const bcrypt = require('bcrypt');
@@ -12,8 +12,8 @@ module.exports = async () => {
             console.error('Invalid MySQL connection string. Please check your .env file.');
             process.exit(1);
         }
-        mysql('connect').then(async (result) => {
-            await mysql('select', 'users', `SELECT * FROM users WHERE username = '${env.parsed.ROOT_USERNAME}'`).then(async (result) => {
+        mysql('connect').then(async () => {
+            await mysql('select', 'users', `SELECT * FROM users WHERE username = '${env.parsed.ROOT_USERNAME}'`).then(async (result: string | any[]) => {
                 if (!result || result.length === 0) {
                     await mysql('insert', 'users', `('${env.parsed.ROOT_USERNAME}', '${await bcrypt.hash(env.parsed.ROOT_PASSWORD, 10)}', '0', '${crypto.randomBytes(16).toString('hex')}')`);
                 }

@@ -1,6 +1,6 @@
 const { client, EmbedBuilder, env } = require('../importdefaults.js');
 
-module.exports = async (interaction) => {
+export default async (interaction: { member?: any; reply?: any; commandName?: any; options?: any; }) => {
     //await interaction.deferReply(); // Does not work because it will not send the ping to the user.
     const { commandName, options } = interaction;
 

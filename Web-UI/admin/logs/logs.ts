@@ -1,10 +1,10 @@
 function logspageloaded() {
-    function announcement(h1, p, type, shouldtimeout) { // type: success, danger, warning, info
+    function announcement(h1: string, p: string, type: string, shouldtimeout: boolean) { // type: success, danger, warning, info
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        document.getElementById('announcement').style.display = 'flex';
-        document.getElementById('announcement-text-h1').innerHTML = h1;
-        document.getElementById('announcement-text-p').innerHTML = p;
-        document.getElementById("announcement").className = `announcement ${type}`;
+        (document.getElementById('announcement') as HTMLDivElement).style.display = 'flex';
+        (document.getElementById('announcement-text-h1') as HTMLHeadingElement).innerHTML = h1;
+        (document.getElementById('announcement-text-p') as HTMLParagraphElement).innerHTML = p;
+        (document.getElementById("announcement") as HTMLDivElement).className = `announcement ${type}`;
         if (shouldtimeout) {
             setTimeout(closeAnnouncement, 5 * 1000);
         }
@@ -14,7 +14,7 @@ function logspageloaded() {
         announcement('Caution', 'This page may not be formated properly for mobile devices.', 'warning', true);
     }
 
-    fetch(`/v1/bot/logs/get?limit=${document.getElementById('rows').value}`, {
+    fetch(`/v1/bot/logs/get?limit=${(document.getElementById('rows') as HTMLSelectElement).value}`, {
         method: 'GET'
     })
         .then(response => response.json())
@@ -24,13 +24,13 @@ function logspageloaded() {
                 return;
             }
 
-            let dataarea = document.getElementById('data');
+            let dataarea = document.getElementById('data') as HTMLDivElement;
             let cadettrainings = data.cadettrainings;
             let departmentjoins = data.departmentjoins;
-            let cadettrainingshtml = document.createElement('table');
-            let departmentjoinshtml = document.createElement('table');
+            let cadettrainingshtml = document.createElement('table') as HTMLTableElement;
+            let departmentjoinshtml = document.createElement('table') as HTMLTableElement;
 
-            cadettrainingshtml = `<tr>
+            cadettrainingshtml.innerHTML = `<tr>
                 <th>ID</th>
                 <th>Passed</th>
                 <th>Cadet</th>
@@ -39,7 +39,7 @@ function logspageloaded() {
             </tr>`;
             for (let i = 0; i < cadettrainings.length; i++) {
                 let passed = cadettrainings[i].passed ? 'Passed' : 'Failed';
-                cadettrainingshtml += `<tr>
+                cadettrainingshtml.innerHTML += `<tr>
                     <td><b>${cadettrainings[i].id}</b></td>
                     <td><b>${passed}</b></td>
                     <td><b>${cadettrainings[i].cadet_username}</b><br /><span title="Cadet ID">${cadettrainings[i].cadet_id}</span></td>
@@ -48,7 +48,7 @@ function logspageloaded() {
                 </tr>`;
             }
 
-            departmentjoinshtml = `<tr>
+            departmentjoinshtml.innerHTML = `<tr>
                 <th>ID</th>
                 <th>Forced</th>
                 <th>Cadet</th>
@@ -58,7 +58,7 @@ function logspageloaded() {
             </tr>`;
             for (let i = 0; i < departmentjoins.length; i++) {
                 let forced = departmentjoins[i].forced ? 'Forced' : 'Not Forced';
-                departmentjoinshtml += `<tr>
+                departmentjoinshtml.innerHTML += `<tr>
                     <td><b>${departmentjoins[i].id}</b></td>
                     <td><b>${forced}</b></td>
                     <td><b>${departmentjoins[i].cadet_username}</b><br /><span title="Cadet ID">${departmentjoins[i].cadet_id}</span></td>

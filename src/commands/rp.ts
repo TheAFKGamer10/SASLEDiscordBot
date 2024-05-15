@@ -1,8 +1,8 @@
-const { client, EmbedBuilder, env, fs } = require("../importdefaults");
-const mysql = require('../events/mysqlhander.js');
-const path = require('path');
+import { env, fs } from "../importdefaults";
+import mysql from '../events/mysqlhander.js';
+import path from 'path';
 
-module.exports = async (interaction) => {
+export default async (interaction: { reply?: any; commandName?: any; options?: any; }) => {
     const { commandName, options } = interaction;
 
     const aop = options.getString('aop');
