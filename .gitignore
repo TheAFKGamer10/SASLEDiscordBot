@@ -4,6 +4,7 @@ node_module*
 *test*
 temp*
 *petro*
+dist*
 
 nodejs-portable*
 

@@ -33,10 +33,10 @@ export default async (interaction: { deferReply?: any; member?: any; editReply?:
         return;
     };
     var departmentList = JSON.parse(env.parsed.LIST_OF_DEPARTMENTS.split(", "));
-    let cadetdepartment;
+    let cadetdepartment: any;
     let cadetdepartmentshort;
     let cadetdepartmentid;
-    let ftodepartment;
+    let ftodepartment: string;
     departmentList.forEach((CurrentDepartment: string) => {
         if (fto_callsign.includes('D')) {
             ftodepartment = 'Federal';
