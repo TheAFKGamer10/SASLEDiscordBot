@@ -13,7 +13,7 @@
     "petro-express": "node Web-UI/server.js --petro",
     "copy-files": "copyfiles -u 1 Web-UI/**/*.html Web-UI/**/*.css Web-UI/public/**/*.* Web-UI/**/*.json dist/Web-UI/",
     "copy-config": "copyfiles -u 1 config/**/*.json dist/config/ && copyfiles -u 1 src/files/*.json dist/src/ && copyfiles .env .env.example CONTRIBUTORS.md LICENSE package-lock.json dist/",
-    "build": "rimraf dist/ && tsc --build && node scripts/removesctrict.js && npm run copy-files && npm run copy-config && npm run minify",
+    "build": "rimraf dist/ && tsc --build && npm run copy-files && npm run copy-config && npm run minify && node scripts/removesctrict.js",
     "watch": "tsc -w --preserveWatchOutput --skipLibCheck && nodemon Web-UI/server.js --watch dist/",
     "minify": "esbuild dist/**/*.js --minify --allow-overwrite --packages=external --outdir=dist/"
   },
