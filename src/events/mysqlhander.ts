@@ -36,10 +36,13 @@ export default async (thingtodo: string, table: string, sqlstring: any) => {
                                 if (err) reject(err);
                                 mysqlconnection.query('CREATE TABLE IF NOT EXISTS rp (id INT AUTO_INCREMENT PRIMARY KEY, aop VARCHAR(64), timestamp TEXT, ping BOOL, training BOOL, pingatrptime BOOL)', function (err: any, result: any) {
                                     if (err) reject(err);
-                                    close().then(() => {
-                                        resolve('Tables created. Connection closed.');
-                                    }).catch((error) => {
-                                        reject(error);
+                                    mysqlconnection.query('CREATE TABLE IF NOT EXISTS pastrp (id INT AUTO_INCREMENT PRIMARY KEY, aop VARCHAR(64), timestamp TEXT, ping BOOL, training BOOL, pingatrptime BOOL)', function (err: any, result: any) {
+                                        if (err) reject(err);
+                                        close().then(() => {
+                                            resolve('Tables created. Connection closed.');
+                                        }).catch((error) => {
+                                            reject(error);
+                                        });
                                     });
                                 });
                             });
@@ -63,6 +66,9 @@ export default async (thingtodo: string, table: string, sqlstring: any) => {
                     valuestemplate = '(username, password, permission, accesskey)';
                 }
                 if (table == 'rp') {
+                    valuestemplate = '(aop, timestamp, ping, training, pingatrptime)';
+                }
+                if (table == 'pastrp') {
                     valuestemplate = '(aop, timestamp, ping, training, pingatrptime)';
                 }
 

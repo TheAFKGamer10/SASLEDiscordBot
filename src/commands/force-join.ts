@@ -1,5 +1,5 @@
-const { client, EmbedBuilder, env } = require("../importdefaults");
-const mysql = require('../events/mysqlhander.js');
+import { client, EmbedBuilder, env } from "../importdefaults";
+import mysql from '../events/mysqlhander.js';
 
 export default async (interaction: { deferReply?: any; options?: any; editReply?: any; member?: any; commandName?: any; }) => {
     const { commandName, options } = interaction;

@@ -1,4 +1,5 @@
 import { client, EmbedBuilder, env } from '../importdefaults.js';
+import mysql from '../events/mysqlhander.js'; // Format: (passed [1 or 0], cadet_username [their username with callsign], cadet_id [their discord id], fto_username [their username with callsign], fto_id [their discord id])
 
 export default async (interaction: { deferReply?: any; member?: any; editReply?: any; commandName?: any; options?: any; }) => {
     await interaction.deferReply();
@@ -6,7 +7,6 @@ export default async (interaction: { deferReply?: any; member?: any; editReply?:
     const TrainingCars = require('../../config/fto-complete/TrainingCars.config.json');
     const blurbs = require('../../config/fto-complete/DepartmentBlurbs.config.json');
     const logos = require('../../config/fto-complete/DepartmentLogos.config.json');
-    const mysql = require('./../events/mysqlhander.js'); // Format: (passed [1 or 0], cadet_username [their username with callsign], cadet_id [their discord id], fto_username [their username with callsign], fto_id [their discord id])
     const guild = client.guilds.cache.get(env.parsed.GUILD_ID);
     const passed = options.getBoolean('passed');
     let status;
@@ -67,7 +67,7 @@ export default async (interaction: { deferReply?: any; member?: any; editReply?:
         blurb = blurbs[cadetdepartmentshort].replace(/\n/g, "\n> ");
     }
 
-    const report_id = (await mysql('select', 'cadettrainings', `SELECT id FROM cadettrainings`)).length + 1;
+    const report_id = (await mysql('select', 'cadettrainings', `SELECT id FROM cadettrainings`) as any).length + 1 as number;
 
     const member = guild.members.fetch(cadet);
     if (passed) {

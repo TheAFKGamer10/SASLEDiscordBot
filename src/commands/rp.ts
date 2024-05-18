@@ -44,6 +44,7 @@ export default async (interaction: { reply?: any; commandName?: any; options?: a
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         const newData = rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, '0') + " " + rpTime.getDate().toString().padStart(2, '0') + " " + rpTime.getHours().toString().padStart(2, '0') + " " + rpTime.getMinutes().toString().padStart(2, '0');
         await mysql('insert', 'rp', `('${aop}', '${newData}', ${ping}, ${training}, ${pingatrptime})`);
+        await mysql('insert', 'pastrp', `('${aop}', '${newData}', ${ping}, ${training}, ${pingatrptime})`);
     } else {
         const existingData = fs.readFileSync(path.join(__dirname, '..', 'files', 'next-rp.json'), 'utf-8');
         const newData = { [rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, '0') + " " + rpTime.getDate().toString().padStart(2, '0') + " " + rpTime.getHours().toString().padStart(2, '0') + " " + rpTime.getMinutes().toString().padStart(2, '0')]: { aop, ping, training, pingatrptime } };

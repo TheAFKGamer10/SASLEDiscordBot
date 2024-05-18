@@ -1,6 +1,7 @@
 import { client, env, fs } from './../importdefaults.js';
+import mysql from './mysqlhander.js';
 
-export default async function (hasdb: any) {
+export default async function (hasdb: boolean) {
     let nextRpData;
 
     const secondtimer = setInterval(async () => {
@@ -14,8 +15,7 @@ export default async function (hasdb: any) {
         setInterval(async () => {
             if (hasdb) {
                 try {
-                    const mysql = require('./mysqlhander.js');
-                    nextRpData = (await mysql('select', 'rp', `SELECT * FROM rp`));
+                    let nextRpData: any = (await mysql('select', 'rp', `SELECT * FROM rp`));
                     for (let i = 0; i < nextRpData.length; i++) {
                         let currentTime = new Date();
 

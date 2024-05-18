@@ -7,15 +7,13 @@ import ftocomplete from "./commands/fto-complete";
 import ftotrain from "./commands/fto-train";
 import rp from "./commands/rp";
 import rpcountdownchecker from "./events/rpcountdownchecker";
+import mysqlfile from "./events/mysqlhander"; // Import the mysqlfile function from the correct file
 if (!fs.existsSync('./.env')) {
     console.log('No .env file found. Please create one before starting the bot again.');
     process.exit(126);
 }
 var hasdb = true;
-let mysqlfile: (arg0: string) => void;
-if (env.parsed.MYSQL_CONNECTION_STRING !== '') {
-    mysqlfile = require("./events/mysqlhander");
-} else {
+if (env.parsed.MYSQL_CONNECTION_STRING == '' || env.parsed.MYSQL_CONNECTION_STRING == undefined || env.parsed.MYSQL_CONNECTION_STRING == null) {
     hasdb = false;
     console.log('No database connection found. Some functionality will be disabled.');
 }
@@ -57,7 +55,7 @@ if (!flags.includes('--petro')) { envcheck(); }; // Petro is used in pterodactyl
 
 client.on('ready', async () => {
     if (hasdb) {
-        mysqlfile('connect');
+        mysqlfile('connect', '', '');
     }
     if (env.parsed.UPTIME_KUMA_URL !== undefined && env.parsed.UPTIME_KUMA_URL !== '') {
         console.log('This method of uptime kuma is no longer supported. Please use the new method of sending a HTTP(s) request to the bots website insted.');

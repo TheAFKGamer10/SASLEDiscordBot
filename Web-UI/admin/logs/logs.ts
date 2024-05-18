@@ -27,8 +27,10 @@ function logspageloaded() {
             let dataarea = document.getElementById('data') as HTMLDivElement;
             let cadettrainings = data.cadettrainings;
             let departmentjoins = data.departmentjoins;
+            let pastrp = data.pastrp;
             let cadettrainingshtml = document.createElement('table') as HTMLTableElement;
             let departmentjoinshtml = document.createElement('table') as HTMLTableElement;
+            let pastrphtml = document.createElement('table') as HTMLTableElement;
 
             cadettrainingshtml.innerHTML = `<tr>
                 <th>ID</th>
@@ -46,7 +48,7 @@ function logspageloaded() {
                     <td><b>${cadettrainings[i].fto_username}</b><br /><span title="FTO ID">${cadettrainings[i].fto_id}</span></td>
                     <td><b>${cadettrainings[i].timestamp}</b></td>
                 </tr>`;
-            }
+            };
 
             departmentjoinshtml.innerHTML = `<tr>
                 <th>ID</th>
@@ -66,14 +68,36 @@ function logspageloaded() {
                     <td><b>${departmentjoins[i].admin_forced_username}</b><br /><span title="Admin ID">${departmentjoins[i].admin_forced_id}</span></td>
                     <td><b>${departmentjoins[i].timestamp}</b></td>
                 </tr>`;
-            }
+            };
+
+            pastrphtml.innerHTML = `<tr>
+                <th>ID</th>
+                <th>AOP</th>
+                <th>Timestamp (Year Month Day Hour Minute)</th>
+                <th>Ping</th>
+                <th>Training</th>
+                <th>Ping At RP Time</th>
+            </tr>`;
+            for (let i = 0; i < pastrp.length; i++) {
+                pastrphtml.innerHTML += `<tr>
+                    <td><b>${pastrp[i].id}</b></td>
+                    <td><b>${pastrp[i].aop}</b></td>
+                    <td><b>${pastrp[i].timestamp}</b></td>
+                    <td><b>${pastrp[i].ping ? 'True' : 'False'}</b></td>
+                    <td><b>${pastrp[i].training ? 'True' : 'False'}</b></td>
+                    <td><b>${pastrp[i].pingatrptime ? 'True' : 'False'}</b></td>
+                </tr>`;
+            };
 
             dataarea.innerHTML = `
             <h2>Cadet Trainings</h2>
-            <table>${cadettrainingshtml}</table>
+            <table>${cadettrainingshtml.innerHTML}</table>
             <br />
             <h2>Department Joins</h2>
-            <table>${departmentjoinshtml}</table>
+            <table>${departmentjoinshtml.innerHTML}</table>
+            <br />
+            <h2>Past Roleplays</h2>
+            <table>${pastrphtml.innerHTML}</table>
             `;
         })
         .catch((error) => {

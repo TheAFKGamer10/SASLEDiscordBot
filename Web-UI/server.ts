@@ -13,6 +13,7 @@ import getenv from './api/getenv';
 import bcrypt from 'bcrypt';
 import beforerun from './beforeruntime';
 import auth from './auth/bot-auth/auth';
+import mysql from '../src/events/mysqlhander.js';
 
 beforerun();
 async function start(): Promise<void> {
@@ -115,10 +116,9 @@ start().then(() => {
 
 // Authentication
 app.get('/login', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'auth', 'login.html')); });
-app.post('/v1/process-login', async (question: { body: { username: string | number; password: any; }; }, answer: { send: (arg0: { status: string; message?: string; }) => void; cookie: (arg0: string, arg1: string) => void; }) => {
+app.post('/v1/process-login', async (question: Request, answer: Response) => {
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         try {
-            const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
             mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`).then(async (result: any) => {
                 let users = result;
                 if (!users || users.length === 0) {
@@ -200,7 +200,7 @@ app.get('/logout', (question: Request, answer: Response) => {
         answer.redirect('/');
     }
 });
-app.get('/account', (question: { session: { userid: any; destroy: () => void; }; url: any; }, answer: { clearCookie: (arg0: string) => void; redirect: (arg0: string) => any; sendFile: (arg0: any) => void; }) => {
+app.get('/account', (question: Request, answer: Response) => {
     if (!question.session.userid) {
         return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=restricted`);
     }
@@ -209,10 +209,10 @@ app.get('/account', (question: { session: { userid: any; destroy: () => void; };
 
 
 // API
-app.all('/api/*', (answer: { status: (arg0: number) => { (): any; new(): any; send: { (arg0: string): any; new(): any; }; }; }) => {
+app.all('/api/*', (question: Request, answer: Response) => {
     return answer.status(401).send('Unauthorized');
 });
-app.use('/v1/', (question: any, answer: any, next: () => void) => {
+app.use('/v1/', (question: Request, answer: Response, next: NextFunction) => {
     env = require('dotenv').config();
     next();
 });
@@ -223,10 +223,7 @@ app.get('/v1/stat', (answer: { send: (arg0: any) => void; }) => {
         "name": pkg.name
     });
 });
-app.get('/v1/pageload', (question: {
-    query: any;
-    cookies: any; session: { userid: string | number; accesskey: any; destroy: () => void; }; url: any; 
-}, answer: { send: (arg0: { status?: string; redirect?: string; }) => any; clearCookie: (arg0: string) => void; redirect: (arg0: string) => any; }) => {
+app.get('/v1/pageload', (question: Request, answer: Response) => {
     if (!question.session.userid) { return answer.send({ "status": "OK" }); }
     
     if (!question.cookies[pkg.name + '-userid'] || !question.cookies[pkg.name + '-role'] || !question.cookies[pkg.name + '-accesskey'] || question.cookies[pkg.name + '-userid'] == undefined || question.cookies[pkg.name + '-role'] == undefined || question.cookies[pkg.name + '-accesskey'] == undefined) {
@@ -234,10 +231,8 @@ app.get('/v1/pageload', (question: {
     }
 
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
         mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.session.userid}'`).then(async (result: any) => {
             let users = JSON.parse(JSON.stringify(result))[0];
-
             if (users.accesskey !== question.session.accesskey) {
                 return answer.send({"redirect": `/logout?next=/login&afterlogin=${question.query.l}&reason=restricted`});
             }
@@ -302,7 +297,7 @@ app.post('/v1/config/submit', async (question: Request, answer: Response) => {
     });
     answer.send({ "status": "OK" });
 });
-// app.post('/v1/config/removeVariable', async (question, answer) => {
+// app.post('/v1/config/removeVariable', async (question: Request, answer: Response) => {
 //     if (!question.cookies.userid) {
 //         return answer.status(401).send('Unauthorized');
 //     }
@@ -328,7 +323,7 @@ app.post('/v1/config/submit', async (question: Request, answer: Response) => {
 //         answer.send({ "status": "OK" });
 //     });
 // });
-app.get('/v1/checkCookies', async (question: { query: { cookie: any; perm: any; }; cookies: { [x: string]: any; }; session: { role: number; }; }, answer: { json: (arg0: {}) => void; }) => {
+app.get('/v1/checkCookies', async (question: Request, answer: Response) => {
     let cookie = question.query.cookie;
     let perm = question.query.perm;
     let result: {perm?: boolean; cookie?: boolean;} = {}; // Add type annotation to specify that result is an object with a cookie property of type boolean
@@ -343,10 +338,9 @@ app.get('/v1/checkCookies', async (question: { query: { cookie: any; perm: any; 
 
     answer.json(result);
 });
-app.get('/v1/bot/rp', async (question: any, answer: { send: (arg0: { status?: string; message?: string; aop?: string; time?: string; training?: string; servertimeoffset?: number; }) => void; }) => {
+app.get('/v1/bot/rp', async (question: Request, answer: Response) => {
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-        let nextRpData = (await mysql('select', 'rp', `SELECT * FROM rp`));
+        let nextRpData: { [key: string]: any } = (await mysql('select', 'rp', `SELECT * FROM rp`)) as { [key: string]: any };
         let keys = Object.keys(nextRpData);
         if (keys.length === 0) { return answer.send({ "status": "warning", "message": "No RP Scheduled" }) }
 
@@ -377,16 +371,17 @@ app.get('/v1/bot/logs/get', async (question: Request, answer: Response) => {
         return answer.send({ "status": "error", "message": `MySQL Connection String is not set. Please set it in the .env file or <a href='/admin/env'>in the panel</a>.` });
     }
     let limit = question.query.limit || 10;
-    const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
     let cadettrainings = (await mysql('select', 'cadettrainings', `SELECT * FROM cadettrainings ORDER BY id DESC LIMIT ${limit};`));
     let departmentjoins = (await mysql('select', 'departmentjoins', `SELECT * FROM departmentjoins ORDER BY id DESC LIMIT ${limit};`));
+    let pastrp = (await mysql('select', 'pastrp', `SELECT * FROM pastrp ORDER BY id DESC LIMIT ${limit};`));
     let result = {
         "cadettrainings": cadettrainings,
-        "departmentjoins": departmentjoins
+        "departmentjoins": departmentjoins,
+        "pastrp": pastrp
     }
     answer.send(result);
 });
-app.get('/v1/bot/rp/create/fields', async (question: any, answer: { send: (arg0: any) => void; }) => { answer.send(require('./api/json/CreateFields.json')); });
+app.get('/v1/bot/rp/create/fields', async (question: Request, answer: Response) => { answer.send(require('./api/json/CreateFields.json')); });
 app.post('/v1/bot/rp/create', async (question: Request, answer: Response) => {
     if (!question.session.role || question.session.role > 2) {
         return answer.status(401).send('Unauthorized');
@@ -422,8 +417,8 @@ app.post('/v1/bot/rp/create', async (question: Request, answer: Response) => {
     let training = question.body.training;
     let pingatrptime = question.body.pingatrptime;
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
         let result = (await mysql('insert', 'rp', `('${aop}', '${newDate}', ${ping}, ${training}, ${pingatrptime})`));
+        let pastrpresult = (await mysql('insert', 'pastrp', `('${aop}', '${newDate}', ${ping}, ${training}, ${pingatrptime})`));
     } else {
         const fs = require('fs');
         const existingData = fs.readFileSync(path.join(__dirname, '..', 'src', 'files', 'next-rp.json'));
@@ -461,9 +456,8 @@ app.get('/v1/users/get', async (question: Request, answer: Response) => {
     };
     const userRoles = require('./api/json/userRoles.json');
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
         if (question.query.id !== '' && question.query.id !== null && question.query.id !== undefined) {
-            let users = (await mysql('select', 'users', `SELECT * FROM users WHERE id = '${question.query.id}'`));
+            let users: any = (await mysql('select', 'users', `SELECT * FROM users WHERE id = '${question.query.id}'`));
             if (users.length === 0) {
                 return answer.send([{ "status": "error", "message": "User not found" }]);
             }
@@ -475,7 +469,7 @@ app.get('/v1/users/get', async (question: Request, answer: Response) => {
             });
             return answer.send(users);
         } else {
-            let users = (await mysql('select', 'users', `SELECT * FROM users`));
+            let users: any = (await mysql('select', 'users', `SELECT * FROM users`));
             users = users.map((user: { password: any; accesskey: any; permission: string | number; }) => {
                 delete user.password;
                 delete user.accesskey;
@@ -511,8 +505,7 @@ app.get('/v1/users/singleuserinfo', async (question: Request, answer: Response) 
         return answer.status(401).send('Unauthorized');
     }
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-        let users = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.session.userid}'`));
+        let users: any = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.session.userid}'`));
         if (users.length === 0) {
             return answer.send({ "status": "error", "message": "User not found" });
         }
@@ -544,8 +537,7 @@ app.post('/v1/users/create', async (question: Request, answer: Response) => {
     question.body.permission = Object.keys(userRoles).find(key => userRoles[key] === question.body.permission) || 99;;
 
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-        let alreadyExists = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`));
+        let alreadyExists: any = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`));
         if (alreadyExists.length > 0) {
             return answer.send({ "status": "error", "message": "User already exists" });
         }
@@ -577,8 +569,7 @@ app.post('/v1/users/useredit', async (question: Request, answer: Response) => {
     const data = question.body;
 
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-        let usernameExists = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${data.username}'`));
+        let usernameExists: any = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${data.username}'`));
         if (usernameExists.length > 0) {
             return answer.send({ "status": "error", "error": "Username already exists" });
         }
@@ -616,10 +607,8 @@ app.post('/v1/users/edit', async (question: Request, answer: Response) => {
     }
     const userRoles = require('./api/json/userRoles.json');
     question.body.permission = Object.keys(userRoles).find(key => userRoles[key] === question.body.permission) || 99;
-
     if (env.parsed.MYSQL_CONNECTION_STRING !== '' && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        const mysql = require(path.join(__dirname, '..', 'src', 'events', 'mysqlhander.js'));
-        let usernameExists = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`));
+        let usernameExists: any = (await mysql('select', 'users', `SELECT * FROM users WHERE username = '${question.body.username}'`));
         if (usernameExists.length > 0 && usernameExists[0].id != question.body.id) {
             return answer.send({ "status": "error", "message": "Username already exists" });
         }
@@ -666,9 +655,7 @@ app.use('/admin', (question: Request, answer: Response, next: NextFunction) => {
 });
 app.get('/admin', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'admin', 'admin.html')); });
 app.get('/admin/users', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'admin/users', 'users.html')); });
-app.get('/admin/users/create', (question: {
-    originalUrl: any; session: { userid: any; role: number; destroy: () => void; }; url: any; 
-}, answer: { clearCookie: (arg0: string) => void; redirect: (arg0: string) => any; sendFile: (arg0: any) => void; }) => {
+app.get('/admin/users/create', (question: Request, answer: Response) => {
     if (!question.session.userid || question.session.role > 0) {
         return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     }
@@ -691,9 +678,7 @@ app.get('/', (question: Request, answer: Response) => {
     answer.sendFile(path.join(__dirname, '/index.html'));
 });
 app.get('/next-rp', (question: Request, answer: Response) => { answer.sendFile(path.join(__dirname, 'client/next-rp/nextrp.html')); });
-app.get('/next-rp/create', (question: {
-    originalUrl: any; session: { role: number; destroy: () => void; }; url: any; 
-}, answer: { clearCookie: (arg0: string) => void; redirect: (arg0: string) => any; sendFile: (arg0: any) => void; }) => {
+app.get('/next-rp/create', (question: Request, answer: Response) => {
     if (!question.session.role || question.session.role > 2) {
         return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     }
