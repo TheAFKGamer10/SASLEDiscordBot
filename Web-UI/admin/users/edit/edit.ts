@@ -38,7 +38,6 @@ async function usereditpageloaded() {
             })
                 .then(response => response.json())
                 .then(async roles => {
-                    console.log(user);
 
                     let data: any = {
                         "Username": {
@@ -50,7 +49,8 @@ async function usereditpageloaded() {
                         "Password": {
                             "type": "text",
                             "description": "The password of the user.",
-                            "required": false
+                            "required": false,
+                            "hint": "Leave blank for same password"
                         },
                         "Permission": {
                             "type": "dropdown",
@@ -163,6 +163,8 @@ async function usereditpageloaded() {
                             input.required = data[key]?.required ? true : false;
                             input.id = `input_${key}`;
                             input.value = data[key].default || '';
+                            input.placeholder = data[key].hint || '';
+
 
                             if (input.required) {
                                 // Create a new span element

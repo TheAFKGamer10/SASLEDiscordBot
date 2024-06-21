@@ -8,9 +8,7 @@ function removeUseStrict(directoryPath, isFile) {
                 return console.log('Unable to read file: ' + err);
             }
 
-            const result = data.replace('"use strict";', '');
-
-            fs.writeFile(directoryPath, result, 'utf8', function(err) {
+            fs.writeFile(directoryPath, data.replace('"use strict";', ''), 'utf8', function(err) {
                 if (err) {
                     return console.log('Unable to write file: ' + err);
                 }

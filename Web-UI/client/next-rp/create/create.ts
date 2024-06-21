@@ -1,4 +1,3 @@
-"use strict";
 async function rpcreatepageloaded() {
     fetch(`/v1/bot/rp/create/fields`, {
         method: 'GET',
@@ -6,7 +5,6 @@ async function rpcreatepageloaded() {
             'Content-Type': 'application/json'
         }
     })
-
         .then(response => response.json())
         .then(async data => {
             let form = document.getElementById('config') as HTMLDivElement;
@@ -148,7 +146,6 @@ async function createrpsubmit() {
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const URL = window.location.origin;
 
     let data: any = {};
     let inputs = document.getElementsByClassName('input') as HTMLCollectionOf<HTMLInputElement>;

@@ -11,7 +11,7 @@ function logspageloaded() {
     }
 
     if (window.innerWidth < 800) {
-        announcement('Caution', 'This page may not be formated properly for mobile devices.', 'warning', true);
+        announcement('Caution', 'This page may not be formated properly for mobile devices.', 'warning', false);
     }
 
     fetch(`/v1/bot/logs/get?limit=${(document.getElementById('rows') as HTMLSelectElement).value}`, {
@@ -74,6 +74,7 @@ function logspageloaded() {
                 <th>ID</th>
                 <th>AOP</th>
                 <th>Timestamp (Year Month Day Hour Minute)</th>
+                <th>User</th>
                 <th>Ping</th>
                 <th>Training</th>
                 <th>Ping At RP Time</th>
@@ -83,6 +84,7 @@ function logspageloaded() {
                     <td><b>${pastrp[i].id}</b></td>
                     <td><b>${pastrp[i].aop}</b></td>
                     <td><b>${pastrp[i].timestamp}</b></td>
+                    <td><b>${pastrp[i].user}</b></td>
                     <td><b>${pastrp[i].ping ? 'True' : 'False'}</b></td>
                     <td><b>${pastrp[i].training ? 'True' : 'False'}</b></td>
                     <td><b>${pastrp[i].pingatrptime ? 'True' : 'False'}</b></td>

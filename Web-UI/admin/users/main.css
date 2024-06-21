@@ -33,6 +33,7 @@
   background-color: var(--button-blue);
   font-size: 16px;
   color: var(--dark-mode-text-color);
+  margin: .25rem;
 }
 
 @media (max-width: 800px) {

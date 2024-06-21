@@ -1,9 +1,9 @@
 import { client, EmbedBuilder, env } from '../importdefaults.js';
 import mysql from '../events/mysqlhander.js'; // Format: (passed [1 or 0], cadet_username [their username with callsign], cadet_id [their discord id], fto_username [their username with callsign], fto_id [their discord id])
 
-export default async (interaction: { deferReply?: any; member?: any; editReply?: any; commandName?: any; options?: any; }) => {
+export default async (interaction: { deferReply?: any; member?: any; editReply?: any; commandName?: string; options?: any; }) => {
     await interaction.deferReply();
-    const { commandName, options } = interaction;
+    const { options } = interaction;
     const TrainingCars = require('../../config/fto-complete/TrainingCars.config.json');
     const blurbs = require('../../config/fto-complete/DepartmentBlurbs.config.json');
     const logos = require('../../config/fto-complete/DepartmentLogos.config.json');
@@ -33,7 +33,7 @@ export default async (interaction: { deferReply?: any; member?: any; editReply?:
         return;
     };
     var departmentList = JSON.parse(env.parsed.LIST_OF_DEPARTMENTS.split(", "));
-    let cadetdepartment: any;
+    let cadetdepartment: string;
     let cadetdepartmentshort;
     let cadetdepartmentid;
     let ftodepartment: string;
