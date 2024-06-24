@@ -27,8 +27,6 @@ Object.keys(rules).forEach(key => {
   }
 });
 
-console.log(departments);
-
 const commands = [
   {
     name: 'rules',
