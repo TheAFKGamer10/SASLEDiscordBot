@@ -1,18 +1,41 @@
-require('dotenv').config();
 const fs = require('fs');
-const execSync = require('child_process').execSync;
-var oldVersion = require('../package.json').version;
-function run(command, output = '') {
-    output = execSync(command);
-    return output.toString();
+const path = require('path');
+const { execSync } = require('child_process');
+
+const configDir = path.join(__dirname, '../config');
+const branch = 'Typescript'
+
+
+// Helper function to recursively read all files in a directory
+function readFilesRecursively(dir, fileList = []) {
+    const files = fs.readdirSync(dir);
+    files.forEach(file => {
+        const filePath = path.join(dir, file);
+        if (fs.statSync(filePath).isDirectory()) {
+            readFilesRecursively(filePath, fileList);
+        } else {
+            fileList.push(filePath);
+        }
+    });
+    return fileList;
 }
 
-run('git stash');
-run('git pull origin main');
-run('npm install');
+// Read directory and filter out non-user-modified files
+const files = readFilesRecursively(configDir);
 
-var newVersion = require('../package.json').version;
-if (oldVersion !== newVersion) {
-    console.log('There are new ENV variables in the .env.example file. Please update your .env file accordingly before starting the bot again.');
-}
-console.log('Version updated from ' + oldVersion + ' to ' + newVersion);
+// Backup user-modified files
+files.forEach(filePath => {
+    const backupPath = `${filePath}.bak`;
+    fs.copyFileSync(filePath, backupPath);
+});
+
+// Perform Git operations
+execSync(`git stash`, { cwd: configDir });
+execSync(`git pull origin ${branch}`, { cwd: configDir });
+
+// Restore backups
+files.forEach(filePath => {
+    const backupPath = `${filePath}.bak`;
+    fs.copyFileSync(backupPath, filePath);
+    fs.unlinkSync(backupPath); // Optionally, remove the backup after restoration
+});
