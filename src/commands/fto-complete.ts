@@ -1,13 +1,23 @@
 import { client, EmbedBuilder, env } from '../importdefaults.js';
 import mysql from '../events/mysqlhander.js'; // Format: (passed [1 or 0], cadet_username [their username with callsign], cadet_id [their discord id], fto_username [their username with callsign], fto_id [their discord id])
+import { CommandInteraction, GuildMember } from 'discord.js';
 
-export default async (interaction: { deferReply?: any; member?: any; editReply?: any; commandName?: string; options?: any; }) => {
-    await interaction.deferReply();
-    const { options } = interaction;
+export default async (interaction: CommandInteraction) => {
+    await interaction.deferReply({ ephemeral: true });
+    const options: any = interaction.options;
     const TrainingCars = require('../../config/fto-complete/TrainingCars.config.json');
     const blurbs = require('../../config/fto-complete/DepartmentBlurbs.config.json');
     const logos = require('../../config/fto-complete/DepartmentLogos.config.json');
-    const guild = client.guilds.cache.get(env.parsed.GUILD_ID);
+    let guild = client.guilds.cache.get(env.parsed.GUILD_ID);
+
+    if (!guild) {
+        guild = await client.guilds.fetch(env.parsed.GUILD_ID);
+    }
+    if (!guild) {
+        interaction.editReply({ content: 'Server not found. Please contact support.' });
+        return;
+    }
+
     const passed = options.getBoolean('passed');
     let status;
     if (passed) {
@@ -16,7 +26,7 @@ export default async (interaction: { deferReply?: any; member?: any; editReply?:
         status = 'DENIED';
     }
     const cadet = options.getUser('cadet');
-    const fto = interaction.member;
+    const fto = interaction.member as GuildMember;
     const cadet_id = cadet.id;
     const fto_id = fto.id;
     if (cadet_id == fto_id) {
@@ -82,9 +92,20 @@ export default async (interaction: { deferReply?: any; member?: any; editReply?:
     };
     const passedlogo = logos[status];
 
-    interaction.editReply({
-        content: `
-<:${departmentlogo}> ▬▬ **Field Training Office Report #${report_id}** ▬▬ <:${departmentlogo}>
+    function splitAndSendMessage(channel: any, message: string, maxLength: number = 1900) {
+        while (message.length > maxLength) {
+            let splitIndex = message.lastIndexOf('\n', maxLength);
+            if (splitIndex === -1) splitIndex = maxLength;
+            const part = message.substring(0, splitIndex);
+            channel.send(part);
+            message = message.substring(splitIndex);
+        }
+        if (message.length > 0) {
+            channel.send(message);
+        }
+    }
+
+    let message = `<:${departmentlogo}> ▬▬ **Field Training Office Report #${report_id}** ▬▬ <:${departmentlogo}>
 
 **STATUS: ${status}** <:${passedlogo}>
 
@@ -123,8 +144,9 @@ ${status === 'ACCEPTED' ? `Welcome To The Team` : ''}
 > ${fto_fullname.split(' | ')[1]}
 > Field Training Officer
 
-***Preserve The Peace, Enforce The Disturb***
-`});
+***Preserve The Peace, Enforce The Disturb***`;
+
+    splitAndSendMessage(interaction.channel, message);
 
     const logembed = new EmbedBuilder()
         .setTitle(`Cadet ${status === 'ACCEPTED' ? 'Passed' : 'Failed'} Training`)
@@ -150,5 +172,6 @@ ${status === 'ACCEPTED' ? `Welcome To The Team` : ''}
     }
 
     console.log(`${num1 + num2} has ${status === 'ACCEPTED' ? 'Passed' : 'Failed'} training`);
+    interaction.editReply({ content: `You have ${status === 'ACCEPTED' ? 'passed' : 'failed'} ${cadet_callsign}'s training.` });
 }
 

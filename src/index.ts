@@ -1,4 +1,5 @@
 import { client, fs, env } from "./importdefaults";
+import { CommandInteraction } from "discord.js";
 import rules from "./commands/rules";
 import join from "./commands/join";
 import emebedRuleFinder from "./events/emebedRuleFinder";
@@ -80,13 +81,7 @@ client.on("ready", async () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-interface AutocompleteInteraction {
-    isAutocomplete: () => boolean;
-    reply: (response: any) => void;
-    commandName: string;
-    [key: string]: any;
-}
-client.on("interactionCreate", async (interaction: AutocompleteInteraction) => {
+client.on("interactionCreate", async (interaction: CommandInteraction) => {
     const { commandName } = interaction;
     try {
         if (interaction.isAutocomplete()) {
