@@ -1,0 +1,99 @@
+@import url("./main.css");
+.data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+table {
+  border-collapse: collapse;
+  width: 90%;
+  word-break: break-all;
+  /* table-layout: fixed; */
+}
+
+table td {
+  padding: 8px;
+  text-align: left;
+}
+
+table th,
+table td {
+  padding: 8px;
+  text-align: left;
+  /* width: fit-content; */
+}
+
+table .buttons {
+  width: 45%;
+}
+
+table th {
+  background-color: #4caf50;
+  color: var(--dark-mode-text-color);
+}
+
+table td:last-child {
+  border-right: none;
+}
+
+.light {
+  table {
+    border-top: 1px solid var(--dark-mode-color);
+    border-left: 1px solid var(--dark-mode-color);
+    border-right: 1px solid var(--dark-mode-color);
+  }
+  table td {
+    border-bottom: 1px solid var(--dark-mode-color);
+    border-right: 1px solid var(--dark-mode-color);
+  }
+  table th,
+  table td {
+    border-bottom: 1px solid var(--dark-mode-color);
+    border-right: 1px solid var(--dark-mode-color);
+  }
+}
+.dark {
+  table {
+    border-top: 1px solid var(--light-mode-color);
+    border-left: 1px solid var(--light-mode-color);
+    border-right: 1px solid var(--light-mode-color);
+  }
+  table td {
+    border-bottom: 1px solid var(--light-mode-color);
+    border-right: 1px solid var(--light-mode-color);
+  }
+  table th,
+  table td {
+    border-bottom: 1px solid var(--light-mode-color);
+    border-right: 1px solid var(--light-mode-color);
+  }
+}
+
+a,
+a:visited {
+  color: inherit;
+}
+
+.submitbtn {
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+.deletebtn {
+  background-color: #dc3545;
+}
+@media screen and (max-width: 800px) {
+  .submitbtn {
+    width: 100%;
+    margin-top: 1%;
+  }
+  .createbtn {
+    width: 80%;
+  }
+}

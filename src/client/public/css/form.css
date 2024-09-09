@@ -1,0 +1,224 @@
+@import url("./main.css");
+/*Table*/
+.form {
+    align-items: center;
+    text-align: center;
+}
+
+.block {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Splits the container into two equal columns */
+    align-items: center; /* Center items vertically */
+    justify-items: stretch; /* Stretch items to fill the cell */
+    margin-bottom: 10px;
+}
+
+:root {
+    --width: 30dvw;
+    --mobile-width: 80%;
+}
+
+.textdiv {
+    width: 90%;
+    grid-column: 1;
+
+    display: flex;
+    margin-left: auto;
+    margin-right: 0;
+    align-items: flex-start;
+    justify-content: flex-start; /* Align text to the left */
+    flex-direction: column; /* Display items in a column */
+}
+.inputlabel {
+    margin-left: auto;
+    margin-right: 0;
+    font-size: 16px;
+    text-align: right; /* Align text to the right */
+}
+.description {
+    margin-left: auto;
+    margin-right: 0;
+    font-size: 12px;
+    margin-top: 5px; /* Add margin to separate from the label */
+    text-align: right; /* Align text to the right */
+}
+.description a,
+.description a:visited {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.geninput {
+    width: var(--width);
+    grid-column: 2;
+    padding: 10px;
+    margin-left: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    outline: none;
+    margin-right: calc(50% - var(--width));
+}
+.geninput:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+.dropdowninput {
+    width: calc(var(--width) + 20px);
+    padding: 10px;
+    margin-left: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    outline: none;
+    margin-right: calc(50% - var(--width));
+}
+.buttoninput {
+    width: calc(var(--width) + 20px);
+    text-align: left;
+}
+.checkbox {
+    box-shadow: none;
+    height: 100%;
+    padding: 10px 10px;
+    border: 1px solid #ccc;
+}
+.checkbox:focus {
+    border-color: none;
+    box-shadow: none;
+}
+
+.inputbreakertext {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 0.5rem 0;
+}
+.inputheaderbreaker {
+    height: 1.5px;
+}
+.eachcheckboxtable,
+.eachradiotable,
+.inputbreakertext {
+    width: 100%;
+}
+.eachcheckboxtable td:first-child {
+    align-items: left;
+    text-align: left;
+    width: 80%;
+}
+
+.submitbtn {
+    padding: 10px 20px;
+    border: 0;
+    border-radius: 5px;
+    background-color: var(--button-blue);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.disabledkeepbright {
+    cursor: inherit;
+    /* background-color: inherit; */
+    color: inherit;
+    opacity: 1;
+}
+
+.copybuttondiv {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    align-items: center;
+    width: calc(var(--width) + 20px);
+    margin-left: 10px;
+    justify-content: space-between;
+    column-gap: 10px;
+}
+.copybutton {
+    grid-column: 2;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0px;
+    background-color: var(--button-blue);
+    color: #fff;
+}
+.inputhascopybutton {
+    grid-column: 1;
+    width: calc(100% - 20px);
+    margin-left: 0;
+}
+
+@media screen and (max-width: 800px) {
+    .block {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .textdiv {
+        margin-right: auto;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .inputlabel {
+        margin-right: auto;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .description {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+    }
+
+    .geninput {
+        width: var(--mobile-width);
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .dropdowninput {
+        width: calc(var(--mobile-width) + 20px);
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .radioarea {
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;
+        align-items: center;
+    }
+    .buttoninput {
+        width: calc(var(--mobile-width) + 20px);
+    }
+
+    .submitbtn {
+        width: var(--mobile-width);
+    }
+
+    .copybuttondiv {
+        width: calc(var(--mobile-width) + 20px);
+        display: block;
+        margin-left: 0;
+    }
+    .copybutton {
+        width: 100%;
+    }
+    .inputhascopybutton {
+        width: calc(100% - 20px);
+        margin-bottom: 10px;
+    }
+}
+
+.light {
+    .inputheaderbreaker {
+        background-color: var(--dark-mode-color);
+    }
+}
+.dark {
+    .inputheaderbreaker {
+        background-color: var(--light-mode-color);
+    }
+}

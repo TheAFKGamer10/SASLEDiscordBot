@@ -1,0 +1,184 @@
+import { client, EmbedBuilder, env, fs } from "../importdefaults.js";
+import mysql from "../../mysqlhander.js"; // Format: (passed [1 or 0], cadet_username [their username with callsign], cadet_id [their discord id], fto_username [their username with callsign], fto_id [their discord id])
+import { CommandInteraction, GuildMember } from "discord.js";
+
+export default async (interaction: CommandInteraction) => {
+    await interaction.deferReply({ ephemeral: true });
+    const options: any = interaction.options;
+    let TrainingCars;
+    let blurbs;
+    let logos;
+    try {
+        TrainingCars = JSON.parse(fs.readFileSync("../../config/fto-complete/TrainingCars.config.json", "utf8"));
+        blurbs = JSON.parse(fs.readFileSync("../../config/fto-complete/DepartmentBlurbs.config.json", "utf8"));
+        logos = JSON.parse(fs.readFileSync("../../config/fto-complete/DepartmentLogos.config.json", "utf8"));
+    } catch (error) {
+        console.log(error);
+        interaction.editReply({ content: "An error occurred while loading the config files." });
+    }
+    let guild = client.guilds.cache.get(env.parsed.GUILD_ID);
+
+    if (!guild) {
+        guild = await client.guilds.fetch(env.parsed.GUILD_ID);
+    }
+    if (!guild) {
+        interaction.editReply({ content: "Server not found. Please contact support." });
+        return;
+    }
+
+    const passed = options.getBoolean("passed");
+    let status;
+    if (passed) {
+        status = "ACCEPTED";
+    } else {
+        status = "DENIED";
+    }
+    const cadet = options.getUser("cadet");
+    const fto = interaction.member as GuildMember;
+    const cadet_id = cadet.id;
+    const fto_id = fto.id;
+    if (cadet_id == fto_id) {
+        interaction.editReply({ content: "You can not complete your own training." });
+        return;
+    }
+    const cadet_fullname = guild.members.cache.get(cadet_id).displayName;
+    const fto_fullname = fto.displayName;
+    const cadet_callsign = cadet_fullname.split(" | ")[0];
+    const fto_callsign = fto_fullname.split(" | ")[0];
+    var CADETroleMembers = guild.roles.cache.get(env.parsed.CADET_ROLE_ID).members;
+    if (!cadet_fullname.includes(" | ") || cadet_callsign.charAt(cadet_callsign.length - 3) !== "0" || !Array.from(CADETroleMembers.keys()).includes(cadet_id)) {
+        interaction.editReply({ content: "You can not complete training for somebody who is not a cadet." });
+        return;
+    }
+    var departmentList = JSON.parse(env.parsed.LIST_OF_DEPARTMENTS.split(", "));
+    let cadetdepartment: string;
+    let cadetdepartmentshort;
+    let cadetdepartmentid;
+    let ftodepartment: string;
+    departmentList.forEach((CurrentDepartment: string) => {
+        if (fto_callsign.includes("D")) {
+            ftodepartment = "Federal";
+        }
+        if (cadet_callsign.includes(`${env.parsed[CurrentDepartment.toUpperCase() + "_START_LETTER"]}`)) {
+            cadetdepartment = env.parsed[CurrentDepartment.toUpperCase() + "_DEPARTMENT_NAME"];
+            cadetdepartmentshort = CurrentDepartment.toUpperCase();
+            cadetdepartmentid = env.parsed[CurrentDepartment.toUpperCase() + "_ROLE_ID"];
+        }
+        if (fto_callsign.includes(`${env.parsed[CurrentDepartment.toUpperCase() + "_START_LETTER"]}`)) {
+            ftodepartment = env.parsed[CurrentDepartment.toUpperCase() + "_DEPARTMENT_NAME"];
+        }
+    });
+
+    let formatedcars: string = "";
+    TrainingCars[cadetdepartmentshort as unknown as string].forEach((CurrentCar: any) => {
+        formatedcars += `${CurrentCar}\n`;
+    });
+
+    const now = new Date();
+    function pad(n: string | number) {
+        return Number(n) < 10 ? "0" + n : n;
+    }
+    const localDateTime = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()) + " " + pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+
+    let blurb = "";
+    if (cadetdepartmentshort) {
+        blurb = blurbs[cadetdepartmentshort].replace(/\n/g, "\n> ");
+    }
+
+    const report_id = (((await mysql("select", "cadettrainings", `SELECT id FROM cadettrainings`)) as any).length + 1) as number;
+
+    const member = guild.members.fetch(cadet);
+    if (passed) {
+        mysql("insert", "cadettrainings", `(1, '${cadet_fullname}', ${cadet_id}, '${fto_fullname}', ${fto_id}, '${new Date(new Date().getTime()).toISOString().replace(/T/, " ").replace(/\..+/, "")}')`);
+    } else {
+        mysql("insert", "cadettrainings", `(0, '${cadet_fullname}', ${cadet_id}, '${fto_fullname}', ${fto_id}, '${new Date(new Date().getTime()).toISOString().replace(/T/, " ").replace(/\..+/, "")}')`);
+    }
+
+    let departmentlogo = "";
+    if (cadetdepartmentshort) {
+        departmentlogo = logos[cadetdepartmentshort];
+    }
+    const passedlogo = logos[status];
+
+    function splitAndSendMessage(channel: any, message: string, maxLength: number = 1900) {
+        while (message.length > maxLength) {
+            let splitIndex = message.lastIndexOf("\n", maxLength);
+            if (splitIndex === -1) splitIndex = maxLength;
+            const part = message.substring(0, splitIndex);
+            channel.send(part);
+            message = message.substring(splitIndex);
+        }
+        if (message.length > 0) {
+            channel.send(message);
+        }
+    }
+
+    let message = `<:${departmentlogo}> ▬▬ **Field Training Office Report #${report_id}** ▬▬ <:${departmentlogo}>
+
+**STATUS: ${status}** <:${passedlogo}>
+
+You Have Been **${status}** Into <:${departmentlogo}> **${env.parsed[cadetdepartmentshort + "_DEPARTMENT_NAME"]}**!
+
+> ${blurb}
+
+${status === "ACCEPTED" ? `<:${departmentlogo}> ▬▬ **Vehicle Spawning** ▬▬ <:${departmentlogo}>\n\nYou Have Been Given Access To The Following Vehicles:\n**${formatedcars}**` : ""}
+<:${departmentlogo}> ▬▬ **Forum** ▬▬ <:${departmentlogo}>
+
+**Cadet Forum**
+\`\`\`
+Name: ${cadet_fullname.split(" | ")[1]}
+Date Of FTO: ${localDateTime.split(" ")[0]}
+Time Of FTO: ${localDateTime.split(" ")[1]}
+Rank: ${cadetdepartment!.split(" (")[0]} Cadet
+Callsign: ${cadet_callsign!}
+\`\`\`
+**FTO Forum**
+\`\`\`
+Name: ${fto_fullname!.split(" | ")[1]}
+Date Of FTO: ${localDateTime!.split(" ")[0]}
+Time Of FTO: ${localDateTime!.split(" ")[1]}
+Rank: ${ftodepartment!.split(" (")[0]} FTO
+Callsign: ${fto_callsign}
+\`\`\`
+
+<:${departmentlogo}> ▬▬ **Support** ▬▬ <:${departmentlogo}>
+
+If You Have Any Issues Spawning Vehicles, or With Other Members, Please Contact Support!
+
+<:${departmentlogo}> ▬▬ **Signing** ▬▬ <:${departmentlogo}>
+
+${status === "ACCEPTED" ? `Welcome To The Team` : ""}
+            *Signed*
+> ${fto_fullname.split(" | ")[1]}
+> Field Training Officer
+
+***Preserve The Peace, Enforce The Disturb***`;
+
+    splitAndSendMessage(interaction.channel, message);
+
+    const logembed = new EmbedBuilder()
+        .setTitle(`Cadet ${status === "ACCEPTED" ? "Passed" : "Failed"} Training`)
+        .setDescription(`<@${fto_id}> has ${status} <@${cadet_id}> into <@&${cadetdepartmentid}>.`)
+        .setColor(0x0099ff)
+        .setTimestamp();
+    // End of embed
+    client.channels.cache.get(env.parsed.LOG_CHANNEL_ID).send({ embeds: [logembed] });
+
+    const index = cadet_callsign.length - 1;
+    let num1 = cadet_callsign.charAt(index - 1);
+    let num2 = cadet_callsign.charAt(index);
+
+    if (passed) {
+        (await member).roles.remove(env.parsed.CADET_ROLE_ID);
+        (await member).roles.remove(env.parsed.CADET_ROLE_ID);
+        (await member).roles.add(env.parsed[cadetdepartmentshort + "_PROBIB_ID"]);
+        (await member).roles.add(env.parsed[cadetdepartmentshort + "_PROBIB_ID"]);
+
+        (await member).setNickname(`${env.parsed[cadetdepartmentshort + "_START_LETTER"]}-1${num1 + num2} | ${cadet_fullname.split(" | ")[1]}`);
+    } else {
+        (await member).roles.remove(env.parsed.JOIN_SERVER_ROLE_ID);
+    }
+
+    console.log(`${num1 + num2} has ${status === "ACCEPTED" ? "Passed" : "Failed"} training`);
+    interaction.editReply({ content: `You have ${status === "ACCEPTED" ? "passed" : "failed"} ${cadet_callsign}'s training.` });
+};

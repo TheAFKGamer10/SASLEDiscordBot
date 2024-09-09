@@ -3,7 +3,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 const configDir = path.join(__dirname, '../config');
-const branch = 'Typescript'
+const branch = process.argv[2] ?? "Webpack";
 
 
 // Helper function to recursively read all files in a directory

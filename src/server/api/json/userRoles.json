@@ -1,0 +1,18 @@
+[
+    {
+        "value": 0,
+        "text": "Full Control"
+    },
+    {
+        "value": 1,
+        "text": "Admin Preview"
+    },
+    {
+        "value": 2,
+        "text": "Roleplay Scheduler"
+    },
+    {
+        "value": 3,
+        "text": "User"
+    }
+]
