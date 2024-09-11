@@ -68,14 +68,14 @@ export default async () => {
             });
         });
     } else {
-        if (!fs.existsSync(path.join(__dirname, "auth", "data"))) {
-            fs.mkdirSync(path.join(__dirname, "auth", "data"));
+        if (!fs.existsSync(path.join(__dirname, "data"))) {
+            fs.mkdirSync(path.join(__dirname, "data"));
         }
-        if (!fs.existsSync(path.join(__dirname, "auth", "data", "users.json"))) {
-            fs.writeFileSync(path.join(__dirname, "auth", "data", "users.json"), JSON.stringify({}));
+        if (!fs.existsSync(path.join(__dirname, "data", "users.json"))) {
+            fs.writeFileSync(path.join(__dirname, "data", "users.json"), JSON.stringify({}));
         }
         try {
-            const usersData = fs.readFileSync(path.join(__dirname, "auth", "data", "users.json")).toString(); // Convert the buffer to a string
+            const usersData = fs.readFileSync(path.join(__dirname, "data", "users.json")).toString(); // Convert the buffer to a string
             const users = usersData.length ? JSON.parse(usersData) : {};
             if (!users.hasOwnProperty(env.parsed.ROOT_USERNAME)) {
                 users[env.parsed.ROOT_USERNAME] = {
@@ -83,7 +83,7 @@ export default async () => {
                     permission: "0",
                     accesskey: crypto.randomBytes(16).toString("hex"),
                 };
-                fs.writeFileSync(path.join(__dirname, "auth", "data", "users.json"), JSON.stringify(users));
+                fs.writeFileSync(path.join(__dirname, "data", "users.json"), JSON.stringify(users));
             }
         } catch (e) {
             console.error(e);

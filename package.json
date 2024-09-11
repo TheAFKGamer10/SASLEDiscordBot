@@ -7,12 +7,12 @@
     "start": "node ./src/server/server.js",
     "pushcmds": "node ./src/server/bot/regester-commands.js",
     "petro-start": "npm run build && cd dist && npm run pushcmds && node src/index.js --petro",
-    "copy-files": "copyfiles -u 1 src/client/**/*.html src/client/**/*.css src/client/public/**/*.* src/client/**/*.json dist/src/ && rimraf dist/src/client/public/js/form.ts",
-    "copy-config": "copyfiles -u 1 config/**/*.json dist/config/ && copyfiles -u 1 src/server/files/*.json src/server/api/json/*.json dist/src/ && copyfiles .env .env.example CONTRIBUTORS.md LICENSE package.json package-lock.json dist/",
+    "copy-files": "node scripts/copy-files.js",
+    "copy-config": "node scripts/copy-config.js",
     "build": "rimraf dist/ && tsc --build && npm run copy-files && npm run copy-config && webpack build && rimraf dist/src/server/ && copyfiles -u 1 tmp/server.js dist/src/server/ && copyfiles -u 1 tmp/regester-commands.js dist/src/server/bot/ && rimraf tmp/",
     "watch": "",
     "watch:build": "tsc --build && npm run copy-files && npm run copy-config && webpack build && rimraf dist/src/server/ && copyfiles -u 1 tmp/server.js dist/src/server/ && copyfiles -u 1 tmp/regester-commands.js dist/src/server/bot/ && rimraf tmp/",
-    "watch:server": "nodemon ./dist/src/server/server.js --watch ./dist",
+    "watch:server": "nodemon ./dist/src/server/server.js --noregistercmds --watch ./dist",
     "watch:pushcmds": "node ./dist/src/server/bot/regester-commands.js"
   },
   "author": "TheAFKGamer10",
@@ -25,8 +25,7 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "src/client/auth/data/users.json",
-      "src/files/next-rp.json"
+      "src/server/data/"
     ]
   },
   "type": "commonjs",
@@ -55,7 +54,8 @@
     "esbuild-loader": "^4.2.2",
     "javascript-obfuscator": "^4.1.1",
     "nodemon": "^3.1.0",
-    "rimraf": "^5.0.5",
+    "rimraf": "^5.0.10",
+    "rsync": "^0.6.1",
     "typescript": "^5.4.5",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",

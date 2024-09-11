@@ -15,7 +15,7 @@ export default async () => {
     function removeunwanted() {
         let removeparsedEnv: { [key: string]: string } = envFile.split("\n").reduce((acc, line) => {
             let key: string, value: string;
-            if (line.includes("=")) {
+            if (line.includes("=") && !line.trim().startsWith("#")) {
                 [key, value] = line.split("=");
                 key = key.trim();
                 value = value.trim().replace(/'/g, "");
@@ -63,7 +63,7 @@ export default async () => {
 
     const parsedEnv: { [key: string]: string } = envFile.split("\n").reduce((acc, line) => {
         let key, value;
-        if (line.includes("=")) {
+        if (line.includes("=") && !line.trim().startsWith("#")) {
             [key, value] = line.split("=");
             key = key.trim();
             value = value.trim().replace(/'/g, "");

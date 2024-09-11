@@ -18,8 +18,12 @@ import auth from "./auth/auth";
 import mysql from "./mysqlhander";
 import { client } from "./bot/bot";
 import rpcountdownchecker from "./bot/events/rpcountdownchecker";
+import { registerCommands } from "./bot/regester-commands";
 
 beforerun();
+if (!process.argv.includes("--noregistercmds")) {
+    registerCommands();
+}
 async function start(): Promise<void> {
     const result = await auth();
     if (typeof result === "number") {
@@ -78,12 +82,13 @@ export function cleantoSQL(text: string, options?: IOptions | "", justtext?: boo
     }
 }
 
-__dirname = path.join(__dirname, "..", "client");
+let __client = path.join(__dirname, "..", "client");
+let __server = path.join(__dirname);
 const app = express();
 app.use(cookieParser());
 app.use(express.json());
 app.disable("x-powered-by");
-app.use(express.static(path.join(__dirname, "/public")));
+app.use(express.static(path.join(__client, "/public")));
 app.use(
     session({
         secret: env.parsed.COOKIE_SECRET || "pOkPUqtcw6qUaZ163FgPzcDPurK1Wr5t",
@@ -165,7 +170,7 @@ app.use((question: Request, answer: Response, next: NextFunction) => {
 
 // Authentication
 app.get("/login", (question: Request, answer: Response) => {
-    answer.sendFile(path.join(__dirname, "auth", "login.html"));
+    answer.sendFile(path.join(__client, "auth", "login.html"));
 });
 app.post("/v1/process-login", async (question: Request, answer: Response) => {
     if (env.parsed.MYSQL_CONNECTION_STRING !== "" && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
@@ -179,15 +184,15 @@ app.post("/v1/process-login", async (question: Request, answer: Response) => {
                     let iv = crypto.randomBytes(16);
                     const cipher = crypto.createCipheriv("aes-256-cbc", crypto.createHash("sha256").update(env.parsed.COOKIE_SECRET).digest(), iv);
                     let encrypteduserid = iv.toString("hex") + ":" + cipher.update(`${cleantoSQL(users[0].id.toString())}-${cleantoSQL(users[0].username)}`, "utf8", "hex") + cipher.final("hex");
-    
+
                     iv = crypto.randomBytes(16);
                     const cipherrole = crypto.createCipheriv("aes-256-cbc", crypto.createHash("sha256").update(env.parsed.COOKIE_SECRET).digest(), iv);
                     let encryptedrole = iv.toString("hex") + ":" + cipherrole.update(`${users[0].permission}`, "utf8", "hex") + cipherrole.final("hex");
-    
+
                     iv = crypto.randomBytes(16);
                     const cipheraccesskey = crypto.createCipheriv("aes-256-cbc", crypto.createHash("sha256").update(env.parsed.COOKIE_SECRET).digest(), iv);
                     let encryptedaccesskey = iv.toString("hex") + ":" + cipheraccesskey.update(`${users[0].accesskey}`, "utf8", "hex") + cipheraccesskey.final("hex");
-    
+
                     answer.cookie(pkg.name + "-userid", encrypteduserid);
                     answer.cookie(pkg.name + "-role", encryptedrole);
                     answer.cookie(pkg.name + "-accesskey", encryptedaccesskey);
@@ -202,7 +207,7 @@ app.post("/v1/process-login", async (question: Request, answer: Response) => {
             answer.send({ status: "error", message: "An error occurred. Please try again later." });
         }
     } else {
-        let existingData = fs.readFileSync(path.join(__dirname, "auth", "data", "users.json"), "utf-8");
+        let existingData = fs.readFileSync(path.join(__server, "data", "users.json"), "utf-8");
         let parsedData = JSON.parse(existingData);
         const user = parsedData[question.body.username];
         if (!user) {
@@ -261,7 +266,7 @@ app.get("/account", (question: Request, answer: Response) => {
     if (!question.session.userid) {
         return answer.redirect(`/logout?next=/login&afterlogin=${question.url}&reason=restricted`);
     }
-    answer.sendFile(path.join(__dirname, "account", "account.html"));
+    answer.sendFile(path.join(__client, "account", "account.html"));
 });
 
 // API
@@ -301,7 +306,7 @@ app.get("/v1/pageload", (question: Request, answer: Response) => {
                 return answer.send({ redirect: `/logout?next=/login&afterlogin=${question.query.l}&reason=restricted` });
             });
     } else {
-        let existingData = fs.readFileSync(path.join(__dirname, "auth", "data", "users.json"), "utf-8");
+        let existingData = fs.readFileSync(path.join(__server, "data", "users.json"), "utf-8");
         let parsedData = JSON.parse(existingData);
         const user = parsedData[question.session.userid];
         if (!user || user.accesskey !== question.session.accesskey) {
@@ -342,15 +347,7 @@ app.post("/v1/config/submit", async (question: Request, answer: Response) => {
         return answer.status(401).send("Unauthorized");
     }
     await writeenv(question.body);
-    const pushcmds = spawn("node", [path.join(__dirname, "..", "src", "regester-commands.js")]);
-    pushcmds.stderr.on("data", (data: { toString: () => any }) => {
-        console.error(data.toString());
-    });
-    pushcmds.on("exit", (code: number) => {
-        if (code !== 0) {
-            console.log(`Bot process exited with code ${code}`);
-        }
-    });
+    await registerCommands();
     answer.send({ status: "OK" });
 });
 app.get("/v1/checkCookies", async (question: Request, answer: Response) => {
@@ -383,7 +380,7 @@ app.get("/v1/bot/rp", async (question: Request, answer: Response) => {
         });
     } else {
         try {
-            let nextRpData = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "src", "files", "next-rp.json"), "utf-8"));
+            let nextRpData = JSON.parse(fs.readFileSync(path.join(__server, "data", "next-rp.json"), "utf-8"));
             let keys = Object.keys(nextRpData);
             if (keys.length === 0) {
                 return answer.send({ status: "warning", message: "No RP Scheduled" });
@@ -457,10 +454,10 @@ app.post("/v1/bot/rp/create", async (question: Request, answer: Response) => {
         let pastrpresult = await mysql("insert", "pastrp", `('${aop}', '${newDate}', '${question.session.userid}', ${ping}, ${training}, ${pingatrptime})`);
     } else {
         const fs = require("fs");
-        const existingData = fs.readFileSync(path.join(__dirname, "..", "src", "files", "next-rp.json"));
+        const existingData = fs.readFileSync(path.join(__server, "data", "next-rp.json"));
         const newData = { [rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, "0") + " " + rpTime.getDate().toString().padStart(2, "0") + " " + rpTime.getHours().toString().padStart(2, "0") + " " + rpTime.getMinutes().toString().padStart(2, "0")]: { aop, ping, training, pingatrptime } };
         const mergedData = { ...JSON.parse(existingData), ...newData };
-        fs.writeFileSync(path.join(__dirname, "..", "src", "files", "next-rp.json"), JSON.stringify(mergedData, null, 4));
+        fs.writeFileSync(path.join(__server, "data", "next-rp.json"), JSON.stringify(mergedData, null, 4));
     }
 
     var output = `## Roleplay Will Be Happening Soon:\n\nAOP: **${aop}**\nTime: **<t:${timestamp}:f>**`;
@@ -513,7 +510,7 @@ app.get("/v1/users/get", async (question: Request, answer: Response) => {
             );
         }
     } else {
-        let existingData = fs.readFileSync(path.join(__dirname, "auth", "data", "users.json"), "utf-8");
+        let existingData = fs.readFileSync(path.join(__server, "data", "users.json"), "utf-8");
         let parsedData = JSON.parse(existingData);
         const result: { username: string; permission: string; id?: number }[] = [];
         if (question.query.id !== "" && question.query.id !== null && question.query.id !== undefined) {
@@ -549,7 +546,7 @@ app.get("/v1/account", async (question: Request, answer: Response) => {
         });
         answer.send(users[0]);
     } else {
-        let existingData = fs.readFileSync(path.join(__dirname, "auth", "data", "users.json"), "utf-8");
+        let existingData = fs.readFileSync(path.join(__server, "data", "users.json"), "utf-8");
         let parsedData = JSON.parse(existingData);
         if (!parsedData[question.session.userid]) {
             return answer.send({ status: "error", message: "User not found" });
@@ -571,7 +568,7 @@ app.post("/v1/users/create", async (question: Request, answer: Response) => {
         }
         let result = await mysql("insert", "users", `('${question.body.username}', '${await bcrypt.hash(question.body.password, 10)}', ${question.body.permission}, '${crypto.randomBytes(16).toString("hex")}')`);
     } else {
-        let existingData = fs.readFileSync(path.join(__dirname, "auth", "data", "users.json"), "utf-8");
+        let existingData = fs.readFileSync(path.join(__server, "data", "users.json"), "utf-8");
         let users = JSON.parse(existingData);
 
         if (users[question.body.username]) {
@@ -584,7 +581,7 @@ app.post("/v1/users/create", async (question: Request, answer: Response) => {
             accesskey: crypto.randomBytes(16).toString("hex"),
         };
 
-        fs.writeFileSync(path.join(__dirname, "auth", "data", "users.json"), JSON.stringify(users, null, 4));
+        fs.writeFileSync(path.join(__server, "data", "users.json"), JSON.stringify(users, null, 4));
     }
     answer.send({ status: "OK" });
 });
@@ -604,7 +601,7 @@ app.post("/v1/account/edit", async (question: Request, answer: Response) => {
             result = await mysql("update", "users", `UPDATE users SET password = '${await bcrypt.hash(data.password, 10)}' WHERE username = '${data.username}'`);
         }
     } else {
-        let existingData = fs.readFileSync(path.join(__dirname, "auth", "data", "users.json"), "utf-8");
+        let existingData = fs.readFileSync(path.join(__server, "data", "users.json"), "utf-8");
         let users = JSON.parse(existingData);
 
         if (data.username !== question.session.userid && users[data.username]) {
@@ -620,7 +617,7 @@ app.post("/v1/account/edit", async (question: Request, answer: Response) => {
         }
         users[data.username].accesskey = crypto.randomBytes(16).toString("hex");
 
-        fs.writeFileSync(path.join(__dirname, "auth", "data", "users.json"), JSON.stringify(users, null, 4));
+        fs.writeFileSync(path.join(__server, "data", "users.json"), JSON.stringify(users, null, 4));
     }
 
     answer.send({ status: "OK" });
@@ -639,7 +636,7 @@ app.post("/v1/users/edit", async (question: Request, answer: Response) => {
             result = await mysql("update", "users", `UPDATE users SET password = '${await bcrypt.hash(question.body.password, 10)}' WHERE id = '${question.body.id}'`);
         }
     } else {
-        let users = JSON.parse(fs.readFileSync(path.join(__dirname, "auth", "data", "users.json"), "utf-8"));
+        let users = JSON.parse(fs.readFileSync(path.join(__server, "data", "users.json"), "utf-8"));
         let keys = Object.keys(users);
 
         if (keys.indexOf(question.body.username) != -1 && keys.indexOf(question.body.username) + 1 != question.body.id) {
@@ -656,7 +653,7 @@ app.post("/v1/users/edit", async (question: Request, answer: Response) => {
         users[question.body.username].accesskey = crypto.randomBytes(16).toString("hex");
         users[question.body.username].permission = question.body.permission;
 
-        fs.writeFileSync(path.join(__dirname, "auth", "data", "users.json"), JSON.stringify(users, null, 4));
+        fs.writeFileSync(path.join(__server, "data", "users.json"), JSON.stringify(users, null, 4));
     }
     answer.send({ status: "OK" });
 });
@@ -672,10 +669,10 @@ app.delete("/v1/users/delete", async (question: Request, answer: Response) => {
     if (env.parsed.MYSQL_CONNECTION_STRING !== "" && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         let result = await mysql("delete", "users", `id = ${question.query.id}`);
     } else {
-        let users = JSON.parse(fs.readFileSync(path.join(__dirname, "auth", "data", "users.json"), "utf-8"));
+        let users = JSON.parse(fs.readFileSync(path.join(__server, "data", "users.json"), "utf-8"));
         let keys = Object.keys(users);
         delete users[keys[Number(question.query.id) - 1]];
-        fs.writeFileSync(path.join(__dirname, "auth", "data", "users.json"), JSON.stringify(users, null, 4));
+        fs.writeFileSync(path.join(__server, "data", "users.json"), JSON.stringify(users, null, 4));
     }
     answer.send({ status: "OK" });
 });
@@ -689,51 +686,51 @@ app.use("/admin", (question: Request, answer: Response, next: NextFunction) => {
     }
 });
 app.get("/admin", (question: Request, answer: Response) => {
-    answer.sendFile(path.join(__dirname, "admin", "admin.html"));
+    answer.sendFile(path.join(__client, "admin", "admin.html"));
 });
 app.get("/admin/users", (question: Request, answer: Response) => {
-    answer.sendFile(path.join(__dirname, "admin/users", "users.html"));
+    answer.sendFile(path.join(__client, "admin/users", "users.html"));
 });
 app.get("/admin/users/create", (question: Request, answer: Response) => {
     if (!question.session.userid || Number(question.session.role) > 0) {
         return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     }
-    answer.sendFile(path.join(__dirname, "admin/users/create", "create.html"));
+    answer.sendFile(path.join(__client, "admin/users/create", "create.html"));
 });
 app.get("/admin/users/edit", (question: Request, answer: Response) => {
     if (!question.session.userid || Number(question.session.role) > 0) {
         return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     }
-    answer.sendFile(path.join(__dirname, "admin/users/edit", "edit.html"));
+    answer.sendFile(path.join(__client, "admin/users/edit", "edit.html"));
 });
 app.get("/admin/env", (question: Request, answer: Response) => {
-    answer.sendFile(path.join(__dirname, "admin/config-env", "configenv.html"));
+    answer.sendFile(path.join(__client, "admin/config-env", "configenv.html"));
 });
 app.get("/admin/logs", (question: Request, answer: Response) => {
-    answer.sendFile(path.join(__dirname, "admin/logs", "logs.html"));
+    answer.sendFile(path.join(__client, "admin/logs", "logs.html"));
 });
 
 // Public Pages
 app.get("/", (question: Request, answer: Response) => {
-    answer.sendFile(path.join(__dirname, "/index.html"));
+    answer.sendFile(path.join(__client, "/index.html"));
 });
 app.get("/next-rp", (question: Request, answer: Response) => {
-    answer.sendFile(path.join(__dirname, "next-rp/nextrp.html"));
+    answer.sendFile(path.join(__client, "next-rp/nextrp.html"));
 });
 app.get("/next-rp/create", (question: Request, answer: Response) => {
     if (!question.session.role || Number(question.session.role) > 2) {
         return answer.redirect(`/logout?next=/login&afterlogin=${question.originalUrl}`);
     }
-    answer.sendFile(path.join(__dirname, "next-rp/create/create.html"));
+    answer.sendFile(path.join(__client, "next-rp/create/create.html"));
 });
 
 // Static Files
 app.get("/favicon.png", (question: Request, answer: Response) => {
-    answer.sendFile(path.join(__dirname, "public", "img", "RPLogoShort.png"));
+    answer.sendFile(path.join(__client, "public", "img", "RPLogoShort.png"));
 });
 /* This Must Be At The Bottom */
 app.get("/*", (question: Request, answer: Response) => {
-    const filePath = path.join(__dirname + question.url);
+    const filePath = path.join(__client + question.url);
     if (fs.existsSync(filePath)) {
         answer.sendFile(filePath);
     } else {
