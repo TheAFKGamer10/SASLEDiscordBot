@@ -16,7 +16,7 @@ export default async function (hasdb: boolean) {
         setInterval(async () => {
             if (hasdb) {
                 try {
-                    let nextRpData: any = await mysql("select", "rp", `SELECT * FROM rp`);
+                    let nextRpData: any = await mysql("select", "rp", `SELECT * FROM rp ORDER BY timestamp ASC`);
                     for (let i = 0; i < nextRpData.length; i++) {
                         let currentTime = new Date();
 
@@ -53,7 +53,7 @@ export default async function (hasdb: boolean) {
                     console.log(e);
                 }
             } else {
-                nextRpData = fs.existsSync(path.join(__dirname, "..", "..", "data", "next-rp.json")) ? JSON.parse(fs.readFileSync(path.join(__dirname, "..", "data", "next-rp.json"), "utf-8")) : {};
+                nextRpData = fs.existsSync(path.join(__dirname, "data", "next-rp.json")) ? JSON.parse(fs.readFileSync(path.join(__dirname, "data", "next-rp.json"), "utf-8")) : {};
                 let keys = Object.keys(nextRpData);
                 for (let i = 0; i < keys.length; i++) {
                     let currentTime = new Date();
@@ -67,7 +67,7 @@ export default async function (hasdb: boolean) {
                     if (afterstring.replace(/\s/g, "") > time.replace(/\s/g, "")) {
                         console.log("Deleting old RP data");
                         delete nextRpData[time];
-                        fs.writeFileSync(path.join(__dirname, "..", "..", "data", "next-rp.json"), JSON.stringify(nextRpData, null, 4));
+                        fs.writeFileSync(path.join(__dirname, "data", "next-rp.json"), JSON.stringify(nextRpData, null, 4));
                     }
 
                     if (currentstring == time) {
@@ -87,7 +87,7 @@ export default async function (hasdb: boolean) {
                         }
                         delete nextRpData[time];
 
-                        fs.writeFileSync(path.join(__dirname, "..", "..", "data", "next-rp.json"), JSON.stringify(nextRpData, null, 4));
+                        fs.writeFileSync(path.join(__dirname, "data", "next-rp.json"), JSON.stringify(nextRpData, null, 4));
                     }
                 }
             }

@@ -21,7 +21,7 @@ async function rpcreatepageloaded() {
             required: false,
             options: [
                 {
-                    value: "true",
+                    value: "ping",
                     text: "",
                     checked: true,
                 },
@@ -29,11 +29,11 @@ async function rpcreatepageloaded() {
         },
         "Training": {
             type: "checkbox",
-            required: true,
+            required: false,
             description: "Will training be happening during this RP",
             options: [
                 {
-                    value: "true",
+                    value: "training",
                     text: "",
                     checked: true,
                 },
@@ -41,11 +41,11 @@ async function rpcreatepageloaded() {
         },
         "Ping At RP Time": {
             type: "checkbox",
-            required: true,
+            required: false,
             description: "Should the server be pinged at the RP time",
             options: [
                 {
-                    value: "true",
+                    value: "pingatrptime",
                     text: "",
                     checked: true,
                 },

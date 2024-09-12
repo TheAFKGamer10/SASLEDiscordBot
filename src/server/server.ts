@@ -183,7 +183,7 @@ app.post("/v1/process-login", async (question: Request, answer: Response) => {
                 if (await bcrypt.compare(cleantoSQL(question.body.password), users[0].password.toString() ?? "")) {
                     let iv = crypto.randomBytes(16);
                     const cipher = crypto.createCipheriv("aes-256-cbc", crypto.createHash("sha256").update(env.parsed.COOKIE_SECRET).digest(), iv);
-                    let encrypteduserid = iv.toString("hex") + ":" + cipher.update(`${cleantoSQL(users[0].id.toString())}-${cleantoSQL(users[0].username)}`, "utf8", "hex") + cipher.final("hex");
+                    let encrypteduserid = iv.toString("hex") + ":" + cipher.update(`${cleantoSQL(users[0].username)}`, "utf8", "hex") + cipher.final("hex");
 
                     iv = crypto.randomBytes(16);
                     const cipherrole = crypto.createCipheriv("aes-256-cbc", crypto.createHash("sha256").update(env.parsed.COOKIE_SECRET).digest(), iv);
@@ -217,11 +217,11 @@ app.post("/v1/process-login", async (question: Request, answer: Response) => {
             if (await bcrypt.compare(cleantoSQL(question.body.password), user.password.toString() ?? "")) {
                 let iv = crypto.randomBytes(16);
                 const cipher = crypto.createCipheriv("aes-256-cbc", crypto.createHash("sha256").update(env.parsed.COOKIE_SECRET).digest(), iv);
-                let encrypteduserid = iv.toString("hex") + ":" + cipher.update(user.username, "utf8", "hex") + cipher.final("hex");
+                let encrypteduserid = iv.toString("hex") + ":" + cipher.update(`${question.body.username}`, "utf8", "hex") + cipher.final("hex");
 
                 iv = crypto.randomBytes(16);
                 const cipherrole = crypto.createCipheriv("aes-256-cbc", crypto.createHash("sha256").update(env.parsed.COOKIE_SECRET).digest(), iv);
-                let encryptedrole = iv.toString("hex") + ":" + cipherrole.update(`${user.permissions}`, "utf8", "hex") + cipherrole.final("hex");
+                let encryptedrole = iv.toString("hex") + ":" + cipherrole.update(`${user.permission}`, "utf8", "hex") + cipherrole.final("hex");
 
                 iv = crypto.randomBytes(16);
                 const cipheraccesskey = crypto.createCipheriv("aes-256-cbc", crypto.createHash("sha256").update(env.parsed.COOKIE_SECRET).digest(), iv);
@@ -453,8 +453,7 @@ app.post("/v1/bot/rp/create", async (question: Request, answer: Response) => {
         let result = await mysql("insert", "rp", `('${aop}', '${newDate}', ${ping}, ${training}, ${pingatrptime})`);
         let pastrpresult = await mysql("insert", "pastrp", `('${aop}', '${newDate}', '${question.session.userid}', ${ping}, ${training}, ${pingatrptime})`);
     } else {
-        const fs = require("fs");
-        const existingData = fs.readFileSync(path.join(__server, "data", "next-rp.json"));
+        const existingData = fs.readFileSync(path.join(__server, "data", "next-rp.json"), "utf-8");
         const newData = { [rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, "0") + " " + rpTime.getDate().toString().padStart(2, "0") + " " + rpTime.getHours().toString().padStart(2, "0") + " " + rpTime.getMinutes().toString().padStart(2, "0")]: { aop, ping, training, pingatrptime } };
         const mergedData = { ...JSON.parse(existingData), ...newData };
         fs.writeFileSync(path.join(__server, "data", "next-rp.json"), JSON.stringify(mergedData, null, 4));

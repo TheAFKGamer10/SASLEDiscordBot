@@ -46,10 +46,10 @@ export default async (interaction: { deferReply?: any; reply?: any; member?: any
         await mysql("insert", "rp", `('${aop}', '${newData}', ${ping}, ${training}, ${pingatrptime})`);
         await mysql("insert", "pastrp", `('${aop}', '${newData}', '${interaction.member.user.displayName}', ${ping}, ${training}, ${pingatrptime})`);
     } else {
-        const existingData = fs.readFileSync(path.join(__dirname, "..", "..", "data", "next-rp.json"), "utf-8");
+        const existingData = fs.readFileSync(path.join(__dirname, "data", "next-rp.json"), "utf-8");
         const newData = { [rpTime.getFullYear() + " " + (rpTime.getMonth() + 1).toString().padStart(2, "0") + " " + rpTime.getDate().toString().padStart(2, "0") + " " + rpTime.getHours().toString().padStart(2, "0") + " " + rpTime.getMinutes().toString().padStart(2, "0")]: { aop, ping, training, pingatrptime } };
         const mergedData = { ...JSON.parse(existingData), ...newData };
-        fs.writeFileSync(path.join(__dirname, "..", "..", "data", "next-rp.json"), JSON.stringify(mergedData, null, 4));
+        fs.writeFileSync(path.join(__dirname, "data", "next-rp.json"), JSON.stringify(mergedData, null, 4));
     }
 
     interaction.reply({ content: output, allowedMentions: { parse: ["everyone"] } });

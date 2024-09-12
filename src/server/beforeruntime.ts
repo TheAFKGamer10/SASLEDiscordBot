@@ -7,23 +7,29 @@ import mysql from "./mysqlhander";
 
 export default async () => {
     // Mandatory checks
-    if (!fs.existsSync("./.env")) {
+    if (!fs.existsSync(path.join(__dirname, "..", "..", ".env"))) {
         console.log("No .env file found. Please create one before starting the bot again.");
         process.exit(126);
     }
-    var hasdb = true;
+
+    if (!fs.existsSync(path.join(__dirname, "data"))) {
+        fs.mkdirSync(path.join(__dirname, "data"));
+    }
+    if (!fs.existsSync(path.join(__dirname, "data", "next-rp.json"))) {
+        fs.writeFileSync(path.join(__dirname, "data", "next-rp.json"), JSON.stringify({}));
+    }
+
     if (env.parsed.MYSQL_CONNECTION_STRING == "" || env.parsed.MYSQL_CONNECTION_STRING == undefined || env.parsed.MYSQL_CONNECTION_STRING == null) {
-        hasdb = false;
         console.log("No database connection found. Some functionality will be disabled.");
     }
-    
+
     const flags = process.argv.slice(2);
-    
+
     async function envcheck() {
         let requireditems = ["BOT_TOKEN", "CLIENT_ID", "GUILD_ID", "LOG_CHANNEL_ID", "LEO_ROLE_ID", "CADET_ROLE_ID", "LIST_OF_DEPARTMENTS"];
         let empty: string[] = [];
         let depsreq: string[] = [];
-    
+
         JSON.parse(env.parsed.LIST_OF_DEPARTMENTS).forEach((element: string) => {
             depsreq.push(element.toUpperCase() + "_START_LETTER");
             depsreq.push(element.toUpperCase() + "_DEPARTMENT_NAME");
@@ -33,7 +39,7 @@ export default async () => {
                 requireditems.push("JOIN_SERVER_ROLE_ID");
             }
         });
-    
+
         Object.keys(env.parsed).forEach((element) => {
             if (requireditems.includes(element) && env.parsed[element] == "") {
                 empty.push(element);
@@ -44,7 +50,7 @@ export default async () => {
                 }
             }
         });
-    
+
         if (empty.length !== 0) {
             console.log(`The following ENV items are empty and the bot can not be run without them: \n\x1b[1m${empty.join(", ")}\x1b[0m\nPlease fill them in the .env file before starting the bot again.`);
             process.exit(126);
@@ -53,7 +59,6 @@ export default async () => {
     if (!flags.includes("--petro")) {
         envcheck();
     } // Petro is used in pterodactyl and they can not check for values that are not there yet.
-    
 
     if (env.parsed.MYSQL_CONNECTION_STRING !== "" && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
         if (!/^mysql:\/\/[^:@]+:[^:@]+@[^:@]+:\d+\/[^:@]+$/.test(env.parsed.MYSQL_CONNECTION_STRING)) {
@@ -68,9 +73,6 @@ export default async () => {
             });
         });
     } else {
-        if (!fs.existsSync(path.join(__dirname, "data"))) {
-            fs.mkdirSync(path.join(__dirname, "data"));
-        }
         if (!fs.existsSync(path.join(__dirname, "data", "users.json"))) {
             fs.writeFileSync(path.join(__dirname, "data", "users.json"), JSON.stringify({}));
         }

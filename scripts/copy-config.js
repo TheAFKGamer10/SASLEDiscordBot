@@ -34,13 +34,11 @@ try {
   if (isWindows) {
     console.log('Copying config files using robocopy...');
     runCommand('robocopy "config" "dist\\config" /E /XF *.ts');
-    runCommand('robocopy "src\\server\\bot\\files" "dist\\src\\server\\bot\\files" /E /XF *.ts');
     runCommand('robocopy "src\\server\\api\\json" "dist\\src\\server\\api\\json" /E /XF *.ts');
     runCommand('copyfiles .env .env.example CONTRIBUTORS.md LICENSE package.json package-lock.json dist\\');
   } else {
     console.log('Copying config files using rsync...');
     runCommand('rsync -av --exclude=\'*.ts\' config/ dist/config/');
-    runCommand('rsync -av --exclude=\'*.ts\' src/server/bot/files/ dist/src/server/bot/files/');
     runCommand('rsync -av --exclude=\'*.ts\' src/server/api/json/ dist/src/server/api/json/');
     runCommand('copyfiles .env .env.example CONTRIBUTORS.md LICENSE package.json package-lock.json dist/');
   }

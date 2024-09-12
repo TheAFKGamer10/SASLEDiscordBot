@@ -1,6 +1,6 @@
 import { announcement } from "./../../main";
 
-type HTMLInputTypes = "text" | "textarea" | "password" | "radio" | "checkbox" | "dropdown" | "color" | "date" | "image" | "file" | "hidden" | "month" | "number" | "range" | "tel" | "time" | "url" | "email" | "search" | "datetime-local" | "header" | "button" | "submitbtn" 
+type HTMLInputTypes = "text" | "textarea" | "password" | "radio" | "checkbox" | "dropdown" | "color" | "date" | "image" | "file" | "hidden" | "month" | "number" | "range" | "tel" | "time" | "url" | "email" | "search" | "datetime-local" | "header" | "button" | "submitbtn";
 export type Data = {
     [key: string]: {
         type: HTMLInputTypes;
@@ -378,9 +378,9 @@ export async function createform(data: Data) {
             element.type = "date";
             element.value = data[key].value ?? "";
             element.className = "date";
-            element.min = `${data[key].min}` ?? "";
-            element.max = `${data[key].max}` ?? "";
-            element.step = `${data[key].step}` ?? `1`;
+            element.min = `${data[key].min}`;
+            element.max = `${data[key].max}`;
+            element.step = `${data[key].step}`;
             element.disabled = data[key].editable !== undefined ? !data[key].editable : false;
         } else if (data[key].type === "file") {
             element = document.createElement("input") as HTMLInputElement;
@@ -403,9 +403,9 @@ export async function createform(data: Data) {
             element.type = "month";
             element.value = data[key].value ?? ""; // YYYY-MM
             element.className = "month";
-            element.min = `${data[key].min}` ?? "";
-            element.max = `${data[key].max}` ?? "";
-            element.step = `${data[key].step}` ?? `1`;
+            element.min = `${data[key].min}`;
+            element.max = `${data[key].max}`;
+            element.step = `${data[key].step}`;
             element.autocapitalize = data[key].autocapitalize ?? "off";
             element.autocomplete = data[key].autocomplete ?? "off";
             element.disabled = data[key].editable !== undefined ? !data[key].editable : false;
@@ -414,9 +414,9 @@ export async function createform(data: Data) {
             element.type = "number";
             element.value = data[key].value ?? "";
             element.className = "number";
-            element.min = `${data[key].min}` ?? "";
-            element.max = `${data[key].max}` ?? "";
-            element.step = `${data[key].step}` ?? `1`;
+            element.min = `${data[key].min}`;
+            element.max = `${data[key].max}`;
+            element.step = `${data[key].step}`;
             element.inputMode = ["numeric", "decimal"].includes(data[key].inputmode ?? "") ? data[key].inputmode ?? "numeric" : "numeric";
             element.disabled = data[key].editable !== undefined ? !data[key].editable : false;
         } else if (data[key].type === "range") {
@@ -424,9 +424,9 @@ export async function createform(data: Data) {
             element.type = "range";
             element.value = data[key].value ?? "";
             element.className = "range";
-            element.min = `${data[key].min}` ?? "";
-            element.max = `${data[key].max}` ?? "";
-            element.step = `${data[key].step}` ?? `1`;
+            element.min = `${data[key].min}`;
+            element.max = `${data[key].max}`;
+            element.step = `${data[key].step}`;
             element.disabled = data[key].editable !== undefined ? !data[key].editable : false;
         } else if (data[key].type === "tel") {
             element = document.createElement("input") as HTMLInputElement;
@@ -441,9 +441,9 @@ export async function createform(data: Data) {
             element.type = "time";
             element.value = data[key].value ?? "";
             element.className = "time";
-            element.min = `${data[key].min}` ?? "";
-            element.max = `${data[key].max}` ?? "";
-            element.step = `${data[key].step}` ?? `1`;
+            element.min = `${data[key].min}`;
+            element.max = `${data[key].max}`;
+            element.step = `${data[key].step}`;
             element.disabled = data[key].editable !== undefined ? !data[key].editable : false;
         } else if (data[key].type === "url") {
             element = document.createElement("input") as HTMLInputElement;
@@ -474,9 +474,9 @@ export async function createform(data: Data) {
             element.type = "datetime-local";
             element.value = data[key].value ?? "";
             element.className = "datetime-local";
-            element.min = `${data[key].min}` ?? "";
-            element.max = `${data[key].max}` ?? "";
-            element.step = `${data[key].step}` ?? `1`;
+            element.min = `${data[key].min}`;
+            element.max = `${data[key].max}`;
+            element.step = `${data[key].step}`;
             element.disabled = data[key].editable !== undefined ? !data[key].editable : false;
         } else {
             element = document.createElement("input") as HTMLInputElement;
@@ -548,7 +548,7 @@ export async function createform(data: Data) {
                     console.error("Copy text is undefined");
                 }
             };
-        
+
             let copyButtonDiv = document.createElement("div") as HTMLDivElement;
             copyButtonDiv.className = "copybuttondiv";
             element.classList.add("inputhascopybutton");

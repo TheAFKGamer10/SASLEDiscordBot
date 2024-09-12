@@ -9,9 +9,9 @@
     "petro-start": "npm run build && cd dist && npm run pushcmds && node src/index.js --petro",
     "copy-files": "node scripts/copy-files.js",
     "copy-config": "node scripts/copy-config.js",
-    "build": "rimraf dist/ && tsc --build && npm run copy-files && npm run copy-config && webpack build && rimraf dist/src/server/ && copyfiles -u 1 tmp/server.js dist/src/server/ && copyfiles -u 1 tmp/regester-commands.js dist/src/server/bot/ && rimraf tmp/",
+    "build": "rimraf dist/ && tsc --build && npm run copy-files && npm run copy-config && webpack build && rimraf dist/src/server/ && copyfiles -u 1 tmp/server.js dist/src/server/ && copyfiles -u 1 tmp/regester-commands.js dist/src/server/bot/ && rimraf tmp/ dist/tsconfig.tsbuildinfo",
     "watch": "",
-    "watch:build": "tsc --build && npm run copy-files && npm run copy-config && webpack build && rimraf dist/src/server/ && copyfiles -u 1 tmp/server.js dist/src/server/ && copyfiles -u 1 tmp/regester-commands.js dist/src/server/bot/ && rimraf tmp/",
+    "watch:build": "tsc --build && npm run copy-files && npm run copy-config && webpack build && rimraf dist/src/server/ && copyfiles -u 1 tmp/server.js dist/src/server/ && copyfiles -u 1 tmp/regester-commands.js dist/src/server/bot/ && rimraf tmp/ dist/tsconfig.tsbuildinfo",
     "watch:server": "nodemon ./dist/src/server/server.js --noregistercmds --watch ./dist",
     "watch:pushcmds": "node ./dist/src/server/bot/regester-commands.js"
   },
