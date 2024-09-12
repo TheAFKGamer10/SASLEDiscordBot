@@ -294,7 +294,7 @@ app.get("/v1/pageload", (question: Request, answer: Response) => {
     }
 
     if (env.parsed.MYSQL_CONNECTION_STRING !== "" && env.parsed.MYSQL_CONNECTION_STRING !== null && env.parsed.MYSQL_CONNECTION_STRING !== undefined) {
-        mysql("select", "users", `SELECT accesskey FROM users WHERE id = '${cleantoSQL(question.session.userid.toString().split("-")[0], "", true)}'`)
+        mysql("select", "users", `SELECT accesskey FROM users WHERE username = '${cleantoSQL(question.session.userid.toString(), "", true)}'`)
             .then(async (result: unknown) => {
                 const accessKeyResult = result as { accesskey: string }[] | [];
                 if (accessKeyResult.length === 0 || accessKeyResult[0].accesskey != question.session.accesskey) {
