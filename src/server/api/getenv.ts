@@ -5,7 +5,7 @@ const envdir = path.join(__dirname, "../..", ".env");
 export default async () => {
     const legalnames = ["JOIN_SERVER_ROLE_ID", "LEO_ROLE_ID", "CADET_ROLE_ID"];
     const ifDEPARTMENTS = ["_DEPARTMENT_NAME", "_START_LETTER", "_ROLE_ID"];
-    const RemoveVariable = ["ROOT_USERNAME", "ROOT_PASSWORD", "WEB_PORT"];
+    const RemoveVariable = ["ROOT_USERNAME", "ROOT_PASSWORD", "WEB_PORT", "COOKIE_SECRET", "MYSQL_CONNECTION_STRING"];
 
     if (!fs.existsSync(envdir)) {
         return { status: "error", message: "No .env file found" };
