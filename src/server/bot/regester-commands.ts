@@ -7,7 +7,7 @@ export async function registerCommands() {
     let departments: { name: string; value: any }[] = [];
     departmentList.forEach((CurrentDepartment: string) => {
         departments.push({
-            name: `${env.parsed[CurrentDepartment + "_DEPARTMENT_NAME"]}`,
+            name: (env.parsed[CurrentDepartment + "_DEPARTMENT_NAME"]) ? `${env.parsed[CurrentDepartment + "_DEPARTMENT_NAME"]}`.slice(0, 100) : CurrentDepartment,
             value: CurrentDepartment,
         });
     });
@@ -27,7 +27,7 @@ export async function registerCommands() {
             value = value.replace(/ /g, "");
 
             embedchoices.push({
-                name: key,
+                name: key.slice(0, 100),
                 value: value,
             });
         }
@@ -36,7 +36,7 @@ export async function registerCommands() {
     const commands = [
         {
             name: "rules",
-            description: "Sends the catogory of rule selected.",
+            description: "Sends the category of rule selected.",
             options: [
                 {
                     name: "category",
@@ -52,7 +52,7 @@ export async function registerCommands() {
                     autocomplete: true,
                 },
                 {
-                    name: "chanel",
+                    name: "channel",
                     description: "The channel you would like to send the rule in.",
                     type: 7, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
                 },
@@ -60,7 +60,7 @@ export async function registerCommands() {
         },
         {
             name: "join",
-            description: "Join a Departmant.",
+            description: "Join a Department.",
             options: [
                 {
                     name: "department",
@@ -85,7 +85,7 @@ export async function registerCommands() {
                 },
                 {
                     name: "user",
-                    description: "The user being forced inot a department.",
+                    description: "The user being forced into a department.",
                     type: 6, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
                     required: true,
                 },
@@ -93,7 +93,7 @@ export async function registerCommands() {
         },
         {
             name: "fto-complete",
-            description: "Let's FTO easely mark a cadet as complete or not.",
+            description: "Let's FTO easily mark a cadet as complete or not.",
             options: [
                 {
                     name: "cadet",
@@ -149,7 +149,7 @@ export async function registerCommands() {
                 },
                 {
                     name: "training",
-                    description: "Is training avabile? Default: Yes",
+                    description: "Is training available? Default: Yes",
                     type: 5, // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type
                 },
             ],

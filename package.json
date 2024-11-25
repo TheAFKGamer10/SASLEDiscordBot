@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./src/server/server.js",
     "pushcmds": "node ./src/server/bot/regester-commands.js",
-    "petro-start": "npm run build && cd dist && npm run pushcmds && node src/server/server.js",
+    "petro-start": "npm run build && cd dist && node src/server/server.js --petro",
     "copy-files": "node scripts/copy-files.js",
     "copy-config": "node scripts/copy-config.js",
     "build": "rimraf dist/ && tsc --build && npm run copy-files && npm run copy-config && webpack build && rimraf dist/src/server/ && copyfiles -u 1 tmp/server.js dist/src/server/ && copyfiles -u 1 tmp/regester-commands.js dist/src/server/bot/ && rimraf tmp/ dist/tsconfig.tsbuildinfo",
