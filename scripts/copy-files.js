@@ -1,35 +1,41 @@
-const { execSync } = require('child_process');
-const os = require('os');
-const fs = require('fs');
+const cpx = require('cpx');
 const path = require('path');
+const { glob } = require('glob');
 
-const isWindows = os.platform() === 'win32';
 const srcDir = path.join(__dirname, '..', 'src', 'client');
 const destDir = path.join(__dirname, '..', 'dist', 'src', 'client');
 
-const runCommand = (command) => {
-    try {
-        execSync(command, { stdio: 'inherit' });
-    } catch (err) {
-        if (isWindows && ([1, 2, 3].includes(err.status))) {
-            console.log(`Command "${command}" completed with minor issues.`);
-        } else {
-            console.error(`Error during command "${command}":`, err);
-            process.exit(1);
-        }
-    }
+const copyFiles = (srcPattern, dest) => {
+    return new Promise((resolve, reject) => {
+        glob(srcPattern, { ignore: '**/*.ts' }, (err, files) => {
+            if (err) {
+                return reject(err);
+            }
+            Promise.all(files.map(file => {
+                return new Promise((res, rej) => {
+                    const relativePath = path.relative(srcDir, file);
+                    const destPath = path.join(dest, relativePath);
+                    cpx.copy(file, path.dirname(destPath), (err) => {
+                        if (err) {
+                            return rej(err);
+                        }
+                        res();
+                    });
+                });
+            }))
+                .then(resolve)
+                .catch(reject);
+        });
+    });
 };
 
-try {
-    if (isWindows) {
-        console.log(`Running robocopy from ${srcDir} to ${destDir}`);
-        runCommand(`robocopy "${srcDir}" "${destDir}" /E /XF *.ts`);
-    } else {
-        console.log(`Running rsync from ${srcDir} to ${destDir}`);
-        runCommand(`cp -r ${srcDir}/* ${destDir}/ --exclude='*.ts'`);
+(async () => {
+    try {
+        console.log(`Copying files from ${srcDir} to ${destDir}`);
+        await copyFiles(`${srcDir}/**/*`, destDir);
+        console.log('File copy completed successfully.');
+    } catch (err) {
+        console.error('Error during file copy:', err);
+        process.exit(1);
     }
-    console.log('File copy completed successfully.');
-} catch (err) {
-    console.error('Unexpected error:', err);
-    process.exit(1);
-}
+})();
