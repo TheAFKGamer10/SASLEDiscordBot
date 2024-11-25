@@ -37,10 +37,10 @@ try {
     runCommand('robocopy "src\\server\\api\\json" "dist\\src\\server\\api\\json" /E /XF *.ts');
     runCommand('copyfiles .env .env.example CONTRIBUTORS.md LICENSE package.json package-lock.json dist\\');
   } else {
-    console.log('Copying config files using rsync...');
-    runCommand('rsync -av --exclude=\'*.ts\' config/ dist/config/');
-    runCommand('rsync -av --exclude=\'*.ts\' src/server/api/json/ dist/src/server/api/json/');
-    runCommand('copyfiles .env .env.example CONTRIBUTORS.md LICENSE package.json package-lock.json dist/');
+    console.log('Copying config files using cp...');
+    runCommand('cp -r config/* dist/config/ --exclude=\'*.ts\'');
+    runCommand('cp -r src/server/api/json/* dist/src/server/api/json/ --exclude=\'*.ts\'');
+    runCommand('cp .env .env.example CONTRIBUTORS.md LICENSE package.json package-lock.json dist/');
   }
   console.log('Configuration files copied successfully.');
 } catch (err) {

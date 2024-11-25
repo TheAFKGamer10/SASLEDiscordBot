@@ -26,7 +26,7 @@ try {
         runCommand(`robocopy "${srcDir}" "${destDir}" /E /XF *.ts`);
     } else {
         console.log(`Running rsync from ${srcDir} to ${destDir}`);
-        runCommand(`rsync -av --exclude='*.ts' "${srcDir}/" "${destDir}/"`);
+        runCommand(`cp -r ${srcDir}/* ${destDir}/ --exclude='*.ts'`);
     }
     console.log('File copy completed successfully.');
 } catch (err) {
