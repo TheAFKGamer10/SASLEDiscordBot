@@ -70,6 +70,9 @@ module.exports = [
                 })
             ]
         },
+        resolve: {
+            preferRelative: true, // Try to resolve these requests in the current directory
+        },
     },
     {
         name: 'server',
@@ -120,6 +123,9 @@ module.exports = [
                 })
             ]
         },
+        resolve: {
+            preferRelative: true, // Try to resolve these requests in the current directory
+        },
     },
     {
         name: 'register-commands',
@@ -167,6 +173,9 @@ module.exports = [
                     target: 'es2015', // Syntax to transpile to (see options below for possible values)
                 }),
             ],
+        },
+        resolve: {
+            preferRelative: true, // Try to resolve these requests in the current directory
         },
     },
 
